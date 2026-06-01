@@ -7,7 +7,7 @@
 
 ## 进行中
 
-（移入正在做的任务）
+### BE-AUTH-02：邮箱验证（下一个任务）
 
 ---
 
@@ -54,20 +54,28 @@
 
 ## 待完成：认证模块 [BE-AUTH]
 
-### BE-AUTH-01：User 实体
+### BE-AUTH-01：User 实体 ✅
 
-**先写测试** `tests/Integration/Auth/RegisterTest.php`：
-- [ ] `testRegisterSuccessfully`：POST /api/auth/register 返回 201，包含 id/userName/emailVerified=false
-- [ ] `testRegisterFailsWithDuplicateEmail`：重复 email 返回 422
-- [ ] `testRegisterFailsWithDuplicateUserName`：重复 userName 返回 422
-- [ ] `testRegisterFailsWithoutGdprConsent`：缺少 gdprConsent 返回 422
-- [ ] `testRegisterFailsWithWeakPassword`：密码太弱返回 422
+**测试** `tests/Integration/Auth/RegisterTest.php`（11 个，全部通过）：
+- [x] `testRegisterSuccessfully`：POST /api/auth/register 返回 201，包含 id/userName/emailVerified=false
+- [x] `testRegisterFailsWithDuplicateEmail`：重复 email 返回 422
+- [x] `testRegisterFailsWithDuplicateUserName`：重复 userName 返回 422
+- [x] `testRegisterFailsWithoutGdprConsent`：缺少 gdprConsent 返回 422
+- [x] `testRegisterFailsWithWeakPassword`：密码太弱返回 422
+- [x] `testRegisterFailsWithBlankEmail`：空 email 返回 422
+- [x] `testRegisterFailsWithInvalidEmailFormat`：无效 email 格式返回 422
+- [x] `testRegisterFailsWithBlankPassword`：空密码返回 422
+- [x] `testRegisterFailsWithBlankUserName`：空 userName 返回 422
+- [x] `testRegisterFailsWithUserNameTooShort`：userName < 2 字符返回 422
+- [x] `testRegisterFailsWithUserNameTooLong`：userName > 50 字符返回 422
 
-**再实现**：
-- [ ] 创建 `src/Entity/User.php`（所有字段：id, email, password, userName, emailVerifiedAt, createdAt, updatedAt, deletedAt, gdprConsentAt）
-- [ ] 创建 `src/ApiResource/User/UserRegisterInput.php`（POST 注册用的 Input DTO）
-- [ ] 创建 Doctrine 迁移：`php bin/console make:migration`
-- [ ] 实现注册 State Processor
+**实现**：
+- [x] 创建 `src/Entity/User.php`（所有字段：id, email, password, userName, emailVerifiedAt, createdAt, updatedAt, deletedAt, gdprConsentAt）
+- [x] 创建 `src/ApiResource/User/UserRegisterInput.php`（POST Input DTO，含 UniqueEntity + PasswordStrength 验证）
+- [x] 创建 `src/ApiResource/User/UserRegisterOutput.php`（POST Output DTO，携带 #[ApiResource] 注解）
+- [x] 创建 `src/Factory/UserFactory.php`（Foundry v2 PersistentObjectFactory）
+- [x] 创建 Doctrine 迁移：`migrations/Version20260601231109.php`（app_user 表）
+- [x] 实现注册 State Processor：`src/State/Processor/UserRegisterProcessor.php`
 
 ### BE-AUTH-02：邮箱验证
 

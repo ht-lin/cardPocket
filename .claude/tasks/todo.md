@@ -9,10 +9,10 @@
 ### 后端
 
 #### [BE-AUTH] 认证模块
-- [ ] BE-AUTH-01：创建 User 实体（含所有字段、软删除、GDPR 字段）
-- [ ] BE-AUTH-02：创建 User 数据库迁移
-- [ ] BE-AUTH-03：配置 LexikJWTAuthenticationBundle
-- [ ] BE-AUTH-04：实现 POST /api/auth/register（含 GDPR consent 验证）
+- [x] BE-AUTH-01：创建 User 实体（含所有字段、软删除、GDPR 字段）
+- [x] BE-AUTH-02：创建 User 数据库迁移
+- [x] BE-AUTH-03：配置 LexikJWTAuthenticationBundle
+- [x] BE-AUTH-04：实现 POST /api/auth/register（含 GDPR consent 验证）
 - [ ] BE-AUTH-05：实现邮箱验证邮件发送（Symfony Mailer + Resend SMTP）
 - [ ] BE-AUTH-06：实现 POST /api/auth/verify-email（Token 验证 + 一次性使用）
 - [ ] BE-AUTH-07：实现 POST /api/auth/login（返回 AccessToken + RefreshToken）
@@ -70,11 +70,11 @@
 - [ ] BE-SHARE-08：编写共享模块集成测试
 
 #### [BE-INFRA] 基础设施
-- [ ] BE-INFRA-01：Docker Compose 配置（PostgreSQL dev + test 两个数据库）
-- [ ] BE-INFRA-02：配置测试数据库（每次测试前 reset schema）
+- [x] BE-INFRA-01：Docker Compose 配置（PostgreSQL dev + test 两个数据库）
+- [x] BE-INFRA-02：配置测试数据库（DAMA 事务隔离，每次测试自动回滚）
 - [ ] BE-INFRA-03：配置 symfony/rate-limiter
-- [ ] BE-INFRA-04：配置 UUID 主键（Doctrine UuidType）
-- [ ] BE-INFRA-05：配置 Doctrine 软删除过滤器（deletedAt is null）
+- [x] BE-INFRA-04：配置 UUID 主键（Doctrine UuidType）
+- [x] BE-INFRA-05：配置 Doctrine 软删除过滤器（deletedAt is null）
 
 ### 前端
 

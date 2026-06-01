@@ -199,3 +199,24 @@
 **推论**：不使用 `stateOptions: new Options(entityClass: ...)` ——该配置专为内置 Doctrine Provider 设计，使用自定义 Provider 后完全不需要。
 
 **权衡**：Output DTO 类数量增加（每个资源 2-3 个类）。对于本项目规模完全可控。
+
+---
+
+## ADR-014：在 Input DTO 上使用 `#[UniqueEntity(entityClass:)]` 验证唯一性
+
+**状态**：已采纳  
+**日期**：2026-06-02
+
+**决策**：唯一性约束（如 email、userName 是否已被注册）写在 Input DTO 上，使用
+`#[UniqueEntity(fields: [...], entityClass: User::class, errorPath: '...')]`，
+而非在 Entity 上标注 `#[UniqueEntity]` 后在 Processor 中手动调用 `$validator->validate($entity)`。
+
+**原因**：
+- API Platform 的 `ValidateProcessor` 在调用自定义 Processor 之前自动对 Input DTO 运行 Symfony Validator，唯一性检查自动发生，Processor 不需要处理违规情况，保持纯净
+- `entityClass` 参数告诉 `UniqueEntityValidator` 查询哪张表（Entity），而非 DTO 本身（DTO 没有对应的数据库表）
+- `fields` 中的属性名须同时存在于 Input DTO（作为取值来源）和 Entity（作为 repository 查询 key）——两者命名一致时自动匹配
+- `errorPath` 确保违规错误附加到正确的字段路径，API Platform 自动生成标准 422 响应体（含 `violations[].propertyPath`）
+
+**适用场景**：所有 Input DTO 中需要检查数据库唯一性的字段（email、userName、卡片名称去重等）。
+
+**权衡**：`fields` 名称需要在 Input DTO 和 Entity 上保持一致；如果将来 Entity 字段改名，Input DTO 中的 `fields` 参数也要同步更新。Race condition 极小（个人项目并发极低，可接受）。
