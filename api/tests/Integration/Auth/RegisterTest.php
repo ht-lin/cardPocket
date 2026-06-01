@@ -96,4 +96,70 @@ final class RegisterTest extends AbstractApiTestCase
         $this->assertResponseStatusCodeSame(422);
         $this->assertJsonContains(['violations' => [['propertyPath' => 'password']]]);
     }
+
+    public function testRegisterFailsWithBlankEmail(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', self::ENDPOINT, ['json' => array_merge(self::VALID_PAYLOAD, [
+            'email' => '',
+        ])]);
+
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertJsonContains(['violations' => [['propertyPath' => 'email']]]);
+    }
+
+    public function testRegisterFailsWithInvalidEmailFormat(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', self::ENDPOINT, ['json' => array_merge(self::VALID_PAYLOAD, [
+            'email' => 'notanemail',
+        ])]);
+
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertJsonContains(['violations' => [['propertyPath' => 'email']]]);
+    }
+
+    public function testRegisterFailsWithBlankPassword(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', self::ENDPOINT, ['json' => array_merge(self::VALID_PAYLOAD, [
+            'password' => '',
+        ])]);
+
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertJsonContains(['violations' => [['propertyPath' => 'password']]]);
+    }
+
+    public function testRegisterFailsWithBlankUserName(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', self::ENDPOINT, ['json' => array_merge(self::VALID_PAYLOAD, [
+            'userName' => '',
+        ])]);
+
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertJsonContains(['violations' => [['propertyPath' => 'userName']]]);
+    }
+
+    public function testRegisterFailsWithUserNameTooShort(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', self::ENDPOINT, ['json' => array_merge(self::VALID_PAYLOAD, [
+            'userName' => 'a',
+        ])]);
+
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertJsonContains(['violations' => [['propertyPath' => 'userName']]]);
+    }
+
+    public function testRegisterFailsWithUserNameTooLong(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', self::ENDPOINT, ['json' => array_merge(self::VALID_PAYLOAD, [
+            'userName' => str_repeat('a', 51),
+        ])]);
+
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertJsonContains(['violations' => [['propertyPath' => 'userName']]]);
+    }
 }
