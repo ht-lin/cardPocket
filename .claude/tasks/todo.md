@@ -23,6 +23,7 @@
 - [ ] BE-AUTH-12：编写所有认证端点的集成测试
 
 #### [BE-USER] 用户模块
+- [ ] BE-USER-00：创建 User DTO 类（UserRegisterInput / UserOutput / UserSearchOutput / UserUpdateInput）
 - [ ] BE-USER-01：实现 GET /api/users/me
 - [ ] BE-USER-02：实现 PATCH /api/users/me（userName + 修改密码）
 - [ ] BE-USER-03：实现 GET /api/users/search（精确匹配，只返回 id+userName）
@@ -32,6 +33,7 @@
 #### [BE-CARD] 卡片模块
 - [ ] BE-CARD-01：创建 Card 实体（含所有字段，expiresAt/archivedAt 预留）
 - [ ] BE-CARD-02：创建 Card 数据库迁移
+- [ ] BE-CARD-02b：创建 Card DTO 类（CardCreateInput / CardUpdateInput / CardOwnerOutput / CardViewerOutput）
 - [ ] BE-CARD-03：创建 CardVoter（CARD_VIEW, CARD_EDIT, CARD_DELETE）
 - [ ] BE-CARD-04：实现 POST /api/cards（含邮箱验证门控 + 200张上限）
 - [ ] BE-CARD-05：实现 GET /api/cards（含共享卡片，viewerNickname 隔离）
@@ -46,6 +48,7 @@
 - [ ] BE-SYNC-03：编写增量同步集成测试
 
 #### [BE-FRIEND] 好友模块
+- [ ] BE-FRIEND-00：创建 Friendship DTO 类（FriendshipOutput / FriendshipCreateInput）
 - [ ] BE-FRIEND-01：创建 Friendship 实体（含联合唯一约束）
 - [ ] BE-FRIEND-02：创建 Friendship 数据库迁移
 - [ ] BE-FRIEND-03：实现 POST /api/friendships（含邮箱验证门控 + 20/day 限制）
@@ -56,6 +59,7 @@
 - [ ] BE-FRIEND-08：编写好友模块集成测试（含级联删除测试）
 
 #### [BE-SHARE] 共享模块
+- [ ] BE-SHARE-00：创建 CardShare DTO 类（CardShareOutput / CardShareCreateInput / CardShareUpdateInput）
 - [ ] BE-SHARE-01：创建 CardShare 实体（含联合唯一约束）
 - [ ] BE-SHARE-02：创建 CardShare 数据库迁移
 - [ ] BE-SHARE-03：创建 CardShareVoter

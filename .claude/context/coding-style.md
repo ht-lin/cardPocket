@@ -63,27 +63,50 @@ class Card
 
 ### API Platform 4 规范
 
-- **Resource DTO 独立于 Entity**：使用 `#[ApiResource]` 注解在独立的 Resource 类上
-- **State Provider/Processor** 实现业务逻辑，Entity 保持纯净（只有属性和基本 getter/setter）
-- Voter 负责所有授权（不使用 `#[IsGranted('ROLE_')]`）
-- 不在 Entity 上直接暴露所有字段，使用 Serialization Groups 控制输入/输出
+- **Resource DTO 独立于 Entity**：使用 `#[ApiResource]` 注解在独立的 DTO 类上，不注解 Entity
+- **不使用 Serialization Groups**：每种视图/角色对应独立 Output DTO，每种写操作对应独立 Input DTO
+- **不使用 `stateOptions(entityClass:...)`**：始终用自定义 State Provider/Processor，不依赖内置 Doctrine Provider
+- **State Provider/Processor** 负责 DTO ↔ Entity 映射与业务逻辑，Entity 保持纯净
+- **Voter 只负责授权**（能否访问该资源），不控制字段可见性；State Provider 判断角色并返回对应 Output DTO
+
+**DTO 命名规范**：
+- `{Resource}CreateInput`：POST 请求体
+- `{Resource}UpdateInput`：PATCH 请求体
+- `{Resource}Output`：单一视图的 GET 响应
+- `{Resource}OwnerOutput` / `{Resource}ViewerOutput`：同一资源多角色的差异化视图
 
 ```php
-// 好：Resource DTO 独立定义
+// 好：独立 Output DTO，不同角色不同类，无 Serialization Groups
 #[ApiResource(
-    operations: [new Post(), new GetCollection(), new Get(), new Patch(), new Delete()],
-    normalizationContext: ['groups' => ['card:read']],
-    denormalizationContext: ['groups' => ['card:write']],
+    operations: [new Get(), new GetCollection()],
+    provider: CardStateProvider::class,
 )]
-class CardResource { ... }
-
-// Voter 授权
-class CardVoter extends Voter
+class CardOwnerOutput
 {
-    protected function supports(string $attribute, mixed $subject): bool
+    public string $id;
+    public string $name;
+    public string $barcodeType;
+    public string $barcodeContent;
+    // viewerNickname 不存在于此类
+}
+
+class CardViewerOutput
+{
+    public string $id;
+    public string $name;
+    public ?string $viewerNickname; // 仅 Viewer 可见
+}
+
+// State Provider 判断角色，返回对应 DTO；Voter 只判断能否访问
+class CardStateProvider implements ProviderInterface
+{
+    public function provide(...): object|array|null
     {
-        return in_array($attribute, ['CARD_VIEW', 'CARD_EDIT', 'CARD_DELETE'])
-            && $subject instanceof Card;
+        $this->security->denyAccessUnlessGranted('CARD_VIEW', $card); // Voter：能否访问
+
+        return $card->getOwner() === $this->security->getUser()       // Provider：角色判断
+            ? new CardOwnerOutput(...)
+            : new CardViewerOutput(...);
     }
 }
 ```

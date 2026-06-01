@@ -67,10 +67,24 @@ src/
 │   ├── CardShare.php
 │   ├── Friendship.php
 │   └── PushToken.php       # Phase 2
-├── ApiResource/            # API Platform 4 资源配置（独立于实体）
-│   ├── CardResource.php
-│   ├── CardShareResource.php
-│   └── FriendshipResource.php
+├── ApiResource/            # API Platform 4 DTO（独立于实体，无 Serialization Groups）
+│   ├── Card/
+│   │   ├── CardCreateInput.php     # POST body
+│   │   ├── CardUpdateInput.php     # PATCH body
+│   │   ├── CardOwnerOutput.php     # GET - owner view
+│   │   └── CardViewerOutput.php    # GET - viewer view
+│   ├── User/
+│   │   ├── UserRegisterInput.php
+│   │   ├── UserOutput.php
+│   │   ├── UserSearchOutput.php
+│   │   └── UserUpdateInput.php
+│   ├── Friendship/
+│   │   ├── FriendshipOutput.php
+│   │   └── FriendshipCreateInput.php
+│   └── CardShare/
+│       ├── CardShareOutput.php
+│       ├── CardShareCreateInput.php
+│       └── CardShareUpdateInput.php
 ├── Security/
 │   └── Voter/
 │       ├── CardVoter.php
@@ -89,9 +103,11 @@ src/
 ```
 
 **API Platform 4 关键配置**：
-- 使用 `#[ApiResource]` 注解在独立的 Resource DTO 上（不直接注解 Entity）
-- State Provider/Processor 实现业务逻辑，保持 Entity 纯净
-- Voters 负责所有授权判断（不使用 Role 系统）
+- `#[ApiResource]` 注解在独立 DTO 上，不注解 Entity
+- **不使用 Serialization Groups**：每种视图/角色用独立 Output DTO，每种写操作用独立 Input DTO
+- **不使用 `stateOptions(entityClass:...)`**：始终用自定义 State Provider/Processor
+- State Provider/Processor 负责 DTO ↔ Entity 映射与业务逻辑，Entity 保持纯净
+- Voter 只负责授权（能否访问资源）；State Provider 判断角色并返回对应 Output DTO
 
 ---
 

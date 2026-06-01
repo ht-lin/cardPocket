@@ -165,3 +165,37 @@
 - MVP 应专注核心流程稳定性
 
 **权衡**：用户拿到截图 QR Code 时只能手动输入，体验稍差。Phase 3 解决。
+
+---
+
+## ADR-012：API Resource 使用独立 DTO 类，不放在 Entity 上
+
+**状态**：已采纳  
+**日期**：2026-06-02
+
+**决策**：`#[ApiResource]` 只注解在 `src/ApiResource/` 下的独立 DTO 类上，Entity 不携带任何 API Platform 注解。
+
+**原因**：
+- Entity 耦合 API 契约导致字段控制困难：`viewerNickname` 隔离、`barcodeType/barcodeContent` 不可改、用户搜索不暴露 `email` 等需求，在 Entity 上实现需要堆积复杂的 Group 注解逻辑
+- DTO 类本身即 API 契约——有哪些字段就暴露哪些字段，无需额外过滤
+- 与 Entity 解耦后，域模型可独立演化，不受 API 格式影响
+
+**权衡**：需要额外的 DTO 类文件和 State Provider/Processor 做映射，样板代码更多。但对于本项目的 Owner/Viewer 角色差异、字段不可变性等需求，这是唯一干净的方案。
+
+---
+
+## ADR-013：不使用 Serialization Groups，每种视图用独立 DTO
+
+**状态**：已采纳  
+**日期**：2026-06-02
+
+**决策**：不在 DTO 上使用 `#[Groups([...])]` 注解。每种视图（Owner/Viewer）用独立 Output DTO，每种写操作（POST/PATCH）用独立 Input DTO。
+
+**原因**：
+- Serialization Groups 将角色判断逻辑散落在两处：DTO 注解（声明哪些字段属于哪个 Group）和 State Provider（设置 context groups）。独立 DTO 让每个类的字段一目了然，角色逻辑集中在 State Provider 中
+- 独立 DTO 可以独立测试，也无需 `stateOptions(entityClass:...)` 告知内置 Provider 查哪张表
+- `CardViewerOutput` 有 `viewerNickname`，`CardOwnerOutput` 没有——这比 `#[Groups(['card:viewer'])]` 更显式、更安全
+
+**推论**：不使用 `stateOptions: new Options(entityClass: ...)` ——该配置专为内置 Doctrine Provider 设计，使用自定义 Provider 后完全不需要。
+
+**权衡**：Output DTO 类数量增加（每个资源 2-3 个类）。对于本项目规模完全可控。

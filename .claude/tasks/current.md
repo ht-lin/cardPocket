@@ -65,7 +65,7 @@
 
 **再实现**：
 - [ ] 创建 `src/Entity/User.php`（所有字段：id, email, password, userName, emailVerifiedAt, createdAt, updatedAt, deletedAt, gdprConsentAt）
-- [ ] 创建 `src/ApiResource/UserResource.php`（POST 注册用的 DTO）
+- [ ] 创建 `src/ApiResource/User/UserRegisterInput.php`（POST 注册用的 Input DTO）
 - [ ] 创建 Doctrine 迁移：`php bin/console make:migration`
 - [ ] 实现注册 State Processor
 
@@ -133,7 +133,8 @@
 - [ ] `testGetMeFailsWithoutAuth`：未认证返回 401
 
 **再实现**：
-- [ ] 配置 API Platform `GetMe` 自定义操作或标准 `/me` 端点
+- [ ] 创建 `src/ApiResource/User/UserOutput.php`（GET /me 响应 DTO，不含 password）
+- [ ] 配置 API Platform 自定义 `/me` 端点，State Provider 返回 `UserOutput`
 
 ### BE-USER-02：PATCH /api/users/me
 
@@ -143,7 +144,7 @@
 - [ ] `testChangePasswordSuccessfully`
 - [ ] `testChangePasswordFailsWithWrongCurrentPassword`
 
-**再实现**：更新 userName / password 的 State Processor
+**再实现**：创建 `UserUpdateInput.php`，State Processor 读取后更新 Entity
 
 ### BE-USER-03：GET /api/users/search
 
@@ -153,7 +154,7 @@
 - [ ] `testSearchReturnsEmptyArrayWhenNotFound`：无匹配返回 []（不是 404）
 - [ ] `testSearchFailsWhenEmailNotVerified`：未验证用户返回 403
 
-**再实现**：自定义 State Provider，查询 userName 或 email 精确匹配
+**再实现**：创建 `UserSearchOutput.php`（只含 id + userName），自定义 State Provider 精确匹配后返回
 
 ### BE-USER-04：DELETE /api/users/me（GDPR）
 
@@ -179,6 +180,11 @@
 
 **再实现**：
 - [ ] 创建 Card 实体（含 barcodeType enum）
+- [ ] 创建 Card DTO 类（`src/ApiResource/Card/`）：
+  - `CardCreateInput.php`（POST body）
+  - `CardUpdateInput.php`（PATCH body，不含 barcodeType/barcodeContent）
+  - `CardOwnerOutput.php`（Owner 视图）
+  - `CardViewerOutput.php`（Viewer 视图，含 viewerNickname）
 - [ ] 创建 CardVoter（CARD_VIEW, CARD_EDIT, CARD_DELETE）
 - [ ] 实现 CRUD 端点
 
@@ -190,7 +196,7 @@
 - [ ] `testViewerNicknameIsIncludedForViewer`：Viewer 能看到自己的 viewerNickname
 - [ ] `testViewerNicknameIsHiddenFromOwner`：Owner 看不到 Viewer 的昵称
 
-**再实现**：自定义 State Provider，根据当前用户身份决定是否返回 viewerNickname
+**再实现**：自定义 State Provider，判断当前用户是 Owner 还是 Viewer，返回对应的 `CardOwnerOutput` 或 `CardViewerOutput`
 
 ---
 
@@ -220,7 +226,9 @@
   - A 解除与 B 的好友关系
   - 验证：3 条 CardShare 记录全部删除
 
-**再实现**：Friendship 实体 + 所有端点 + 应用层级联删除逻辑
+**再实现**：
+- 创建 Friendship DTO（`src/ApiResource/Friendship/`）：`FriendshipOutput.php`、`FriendshipCreateInput.php`
+- Friendship 实体 + 所有端点 + 应用层级联删除逻辑
 
 ---
 
@@ -235,7 +243,9 @@
 - [ ] `testOwnerCanRemoveViewer`
 - [ ] `testViewerCanLeaveShare`
 
-**再实现**：CardShare 实体 + CardShareVoter + 所有端点
+**再实现**：
+- 创建 CardShare DTO（`src/ApiResource/CardShare/`）：`CardShareOutput.php`、`CardShareCreateInput.php`、`CardShareUpdateInput.php`
+- CardShare 实体 + CardShareVoter + 所有端点
 
 ---
 
