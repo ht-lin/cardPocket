@@ -9,6 +9,7 @@ use ApiPlatform\State\ProcessorInterface;
 use App\ApiResource\User\UserRegisterInput;
 use App\ApiResource\User\UserRegisterOutput;
 use App\Entity\User;
+use App\Service\EmailVerificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -20,6 +21,7 @@ final class UserRegisterProcessor implements ProcessorInterface
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly EmailVerificationService $emailVerificationService,
     ) {
     }
 
@@ -41,6 +43,8 @@ final class UserRegisterProcessor implements ProcessorInterface
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+
+        $this->emailVerificationService->sendVerification($user);
 
         return new UserRegisterOutput(
             id: (string) $user->getId(),

@@ -220,3 +220,18 @@
 **适用场景**：所有 Input DTO 中需要检查数据库唯一性的字段（email、userName、卡片名称去重等）。
 
 **权衡**：`fields` 名称需要在 Input DTO 和 Entity 上保持一致；如果将来 Entity 字段改名，Input DTO 中的 `fields` 参数也要同步更新。Race condition 极小（个人项目并发极低，可接受）。
+
+---
+
+## ADR-015：邮箱验证 token 失败统一返回 422，不区分"不存在/已过期/已使用"
+
+**状态**：已采纳  
+**日期**：2026-06-03
+
+**决策**：`VerifyEmailProcessor` 对"token 不存在"、"token 已过期"、"token 已使用"三种失败情况统一抛出相同的 `ValidationException`（422），消息为 `"Invalid or expired token."`，不做区分。
+
+**原因**：
+- 防止 token 枚举攻击：若 404 表示"不存在"、422 表示"已过期"，攻击者可以推断 token 存在状态，进而暴力枚举有效 token
+- 与项目已有 422 响应格式一致（`violations[].propertyPath: "token"`）
+
+**权衡**：前端无法区分"token 不存在"和"token 已过期"，须统一显示"链接已失效，请重新请求验证邮件"。这对 UX 影响极小。

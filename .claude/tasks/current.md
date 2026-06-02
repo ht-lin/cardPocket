@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### BE-AUTH-02：邮箱验证（下一个任务）
+### BE-AUTH-03：登录（下一个任务）
 
 ---
 
@@ -77,18 +77,21 @@
 - [x] 创建 Doctrine 迁移：`migrations/Version20260601231109.php`（app_user 表）
 - [x] 实现注册 State Processor：`src/State/Processor/UserRegisterProcessor.php`
 
-### BE-AUTH-02：邮箱验证
+### BE-AUTH-02：邮箱验证 ✅
 
-**先写测试** `tests/Integration/Auth/VerifyEmailTest.php`：
-- [ ] `testVerifyEmailSuccessfully`：有效 token 返回 200，emailVerifiedAt 被设置
-- [ ] `testVerifyEmailFailsWithExpiredToken`：24 小时后 token 失效
-- [ ] `testVerifyEmailFailsWithUsedToken`：Token 只能用一次
+**先写测试** `tests/Integration/Auth/VerifyEmailTest.php`（6 个，全部通过）：
+- [x] `testVerifyEmailSuccessfully`：有效 token 返回 200，emailVerifiedAt 和 usedAt 均被设置
+- [x] `testVerifyEmailFailsWithExpiredToken`：过期 token 返回 422
+- [x] `testVerifyEmailFailsWithUsedToken`：已使用 token 返回 422
+- [x] `testVerifyEmailFailsWithNonExistentToken`：不存在的 token 返回 422
+- [x] `testVerifyEmailFailsWithBlankToken`：空字符串 token 返回 422
+- [x] `testVerifyEmailFailsWithMissingTokenField`：缺少 token 字段返回 422
 
 **再实现**：
-- [ ] 创建 `EmailVerificationToken` 实体（id, user, token, expiresAt, usedAt）
-- [ ] 实现邮件发送 Service（`src/Service/EmailVerificationService.php`）
-- [ ] 配置 Symfony Mailer（SMTP DSN 从环境变量读取）
-- [ ] 实现 POST /api/auth/verify-email 端点
+- [x] 创建 `EmailVerificationToken` 实体（id, user, token, expiresAt, usedAt）
+- [x] 实现邮件发送 Service（`src/Service/EmailVerificationService.php`）
+- [x] 配置 Symfony Mailer（SMTP DSN 从环境变量读取）
+- [x] 实现 POST /api/auth/verify-email 端点
 
 ### BE-AUTH-03：登录
 
