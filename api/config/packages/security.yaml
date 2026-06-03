@@ -14,8 +14,15 @@ security:
             pattern: ^/(_(profiler|wdt)|assets|build)/
             security: false
 
+        api_auth_refresh:
+            pattern: ^/api/auth/refresh
+            stateless: true
+            provider: app_user_provider
+            refresh_jwt:
+                check_path: /api/auth/refresh
+
         auth_public:
-            pattern: ^/api/auth/(login|register|verify-email|refresh|logout)
+            pattern: ^/api/auth/(login|register|verify-email|logout)
             stateless: true
             security: false
 

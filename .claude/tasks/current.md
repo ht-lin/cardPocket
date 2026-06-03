@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### BE-AUTH-03：登录（下一个任务）
+### BE-AUTH-04：Refresh Token Rotation（下一个任务）
 
 ---
 
@@ -93,19 +93,26 @@
 - [x] 配置 Symfony Mailer（SMTP DSN 从环境变量读取）
 - [x] 实现 POST /api/auth/verify-email 端点
 
-### BE-AUTH-03：登录
+### BE-AUTH-03：登录 ✅
 
-**先写测试** `tests/Integration/Auth/LoginTest.php`：
-- [ ] `testLoginSuccessfully`：正确凭据返回 200 含 access_token + refresh_token
-- [ ] `testLoginFailsWithWrongPassword`：错误密码返回 401
-- [ ] `testLoginFailsWithNonExistentEmail`：不存在的 email 返回 401（不泄露用户存在性）
-- [ ] `testLoginFailsWithSoftDeletedUser`：软删除用户返回 401
+**测试** `tests/Integration/Auth/LoginTest.php`（9 个，全部通过）：
+- [x] `testLoginSuccessfully`：正确凭据返回 200 含 access_token（JWT 三段式正则验证）+ refresh_token（数据库持久化验证）
+- [x] `testLoginFailsWithWrongPassword`：错误密码返回 401，响应体无 token，detail 为 "Invalid credentials."
+- [x] `testLoginFailsWithNonExistentEmail`：不存在的 email 返回 401，同上
+- [x] `testLoginFailsWithSoftDeletedUser`：软删除用户返回 401，同上
+- [x] `testWrongPasswordAndNonExistentEmailReturnIdenticalResponse`：两个 401 场景 detail 字段完全相同（防用户枚举）
+- [x] `testLoginFailsWithBlankEmail`：空 email 返回 422
+- [x] `testLoginFailsWithInvalidEmailFormat`：无效 email 格式返回 422
+- [x] `testLoginFailsWithBlankPassword`：空 password 返回 422
+- [x] `testLoginSucceedsWithUnverifiedEmail`：未验证邮箱用户可以正常登录（设计意图）
 
-**再实现**：
-- [ ] 安装 `gesdinet/jwt-refresh-token-bundle`，配置 `config/packages/gesdinet_jwt_refresh_token.yaml`（TTL 30天，`ttl_update: true`）
-- [ ] 创建 `src/Entity/RefreshToken.php` 继承 bundle 的 `AbstractRefreshToken`，生成迁移
-- [ ] 配置路由将 bundle 默认的 `/api/token/refresh` 覆盖为 `/api/auth/refresh`
-- [ ] 实现 POST /api/auth/login State Processor，注入 `RefreshTokenGeneratorInterface` 生成 Refresh Token
+**实现**：
+- [x] 安装 `gesdinet/jwt-refresh-token-bundle` v2.0.0，配置 `config/packages/gesdinet_jwt_refresh_token.yaml`（TTL 30天，`ttl_update: true`）
+- [x] 创建 `src/Entity/RefreshToken.php` 继承 `Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken`（mapped-superclass），表名 `refresh_tokens`，生成迁移
+- [x] 在 `config/packages/doctrine.yaml` 注册 bundle 的 XML 映射（gesdinet v2 使用安全 firewall authenticator 而非路由控制器）
+- [x] 在 `config/packages/security.yaml` 新增 `api_auth_refresh` firewall（`refresh_jwt` authenticator，`check_path: /api/auth/refresh`）
+- [x] 实现 POST /api/auth/login State Processor（`LoginInput`/`LoginOutput`/`LoginProcessor`），注入 `RefreshTokenGeneratorInterface` + `RefreshTokenManagerInterface`
+- [x] 在 `config/services.yaml` 绑定 `$jwtTtl: '%lexik_jwt_authentication.token_ttl%'`
 
 ### BE-AUTH-04：Refresh Token Rotation
 

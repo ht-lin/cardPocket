@@ -23,5 +23,9 @@ services:
         arguments:
             $appUrl: '%env(APP_URL)%'
 
+    App\State\Processor\LoginProcessor:
+        arguments:
+            $jwtTtl: '%lexik_jwt_authentication.token_ttl%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

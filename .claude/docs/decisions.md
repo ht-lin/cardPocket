@@ -240,18 +240,23 @@
 
 ## ADR-016：使用 gesdinet/jwt-refresh-token-bundle 管理 Refresh Token
 
-**状态**：已采纳  
+**状态**：已采纳（v2.0.0 实装）  
 **日期**：2026-06-03
 
-**决策**：使用 `gesdinet/jwt-refresh-token-bundle` 管理 Refresh Token 的持久化、轮换（Rotation）和撤销，不手写 `RefreshToken` 实体与轮换逻辑。
+**决策**：使用 `gesdinet/jwt-refresh-token-bundle` v2.0.0 管理 Refresh Token 的持久化、轮换（Rotation）和撤销，不手写 `RefreshToken` 实体与轮换逻辑。
 
 **原因**：
 - 该 bundle 内置 Token Rotation（`ttl_update: true`）、过期清理、单次使用保证，手写会重复实现相同逻辑
 - 与 `lexik/jwt-authentication-bundle` 天然集成，无需额外桥接代码
-- `/api/auth/refresh` 端点由 bundle 路由接管，BE-AUTH-04 只需配置，无需实现处理器
+- `/api/auth/refresh` 端点由 bundle 的 `RefreshTokenAuthenticator`（security firewall）接管，BE-AUTH-04 只需在 `security.yaml` 配置，无需实现处理器
 - Logout（撤销 token）通过 bundle 的 `RefreshTokenManagerInterface::delete()` 一行完成
 
 **权衡**：
 - gesdinet 的 `RefreshToken` 实体字段固定（`username`、`refreshToken`、`valid`），不包含 `usedAt`（重用检测）和 `revokedAt`（精细审计）。本项目不需要重用检测（Rotation 本身已保证旧 token 失效），放弃这两个字段可接受
-- bundle 默认路由为 `/api/token/refresh`，需通过路由配置覆盖为 `/api/auth/refresh` 以保持 API 一致性
-- 实体表名默认为 `refresh_tokens`，与原手写方案的 `refresh_token` 不同（尚未上线，无迁移兼容性问题）
+- 实体表名默认为 `refresh_tokens`
+
+**v2.0 实装说明**：
+- `App\Entity\RefreshToken` 继承 `Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken`（XML mapped-superclass），需在 `doctrine.yaml` 的 `mappings` 中显式注册 bundle 的 XML 映射路径（`vendor/gesdinet/jwt-refresh-token-bundle/config/doctrine`）
+- `/api/auth/refresh` 端点通过 `security.yaml` 的 `refresh_jwt` firewall 配置（`check_path: /api/auth/refresh`），v2 不再使用独立路由控制器
+- `RefreshTokenGeneratorInterface::createForUserWithTtl()` 只创建实体，不自动持久化，必须显式调用 `RefreshTokenManagerInterface::save()`
+- 登录 Processor 中手动调用 Generator + Manager::save()，不依赖 `AttachRefreshTokenOnSuccessListener`（该 listener 仅在 Lexik JWT 触发 AUTHENTICATION_SUCCESS 事件时生效，自定义 Processor 不会触发该事件）
