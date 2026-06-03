@@ -131,11 +131,16 @@
 ### BE-AUTH-05：登出
 
 **先写测试** `tests/Integration/Auth/LogoutTest.php`：
-- [ ] `testLogoutSuccessfully`：登出后 refreshToken 失效
-- [ ] `testRefreshFailsAfterLogout`：登出后不能用旧 refreshToken 刷新
+- [x] `testLogoutSuccessfully`：登出后 refreshToken 失效（DB 校验已删除）
+- [x] `testRefreshFailsAfterLogout`：登出后不能用旧 refreshToken 刷新
+- [x] `testLogoutWithNonExistentTokenReturns204`：不存在的 token 幂等返回 204
+- [x] `testLogoutFailsWithBlankRefreshToken`：空字符串返回 422
+- [x] `testLogoutFailsWithMissingRefreshToken`：缺少字段返回 422
 
 **再实现**：
-- [ ] 实现 POST /api/auth/logout State Processor，注入 `RefreshTokenManagerInterface`，调用 `delete()` 撤销 token，返回 204
+- [x] 创建 `src/ApiResource/Auth/LogoutInput.php`（`refresh_token` 字段，`#[Assert\NotBlank]`）
+- [x] 创建 `src/ApiResource/Auth/LogoutOutput.php`（`#[ApiResource]`，`output: false, status: 204`）
+- [x] 创建 `src/State/Processor/LogoutProcessor.php`，注入 `RefreshTokenManagerInterface`，调用 `delete()` 撤销 token，token 不存在时幂等忽略，返回 204
 
 ### BE-AUTH-06：速率限制
 
