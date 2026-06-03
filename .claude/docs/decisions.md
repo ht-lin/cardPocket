@@ -246,9 +246,9 @@
 **决策**：使用 `gesdinet/jwt-refresh-token-bundle` v2.0.0 管理 Refresh Token 的持久化、轮换（Rotation）和撤销，不手写 `RefreshToken` 实体与轮换逻辑。
 
 **原因**：
-- 该 bundle 内置 Token Rotation（`ttl_update: true`）、过期清理、单次使用保证，手写会重复实现相同逻辑
+- 该 bundle 内置 Token Rotation（`single_use: true`）、过期清理，手写会重复实现相同逻辑
 - 与 `lexik/jwt-authentication-bundle` 天然集成，无需额外桥接代码
-- `/api/auth/refresh` 端点由 bundle 的 `RefreshTokenAuthenticator`（security firewall）接管，BE-AUTH-04 只需在 `security.yaml` 配置，无需实现处理器
+- `/api/auth/refresh` 端点由 bundle 的 `RefreshTokenAuthenticator`（security firewall）接管，无需实现 State Processor
 - Logout（撤销 token）通过 bundle 的 `RefreshTokenManagerInterface::delete()` 一行完成
 
 **权衡**：
@@ -257,6 +257,8 @@
 
 **v2.0 实装说明**：
 - `App\Entity\RefreshToken` 继承 `Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken`（XML mapped-superclass），需在 `doctrine.yaml` 的 `mappings` 中显式注册 bundle 的 XML 映射路径（`vendor/gesdinet/jwt-refresh-token-bundle/config/doctrine`）
-- `/api/auth/refresh` 端点通过 `security.yaml` 的 `refresh_jwt` firewall 配置（`check_path: /api/auth/refresh`），v2 不再使用独立路由控制器
+- **路由必须显式注册**：`RouterListener`（priority 32）先于 Firewall（priority 8）运行；若 `/api/auth/refresh` 未在路由表中注册，RouterListener 直接 404，firewall 无法介入。在 `config/routes/security.yaml` 添加 `api_auth_refresh` 路由即可
+- 配置使用 `single_use: true`（**非** `ttl_update: true`）：`ttl_update` 只延长同一 token 的有效期（滑动窗口，token 值不变），`single_use` 才是真正 Rotation——每次刷新删除旧 token、颁发新 token
 - `RefreshTokenGeneratorInterface::createForUserWithTtl()` 只创建实体，不自动持久化，必须显式调用 `RefreshTokenManagerInterface::save()`
 - 登录 Processor 中手动调用 Generator + Manager::save()，不依赖 `AttachRefreshTokenOnSuccessListener`（该 listener 仅在 Lexik JWT 触发 AUTHENTICATION_SUCCESS 事件时生效，自定义 Processor 不会触发该事件）
+- **响应格式转换**：bundle 默认返回 `{"token": "..."}` 而非 `{"access_token": "..."}`。通过 `AuthenticationSuccessSubscriber` 监听 `Lexik Events::AUTHENTICATION_SUCCESS`（priority -10，在 Gesdinet 的 `AttachRefreshTokenOnSuccessListener` 之后），将 `token` 重命名为 `access_token` 并注入 `expires_in`。此事件仅由 gesdinet refresh 流程触发，不影响 `LoginProcessor` 的自定义响应

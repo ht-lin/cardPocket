@@ -13,11 +13,11 @@
 - [x] BE-AUTH-02：创建 User 数据库迁移
 - [x] BE-AUTH-03：配置 LexikJWTAuthenticationBundle
 - [x] BE-AUTH-04：实现 POST /api/auth/register（含 GDPR consent 验证）
-- [ ] BE-AUTH-05：实现邮箱验证邮件发送（Symfony Mailer + Resend SMTP）
-- [ ] BE-AUTH-06：实现 POST /api/auth/verify-email（Token 验证 + 一次性使用）
-- [ ] BE-AUTH-07：实现 POST /api/auth/login（返回 AccessToken + RefreshToken）
-- [ ] BE-AUTH-08：实现 Refresh Token Rotation
-- [ ] BE-AUTH-09：实现 POST /api/auth/refresh
+- [x] BE-AUTH-05：实现邮箱验证邮件发送（Symfony Mailer + Resend SMTP）
+- [x] BE-AUTH-06：实现 POST /api/auth/verify-email（Token 验证 + 一次性使用）
+- [x] BE-AUTH-07：实现 POST /api/auth/login（返回 AccessToken + RefreshToken）
+- [x] BE-AUTH-08：实现 Refresh Token Rotation（`single_use: true` + `AuthenticationSuccessSubscriber`）
+- [x] BE-AUTH-09：实现 POST /api/auth/refresh
 - [ ] BE-AUTH-10：实现 POST /api/auth/logout（使 RefreshToken 失效）
 - [ ] BE-AUTH-11：配置速率限制（注册 5/h/IP，登录 10/min/IP，验证邮件 3/h/user）
 - [ ] BE-AUTH-12：编写所有认证端点的集成测试

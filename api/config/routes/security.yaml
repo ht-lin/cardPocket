@@ -1,3 +1,7 @@
 _security_logout:
     resource: security.route_loader.logout
     type: service
+
+api_auth_refresh:
+    path: /api/auth/refresh
+    methods: [POST]

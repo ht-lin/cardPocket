@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### BE-AUTH-04：Refresh Token Rotation（下一个任务）
+### BE-AUTH-05：登出（下一个任务）
 
 ---
 
@@ -114,16 +114,19 @@
 - [x] 实现 POST /api/auth/login State Processor（`LoginInput`/`LoginOutput`/`LoginProcessor`），注入 `RefreshTokenGeneratorInterface` + `RefreshTokenManagerInterface`
 - [x] 在 `config/services.yaml` 绑定 `$jwtTtl: '%lexik_jwt_authentication.token_ttl%'`
 
-### BE-AUTH-04：Refresh Token Rotation
+### BE-AUTH-04：Refresh Token Rotation ✅
 
-**先写测试** `tests/Integration/Auth/RefreshTest.php`：
-- [ ] `testRefreshSuccessfully`：有效 refreshToken 返回新 accessToken + 新 refreshToken
-- [ ] `testRefreshFailsWithExpiredToken`：30 天后 token 失效返回 401
-- [ ] `testOldRefreshTokenIsRevokedAfterRotation`：旧 refreshToken 刷新后立即失效
+**测试** `tests/Integration/Auth/RefreshTest.php`（4 个，全部通过）：
+- [x] `testRefreshSuccessfully`：有效 refreshToken 返回新 accessToken + 新 refreshToken（新旧不同，新 token 入库，旧 token 已删除）
+- [x] `testRefreshFailsWithExpiredToken`：过期 token 返回 401，响应体无 token 字段
+- [x] `testRefreshFailsWithNonExistentToken`：不存在的 token 返回 401
+- [x] `testOldRefreshTokenIsRevokedAfterRotation`：旧 token 刷新后立即失效，新 token 仍可继续使用
 
-**再实现**：
-- [ ] `/api/auth/refresh` 端点由 gesdinet bundle 路由接管，`ttl_update: true` 自动完成 Rotation，无需自定义处理器
-- [ ] 验证响应格式与 api.md 一致（`access_token`、`refresh_token`、`expires_in`）
+**实现**：
+- [x] 在 `config/routes/security.yaml` 显式注册 `api_auth_refresh` 路由（`RouterListener` priority 32 先于 Firewall priority 8，未注册则 404）
+- [x] 将 gesdinet 配置从 `ttl_update: true` 改为 `single_use: true`（`ttl_update` 只延长同一 token 有效期；`single_use` 才是真正 Rotation：刷新时删除旧 token、生成新 token）
+- [x] 创建 `src/EventSubscriber/AuthenticationSuccessSubscriber.php`，监听 `Lexik Events::AUTHENTICATION_SUCCESS`（priority -10），将 bundle 默认的 `token` 字段重命名为 `access_token` 并注入 `expires_in`（仅影响 refresh 流，LoginProcessor 走 API Platform Processor 路径，不触发该事件）
+- [x] 在 `config/services.yaml` 为 Subscriber 绑定 `$jwtTtl: '%lexik_jwt_authentication.token_ttl%'`
 
 ### BE-AUTH-05：登出
 
