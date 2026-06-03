@@ -102,9 +102,10 @@
 - [ ] `testLoginFailsWithSoftDeletedUser`：软删除用户返回 401
 
 **再实现**：
-- [ ] 创建 `RefreshToken` 实体（id, user, token, expiresAt, usedAt, revokedAt）
-- [ ] 实现 POST /api/auth/login 控制器
-- [ ] 实现 RefreshToken 生成逻辑（随机 64 字节，存数据库）
+- [ ] 安装 `gesdinet/jwt-refresh-token-bundle`，配置 `config/packages/gesdinet_jwt_refresh_token.yaml`（TTL 30天，`ttl_update: true`）
+- [ ] 创建 `src/Entity/RefreshToken.php` 继承 bundle 的 `AbstractRefreshToken`，生成迁移
+- [ ] 配置路由将 bundle 默认的 `/api/token/refresh` 覆盖为 `/api/auth/refresh`
+- [ ] 实现 POST /api/auth/login State Processor，注入 `RefreshTokenGeneratorInterface` 生成 Refresh Token
 
 ### BE-AUTH-04：Refresh Token Rotation
 
@@ -114,7 +115,8 @@
 - [ ] `testOldRefreshTokenIsRevokedAfterRotation`：旧 refreshToken 刷新后立即失效
 
 **再实现**：
-- [ ] 实现 POST /api/auth/refresh 控制器（验证 → 撤销旧 token → 生成新 token pair）
+- [ ] `/api/auth/refresh` 端点由 gesdinet bundle 路由接管，`ttl_update: true` 自动完成 Rotation，无需自定义处理器
+- [ ] 验证响应格式与 api.md 一致（`access_token`、`refresh_token`、`expires_in`）
 
 ### BE-AUTH-05：登出
 
@@ -123,7 +125,7 @@
 - [ ] `testRefreshFailsAfterLogout`：登出后不能用旧 refreshToken 刷新
 
 **再实现**：
-- [ ] 实现 POST /api/auth/logout（设置 revokedAt = now()）
+- [ ] 实现 POST /api/auth/logout State Processor，注入 `RefreshTokenManagerInterface`，调用 `delete()` 撤销 token，返回 204
 
 ### BE-AUTH-06：速率限制
 

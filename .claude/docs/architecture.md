@@ -67,6 +67,7 @@ src/
 │   ├── CardShare.php
 │   ├── Friendship.php
 │   └── PushToken.php       # Phase 2
+│   # RefreshToken 由 gesdinet/jwt-refresh-token-bundle 提供，不在 src/Entity/ 下
 ├── ApiResource/            # API Platform 4 DTO（独立于实体，无 Serialization Groups）
 │   ├── Card/
 │   │   ├── CardCreateInput.php     # POST body
@@ -108,6 +109,10 @@ src/
 - **不使用 `stateOptions(entityClass:...)`**：始终用自定义 State Provider/Processor
 - State Provider/Processor 负责 DTO ↔ Entity 映射与业务逻辑，Entity 保持纯净
 - Voter 只负责授权（能否访问资源）；State Provider 判断角色并返回对应 Output DTO
+
+**关键依赖**：
+- `lexik/jwt-authentication-bundle`：JWT 签发与验证（Access Token）
+- `gesdinet/jwt-refresh-token-bundle`：Refresh Token 持久化、Rotation、撤销（见 ADR-016）
 
 ---
 

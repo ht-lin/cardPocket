@@ -235,3 +235,23 @@
 - 与项目已有 422 响应格式一致（`violations[].propertyPath: "token"`）
 
 **权衡**：前端无法区分"token 不存在"和"token 已过期"，须统一显示"链接已失效，请重新请求验证邮件"。这对 UX 影响极小。
+
+---
+
+## ADR-016：使用 gesdinet/jwt-refresh-token-bundle 管理 Refresh Token
+
+**状态**：已采纳  
+**日期**：2026-06-03
+
+**决策**：使用 `gesdinet/jwt-refresh-token-bundle` 管理 Refresh Token 的持久化、轮换（Rotation）和撤销，不手写 `RefreshToken` 实体与轮换逻辑。
+
+**原因**：
+- 该 bundle 内置 Token Rotation（`ttl_update: true`）、过期清理、单次使用保证，手写会重复实现相同逻辑
+- 与 `lexik/jwt-authentication-bundle` 天然集成，无需额外桥接代码
+- `/api/auth/refresh` 端点由 bundle 路由接管，BE-AUTH-04 只需配置，无需实现处理器
+- Logout（撤销 token）通过 bundle 的 `RefreshTokenManagerInterface::delete()` 一行完成
+
+**权衡**：
+- gesdinet 的 `RefreshToken` 实体字段固定（`username`、`refreshToken`、`valid`），不包含 `usedAt`（重用检测）和 `revokedAt`（精细审计）。本项目不需要重用检测（Rotation 本身已保证旧 token 失效），放弃这两个字段可接受
+- bundle 默认路由为 `/api/token/refresh`，需通过路由配置覆盖为 `/api/auth/refresh` 以保持 API 一致性
+- 实体表名默认为 `refresh_tokens`，与原手写方案的 `refresh_token` 不同（尚未上线，无迁移兼容性问题）
