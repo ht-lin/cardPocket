@@ -280,3 +280,16 @@
 **权衡**：
 - 需要额外运维一个 Redis 实例（成本轻微增加）
 - 安全优先降级在 Redis 故障期间会影响合法用户（受限端点暂时不可用）；通过监控告警缩短故障恢复时间来缓解
+
+**实装说明（Phase 1）**：
+- 三个 limiter 定义在 `config/packages/rate_limiter.yaml`，`dev` / `test` 环境通过同文件内的 `when@dev` / `when@test` 块覆盖为 `no_limit`：
+
+  | limiter 名称 | 策略 | 阈值 | 窗口 |
+  |---|---|---|---|
+  | `register_by_ip` | sliding_window | 5 次 | 1 小时 |
+  | `login_by_ip` | sliding_window | 10 次 | 1 分钟 |
+  | `resend_verification_by_user` | sliding_window | 3 次 | 1 小时 |
+
+- Redis 服务：`compose.yaml` 中的 `redis_rate_limiter`（`redis:7-alpine`，`--maxmemory-policy noeviction`，本地端口 6379）
+- Cache pool：`config/packages/cache.yaml` 中的 `cache.rate_limiter`（`cache.adapter.redis`，读取环境变量 `REDIS_URL_RATE_LIMITER`）
+- 503 降级行为（Redis 不可用时拒绝请求）须通过专项集成测试覆盖：mock Redis 连接失败，验证受限端点返回 503 而非 200（BE-AUTH-06 编写代码时实现）

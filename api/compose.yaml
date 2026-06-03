@@ -19,6 +19,14 @@ services:
       # - ./docker/db/data:/var/lib/postgresql/data:rw
 ###< doctrine/doctrine-bundle ###
 
+###> symfony/rate-limiter ###
+  redis_rate_limiter:
+    image: redis:7-alpine
+    command: redis-server --maxmemory-policy noeviction
+    ports:
+      - "6379:6379"
+###< symfony/rate-limiter ###
+
 volumes:
 ###> doctrine/doctrine-bundle ###
   database_data:

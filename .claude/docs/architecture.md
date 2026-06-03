@@ -249,7 +249,7 @@ Symfony Local Server (https://localhost:8000)
 Docker: postgres:16 (localhost:5432)
   database: cardpocket_dev
   database: cardpocket_test  # 测试专用，每次测试前 reset
-Docker: redis:7 (localhost:6380)  # 速率限制专用，maxmemory-policy noeviction
+Docker: redis:7 (localhost:6379)  # 速率限制专用，maxmemory-policy noeviction
 
 Expo Dev Server (localhost:19000)
   ↕ 指向 https://localhost:8000
