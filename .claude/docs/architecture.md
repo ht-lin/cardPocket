@@ -12,6 +12,7 @@
 后端（Symfony 7 + API Platform 4）
   ↕
 PostgreSQL（主数据库）
+Redis（速率限制专用，maxmemory-policy noeviction）
 
 Phase 2：Symfony Messenger Worker → Expo Push API → FCM/APNs
 Phase 3：Expo Web（PWA）+ Service Worker
@@ -113,6 +114,7 @@ src/
 **关键依赖**：
 - `lexik/jwt-authentication-bundle`：JWT 签发与验证（Access Token）
 - `gesdinet/jwt-refresh-token-bundle`：Refresh Token 持久化、Rotation、撤销（见 ADR-016）
+- `symfony/rate-limiter`：速率限制（专用 Redis 实例，noeviction，安全优先降级，见 ADR-017）
 
 ---
 
@@ -231,6 +233,7 @@ Nginx
   └── /静态文件 → 本地磁盘
         │
         ├── PostgreSQL (5432, 仅本地访问)
+        ├── Redis:rate-limiter (6380, 仅本地访问, maxmemory-policy noeviction)
         └── 本地磁盘（Phase 3 图片）
 
 后台进程（Phase 2）
@@ -246,6 +249,7 @@ Symfony Local Server (https://localhost:8000)
 Docker: postgres:16 (localhost:5432)
   database: cardpocket_dev
   database: cardpocket_test  # 测试专用，每次测试前 reset
+Docker: redis:7 (localhost:6380)  # 速率限制专用，maxmemory-policy noeviction
 
 Expo Dev Server (localhost:19000)
   ↕ 指向 https://localhost:8000
@@ -260,7 +264,7 @@ Expo Dev Server (localhost:19000)
 | 传输 | HTTPS + HSTS |
 | 认证 | JWT（15min）+ Refresh Token Rotation |
 | 授权 | Symfony Voter（每次操作独立判断） |
-| 速率限制 | symfony/rate-limiter（Nginx 层也可加） |
+| 速率限制 | symfony/rate-limiter（专用 Redis，noeviction，安全优先降级；见 ADR-017） |
 | 本地存储 | expo-secure-store（AES-256，TEE/SE）|
 | 数据库 | UUID 主键（防 ID 枚举），软删除（deletedAt） |
 

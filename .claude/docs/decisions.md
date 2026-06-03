@@ -262,3 +262,21 @@
 - `RefreshTokenGeneratorInterface::createForUserWithTtl()` 只创建实体，不自动持久化，必须显式调用 `RefreshTokenManagerInterface::save()`
 - 登录 Processor 中手动调用 Generator + Manager::save()，不依赖 `AttachRefreshTokenOnSuccessListener`（该 listener 仅在 Lexik JWT 触发 AUTHENTICATION_SUCCESS 事件时生效，自定义 Processor 不会触发该事件）
 - **响应格式转换**：bundle 默认返回 `{"token": "..."}` 而非 `{"access_token": "..."}`。通过 `AuthenticationSuccessSubscriber` 监听 `Lexik Events::AUTHENTICATION_SUCCESS`（priority -10，在 Gesdinet 的 `AttachRefreshTokenOnSuccessListener` 之后），将 `token` 重命名为 `access_token` 并注入 `expires_in`。此事件仅由 gesdinet refresh 流程触发，不影响 `LoginProcessor` 的自定义响应
+
+---
+
+## ADR-017：速率限制使用专用 Redis 实例，降级策略为安全优先
+
+**状态**：已采纳  
+**日期**：2026-06-03
+
+**决策**：`symfony/rate-limiter` 使用独立于应用缓存的专用 Redis 实例作为存储后端；该实例设置 `maxmemory-policy noeviction`；当 Redis 不可用时，降级策略为**安全优先**（拒绝请求而非放行）。
+
+**原因**：
+- **存储隔离**：若速率限制计数器与应用缓存（响应缓存、Session 等）共用同一 Redis 实例，高负载下缓存淘汰策略（如 `allkeys-lru`）可能意外驱逐限速计数器，导致限速窗口静默重置，形成安全漏洞
+- **noeviction 策略**：限速计数器必须精确、不可丢失；`noeviction` 在内存满时返回写入错误而非静默删除数据，维护计数器完整性；若触发则发出告警并扩容
+- **安全优先降级**：速率限制的核心目的是防暴力破解和滥用；若 Redis 故障时放行所有请求，等同于限速完全失效，攻击者可趁故障窗口攻击登录/注册端点；故障时应拒绝请求（返回 503），而非静默放行
+
+**权衡**：
+- 需要额外运维一个 Redis 实例（成本轻微增加）
+- 安全优先降级在 Redis 故障期间会影响合法用户（受限端点暂时不可用）；通过监控告警缩短故障恢复时间来缓解
