@@ -296,3 +296,39 @@
 - 限速器集成：`UserRegisterProcessor`（`limiter.register_by_ip`）和 `LoginProcessor`（`limiter.login_by_ip`）通过 `#[Autowire(service: '...')]` 注入 `RateLimiterFactory`，超限时抛 `TooManyRequestsHttpException`（429）
 - `testRegisterRateLimitReturns429` 测试：⏸️ 暂缓。Symfony 编译容器对私有服务的 `$privates[]` 直接访问导致 `getContainer()->set()` 无法替换，需调查更可靠的覆盖方式
 - 503 降级行为（Redis 不可用时拒绝请求）的集成测试同样待实现
+
+---
+
+## ADR-018：前端表单处理使用 React Hook Form + Zod
+
+**状态**：已采纳
+**日期**：2026-06-04
+
+**决策**：从 Phase 1 认证界面起，所有前端表单使用 `react-hook-form` 管理状态，通过 `@hookform/resolvers/zod` 桥接 `zod` schema 进行验证。
+
+**原因**：
+- React Hook Form 基于非受控组件，减少不必要的 re-render，性能优于受控方案
+- Zod schema 作为 single source of truth：同时提供运行时验证逻辑和 `z.infer<>` 推导出的 TypeScript 类型，避免类型定义与验证规则分离导致的漂移
+- 认证页面（注册/登录）是输入最密集的界面，也是最先开发的，在此统一引入可为后续卡片编辑、用户设置表单建立规范
+
+**权衡**：
+- 增加两个依赖（`react-hook-form`、`zod`）和一个桥接包（`@hookform/resolvers`）
+- 团队需要了解 `useForm` + `zodResolver` 的使用模式；对于极简单的单字段输入（如搜索框）可直接用 `useState`，无需 RHF
+
+---
+
+## ADR-019：错误监控使用 Sentry，Phase 2 引入
+
+**状态**：已采纳
+**日期**：2026-06-04
+
+**决策**：Phase 2 引入 Sentry 作为错误监控与性能追踪方案。前端使用 `@sentry/react-native`，后端使用 `sentry/sentry-symfony` bundle。
+
+**原因**：
+- Phase 1 目标是 MVP 可运行，运维工具属于体验完善阶段的基础设施
+- Sentry 同时覆盖前后端，统一告警入口，避免前后端错误分散在不同系统
+- React Native SDK 支持 Expo，集成成本低；Symfony bundle 支持自动捕获未处理异常和慢请求
+
+**权衡**：
+- 需要创建 Sentry 项目并管理 DSN 配置（环境变量）
+- 需注意 PII 过滤：用户邮箱、卡片内容等敏感字段不得上报到 Sentry（须配置 `beforeSend` 过滤）

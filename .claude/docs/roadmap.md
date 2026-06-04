@@ -62,9 +62,10 @@
 
 ```
 [后端[1]完成后] 认证界面
-    ├── 注册页（含 GDPR 同意勾选）
+    ├── 安装 react-hook-form + zod + @hookform/resolvers
+    ├── 注册页（含 GDPR 同意勾选，Zod schema 验证）
     ├── 邮箱验证提示页
-    ├── 登录页
+    ├── 登录页（Zod schema 验证）
     ├── JWT 存储（内存）+ Refresh Token（SecureStore）
     └── 自动刷新逻辑
 
@@ -103,6 +104,7 @@
 
 **目标**：让应用"好用"而不只是"能用"
 
+- [ ] 前端+后端：Sentry 集成（`@sentry/react-native` + Sentry Symfony bundle，错误上报 + 性能监控）
 - [ ] 后端：卡片全文搜索（ILIKE，GET /api/cards?q=）
 - [ ] 前端：搜索界面（实时搜索，防抖）
 - [ ] 后端：卡片有效期字段开放（PATCH expiresAt）

@@ -51,6 +51,8 @@ src/
 
 **状态管理**：优先使用 React Query（服务端状态） + Context（认证状态），不引入 Redux。
 
+**表单处理**：使用 React Hook Form + Zod（Phase 1 认证界面起引入）。Zod schema 同时作为运行时验证与 TypeScript 类型来源（single source of truth）。
+
 **离线同步策略**：
 1. App 进入前台时触发 `GET /api/cards?updatedAfter=<lastSync>`
 2. 响应的 `updated` 覆盖本地缓存，`deleted` 从本地删除

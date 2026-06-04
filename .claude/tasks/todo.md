@@ -89,9 +89,10 @@
 - [ ] FE-INFRA-08：开发环境配置（API_BASE_URL + app.config.ts）
 
 #### [FE-AUTH] 认证界面（后端 BE-AUTH 完成后）
-- [ ] FE-AUTH-01：注册页面（表单验证 + GDPR 同意勾选）
+- [ ] FE-AUTH-00：安装 react-hook-form、zod、@hookform/resolvers
+- [ ] FE-AUTH-01：注册页面（Zod schema 验证 + GDPR 同意勾选）
 - [ ] FE-AUTH-02：邮箱验证提示页（提示去邮箱验证）
-- [ ] FE-AUTH-03：登录页面
+- [ ] FE-AUTH-03：登录页面（Zod schema 验证）
 - [ ] FE-AUTH-04：JWT Token 管理（AccessToken 存内存，RefreshToken 存 SecureStore）
 - [ ] FE-AUTH-05：自动 Token 刷新（请求拦截 + 401 时自动 refresh）
 - [ ] FE-AUTH-06：未验证用户的功能限制提示
@@ -129,6 +130,8 @@
 
 ## Phase 2：体验完善
 
+- [ ] FE: 安装 @sentry/react-native，配置 DSN + beforeSend PII 过滤
+- [ ] BE: 安装 sentry/sentry-symfony bundle，配置 DSN + 敏感字段过滤
 - [ ] BE: 卡片全文搜索（GET /api/cards?q=，ILIKE）
 - [ ] FE: 搜索界面（实时搜索，防抖 300ms）
 - [ ] BE: expiresAt 字段开放（PATCH）
