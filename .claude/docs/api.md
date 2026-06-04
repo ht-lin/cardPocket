@@ -7,7 +7,7 @@
 ## 通用规则
 
 - **Content-Type**：`application/json`（请求和响应均为 JSON）
-- **认证**：`Authorization: Bearer <access_token>`（除注册/登录/邮箱验证外所有端点）
+- **认证**：`Authorization: Bearer <access_token>`（除注册/登录/邮箱验证/重发验证邮件外所有端点）
 - **OpenAPI 文档**：`GET /api/docs`（API Platform 自动生成）
 - **UUID**：所有资源主键均为 UUID v4
 
@@ -148,6 +148,26 @@
 ```
 
 **响应 204**（无响应体）
+
+---
+
+### POST /api/auth/resend-verification
+重新发送邮箱验证邮件。无论邮箱是否存在或已验证，始终返回 200（不泄露账户信息）。
+
+**请求体**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**响应 200**（无响应体）
+
+**行为规则**：
+- 未验证用户：创建新 `EmailVerificationToken`（24 小时有效）并发送验证邮件
+- 已验证用户 / 不存在的邮箱 / 软删除用户：直接返回 200，不发邮件
+
+**限制**：3 次/小时/邮箱
 
 ---
 
@@ -537,6 +557,6 @@ Viewer 更新自己的私有昵称（仅 Viewer 本人可操作）。
 |------|----------|------|
 | POST /api/auth/register | IP | 5 次/小时 |
 | POST /api/auth/login | IP | 10 次/分钟 |
-| POST /api/auth/verify-email（重新发送） | 用户 | 3 次/小时 |
+| POST /api/auth/resend-verification | 邮箱 | 3 次/小时 |
 | POST /api/friendships | 用户 | 20 次/天 |
 | 所有其他认证 API | 用户 | 120 次/分钟 |

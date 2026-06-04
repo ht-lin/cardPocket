@@ -449,7 +449,8 @@
 - [x] `src/types/api.ts`：添加 `ResendVerificationRequest`
 - [x] `backend/src/ApiResource/Auth/ResendVerificationInput.php`：email 字段 + NotBlank + Email 验证
 - [x] `backend/src/ApiResource/Auth/ResendVerificationOutput.php`：`output: false`，status 200
-- [x] `backend/src/State/Processor/ResendVerificationProcessor.php`：rate limit（3次/小时/user），安全幂等（不泄露邮箱是否存在）
+- [x] `backend/src/State/Processor/ResendVerificationProcessor.php`：rate limit（3次/小时/邮箱），安全幂等（不泄露邮箱是否存在）
+- [x] `tests/Integration/Auth/ResendVerificationTest.php`：7 个集成测试（4 个 200 幂等场景 + 2 个 422 + missingField，空响应体断言，expiresAt 下界验证）
 
 ### FE-AUTH-03：登录页面
 
