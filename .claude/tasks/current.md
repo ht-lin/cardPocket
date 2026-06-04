@@ -7,7 +7,7 @@
 
 ## 进行中
 
-（FE-AUTH + FE-USER 全部完成，等待 BE-CARD 完成后开始 FE-CARD）
+（FE-AUTH + FE-USER 全部完成，BE-CARD-01 ✅ 完成，等待 BE-CARD-02 完成后开始 FE-CARD）
 
 ---
 
@@ -197,7 +197,7 @@
 - [x] `testDeleteAccountReturns204`：认证用户调用 DELETE → 204 No Content
 - [x] `testDeleteAccountFailsWithoutAuth`：未认证请求 → 401
 - [x] `testDeletedUserCannotLogin`：软删除后无法登录
-- [ ] `testDeleteAccountCascadesCards`：⏸️ 推迟到 BE-CARD-01（Card 实体创建后补充）
+- [x] `testDeleteAccountCascadesCards`：软删除用户时级联软删除所有 Card（BE-CARD-01 已补充）
 - [ ] `testDeleteAccountCascadesCardShares`：⏸️ 推迟到 BE-SHARE（CardShare 实体创建后补充）
 - [ ] `testDeleteAccountCascadesFriendships`：⏸️ 推迟到 BE-FRIEND（Friendship 实体创建后补充）
 
@@ -207,25 +207,55 @@
 
 ---
 
-## 待完成：卡片模块 [BE-CARD]
+## 卡片模块 [BE-CARD]
 
-### BE-CARD-01：Card 实体和 Voter
+### BE-CARD-01：Card 实体和 Voter ✅
 
-**先写测试** `tests/Integration/Card/CreateCardTest.php`：
-- [ ] `testCreateCardSuccessfully`
-- [ ] `testCreateCardFailsWhenEmailNotVerified`：返回 403
-- [ ] `testCreateCardFailsWhenLimitReached`：200 张上限返回 422
-- [ ] `testBarcodeTypeAndContentCannotBeUpdated`：PATCH 时静默忽略
+**测试**（共 21 个，全部通过）：
 
-**再实现**：
-- [ ] 创建 Card 实体（含 barcodeType enum）
-- [ ] 创建 Card DTO 类（`src/ApiResource/Card/`）：
-  - `CardCreateInput.php`（POST body）
-  - `CardUpdateInput.php`（PATCH body，不含 barcodeType/barcodeContent）
-  - `CardOwnerOutput.php`（Owner 视图）
-  - `CardViewerOutput.php`（Viewer 视图，含 viewerNickname）
-- [ ] 创建 CardVoter（CARD_VIEW, CARD_EDIT, CARD_DELETE）
-- [ ] 实现 CRUD 端点
+`tests/Integration/Card/CreateCardTest.php`（9 个）：
+- [x] `testCreateCardSuccessfully`
+- [x] `testCreateCardFailsWithoutAuth`：未认证 → 401
+- [x] `testCreateCardFailsWhenEmailNotVerified`：返回 403
+- [x] `testCreateCardFailsWhenLimitReached`：200 张上限返回 422
+- [x] `testCreateCardFailsWithBlankName`：422 + violations
+- [x] `testCreateCardFailsWithBlankBarcodeContent`：422 + violations
+- [x] `testCreateCardFailsWithInvalidBarcodeType`：反序列化失败 → 400
+- [x] `testCreateCardFailsWithMissingBarcodeType`：NotNull → 422
+- [x] `testBarcodeTypeAndContentCannotBeUpdated`：PATCH 时静默忽略
+
+`tests/Integration/Card/GetCardTest.php`（4 个）：
+- [x] `testGetCardSuccessfully`
+- [x] `testGetCardFailsForNonOwner`：403（CardVoter::CARD_VIEW）
+- [x] `testGetCardFailsWithoutAuth`：401
+- [x] `testGetCardReturns404ForNonExistentCard`
+
+`tests/Integration/Card/UpdateCardTest.php`（4 个）：
+- [x] `testUpdateCardSuccessfully`
+- [x] `testUpdateCardFailsForNonOwner`：403（CardVoter::CARD_EDIT）
+- [x] `testUpdateCardFailsWithoutAuth`：401
+- [x] `testUpdateCardReturns404ForNonExistentCard`
+
+`tests/Integration/Card/DeleteCardTest.php`（4 个）：
+- [x] `testDeleteCardSuccessfully`：204
+- [x] `testDeleteCardFailsForNonOwner`：403（CardVoter::CARD_DELETE）
+- [x] `testDeleteCardFailsWithoutAuth`：401
+- [x] `testDeleteCardReturns404ForNonExistentCard`
+
+**实现**：
+- [x] 创建 `src/Enum/BarcodeType.php`（9 个 case 的 backed string enum）
+- [x] 创建 `src/Entity/Card.php`（UUID、软删除、lifecycle callbacks，onDelete: RESTRICT）
+- [x] 创建 `src/Repository/CardRepository.php`（`findActiveByOwner`、`countActiveByOwner`）
+- [x] 创建 `src/Factory/CardFactory.php`（Foundry v2）
+- [x] 创建 Card DTO 类（`src/ApiResource/Card/`）：
+  - [x] `CardCreateInput.php`（POST body）
+  - [x] `CardUpdateInput.php`（PATCH body，不含 barcodeType/barcodeContent）
+  - [x] `CardOwnerOutput.php`（Owner 视图，含 `#[ApiResource]`）
+  - [x] `CardViewerOutput.php`（Viewer 视图，含 viewerNickname，供 BE-CARD-02 用）
+- [x] 创建 `src/Security/Voter/CardVoter.php`（CARD_VIEW, CARD_EDIT, CARD_DELETE，当前均限 owner）
+- [x] 创建 `src/State/Provider/CardViewProvider.php`（GET/{id} 查卡 + 权限检查）
+- [x] 实现 CRUD State Processors：`CardCreateProcessor`、`CardUpdateProcessor`、`CardDeleteProcessor`
+- [x] 生成并执行 Doctrine 迁移（`migrations/Version20260604161247.php`）
 
 ### BE-CARD-02：GET /api/cards 含 Viewer 昵称隔离
 

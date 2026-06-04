@@ -6,20 +6,23 @@ namespace App\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\Entity\Card;
 use App\Entity\User;
-use App\Repository\CardRepository;
+use App\Security\Voter\CardVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @implements ProcessorInterface<mixed, null>
  */
-final class DeleteAccountProcessor implements ProcessorInterface
+final class CardDeleteProcessor implements ProcessorInterface
 {
     public function __construct(
         private readonly Security $security,
         private readonly EntityManagerInterface $entityManager,
-        private readonly CardRepository $cardRepository,
     ) {
     }
 
@@ -28,11 +31,17 @@ final class DeleteAccountProcessor implements ProcessorInterface
         $user = $this->security->getUser();
         assert($user instanceof User);
 
-        foreach ($this->cardRepository->findActiveByOwner($user) as $card) {
-            $card->setDeletedAt(new \DateTimeImmutable());
+        $card = $this->entityManager->find(Card::class, Uuid::fromString((string) ($uriVariables['id'] ?? '')));
+
+        if ($card === null) {
+            throw new NotFoundHttpException();
         }
 
-        $user->setDeletedAt(new \DateTimeImmutable());
+        if (!$this->security->isGranted(CardVoter::CARD_DELETE, $card)) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $card->setDeletedAt(new \DateTimeImmutable());
         $this->entityManager->flush();
 
         return null;
