@@ -3,22 +3,33 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 type AuthContextValue = {
   isAuthenticated: boolean;
   isLoading: boolean;
-  setTokens: (accessToken: string, refreshToken: string) => void;
-  clearTokens: () => void;
+  getAccessToken(): string | null;
+  getRefreshToken(): string | null;
+  setTokens(accessToken: string, refreshToken: string): void;
+  clearTokens(): void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
   return (
     <AuthContext.Provider
       value={{
-        isAuthenticated,
+        isAuthenticated: accessToken !== null,
         isLoading: false,
-        setTokens: () => setIsAuthenticated(true),
-        clearTokens: () => setIsAuthenticated(false),
+        getAccessToken: () => accessToken,
+        getRefreshToken: () => refreshToken,
+        setTokens: (access, refresh) => {
+          setAccessToken(access);
+          setRefreshToken(refresh);
+        },
+        clearTokens: () => {
+          setAccessToken(null);
+          setRefreshToken(null);
+        },
       }}
     >
       {children}
