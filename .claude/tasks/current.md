@@ -175,15 +175,21 @@
 
 **再实现**：创建 `UserUpdateInput.php`，State Processor 读取后更新 Entity
 
-### BE-USER-03：GET /api/users/search
+### BE-USER-03：GET /api/users/search ✅
 
-**先写测试** `tests/Integration/User/SearchTest.php`：
-- [ ] `testSearchByUserName`：精确匹配 userName 返回 [{id, userName}]
-- [ ] `testSearchByEmail`：精确匹配 email 返回 [{id, userName}]（响应不含 email）
-- [ ] `testSearchReturnsEmptyArrayWhenNotFound`：无匹配返回 []（不是 404）
-- [ ] `testSearchFailsWhenEmailNotVerified`：未验证用户返回 403
+**测试** `tests/Integration/User/SearchTest.php`（8 个，全部通过）：
+- [x] `testSearchByUserName`：精确匹配 userName 返回 [{id, userName}]
+- [x] `testSearchByEmail`：精确匹配 email 返回 [{id, userName}]（响应不含 email）
+- [x] `testSearchReturnsEmptyArrayWhenNotFound`：无匹配返回 []（不是 404）
+- [x] `testSearchReturnsEmptyArrayWhenQIsEmpty`：?q= 空字符串返回 []
+- [x] `testSearchReturnsEmptyArrayWhenQParamMissing`：不传 ?q 参数返回 []
+- [x] `testSearchDoesNotReturnSoftDeletedUser`：软删除用户不出现在结果中
+- [x] `testSearchFailsWhenEmailNotVerified`：未验证用户返回 403
+- [x] `testSearchFailsWithoutAuth`：未认证返回 401
 
-**再实现**：创建 `UserSearchOutput.php`（只含 id + userName），自定义 State Provider 精确匹配后返回
+**实现**：
+- [x] 创建 `src/ApiResource/User/UserSearchOutput.php`（只含 id + userName，GetCollection 操作）
+- [x] 创建 `src/State/Provider/UserSearchProvider.php`（邮箱验证检查，精确匹配 userName 或 email）
 
 ### BE-USER-04：DELETE /api/users/me（GDPR）
 
