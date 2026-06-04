@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-INFRA-08：开发环境配置（当前任务）
+### FE-AUTH-01：注册页面（当前任务）
 
 ---
 
@@ -414,14 +414,12 @@
 **目标**：环境变量管理，API 地址可配置
 
 **实现**：
-- `frontend/app.config.ts`：读取 `process.env.API_BASE_URL`，默认 `http://localhost:8000`，注入 `extra.apiBaseUrl`
-- `frontend/.env.local`（加入 `.gitignore`）：`API_BASE_URL=http://localhost:8000`
-- `src/services/api.ts`：通过 `Constants.expoConfig?.extra?.apiBaseUrl` 读取地址
-- `src/types/api.ts`：占位文件，后续按后端响应类型逐步填入
+- [x] `frontend/app.config.ts`：读取 `process.env.API_BASE_URL`，默认 `http://localhost:8000`，注入 `extra.apiBaseUrl`
+- [x] `frontend/.env.local`（已在 `.gitignore` 中）：`API_BASE_URL=http://localhost:8000`
+- [x] `src/constants/env.ts`：通过 `Constants.expoConfig?.extra?.apiBaseUrl` 读取地址（`api.ts` / `AuthContext.tsx` 无需改动）
+- [x] `src/types/api.ts`：占位文件，后续按后端响应类型逐步填入
 
-**验收**：`npx expo start` 无报错；修改 `.env.local` 后 API 请求指向新地址
-
-**状态**：⏸️ 待开始
+**验收**：`npx tsc --noEmit` 无类型错误 ✅
 
 ---
 

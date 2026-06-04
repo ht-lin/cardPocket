@@ -86,7 +86,7 @@
 - [x] FE-INFRA-05：Auth Context + Token 管理（内存 AccessToken + SecureStore RefreshToken）
 - [x] FE-INFRA-06：React Query 配置（QueryClient + 全局 Provider）
 - [x] FE-INFRA-07：SecureStore 封装（类型安全读/写/删）
-- [ ] FE-INFRA-08：开发环境配置（API_BASE_URL + app.config.ts）
+- [x] FE-INFRA-08：开发环境配置（API_BASE_URL + app.config.ts）
 
 #### [FE-AUTH] 认证界面（后端 BE-AUTH 完成后）
 - [ ] FE-AUTH-00：安装 react-hook-form、zod、@hookform/resolvers
