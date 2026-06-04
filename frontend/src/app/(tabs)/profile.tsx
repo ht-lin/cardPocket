@@ -13,13 +13,19 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthContext } from '@/context/AuthContext';
 import { getMe, updateMe } from '@/services/userService';
-import { updateUserNameSchema, type UpdateUserNameFormData } from '@/schemas/auth';
+import {
+  updateUserNameSchema,
+  type UpdateUserNameFormData,
+  changePasswordSchema,
+  type ChangePasswordFormData,
+} from '@/schemas/auth';
 import type { ApiValidationError } from '@/types/api';
 
 export default function ProfileScreen() {
   const auth = useAuthContext();
   const queryClient = useQueryClient();
   const [userNameModalVisible, setUserNameModalVisible] = useState(false);
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
 
   const { data: user, isLoading, isError } = useQuery({
     queryKey: ['users', 'me'],
@@ -43,7 +49,7 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.button} onPress={() => setUserNameModalVisible(true)}>
           <Text style={styles.buttonText}>修改用户名</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => setPasswordModalVisible(true)}>
           <Text style={styles.buttonText}>修改密码</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.dangerButton]}>
@@ -58,6 +64,12 @@ export default function ProfileScreen() {
           await queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
           setUserNameModalVisible(false);
         }}
+        auth={auth}
+      />
+
+      <ChangePasswordModal
+        visible={passwordModalVisible}
+        onClose={() => setPasswordModalVisible(false)}
         auth={auth}
       />
     </View>
@@ -137,6 +149,127 @@ function UpdateUserNameModal({ visible, onClose, onSuccess, auth }: UpdateUserNa
             />
             {errors.userName ? (
               <Text style={styles.fieldError}>{errors.userName.message}</Text>
+            ) : null}
+          </View>
+
+          {globalError ? <Text style={styles.fieldError}>{globalError}</Text> : null}
+
+          <TouchableOpacity
+            style={[styles.button, styles.submitButton, isSubmitting && styles.buttonDisabled]}
+            onPress={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.submitText}>保存</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
+            <Text style={styles.buttonText}>取消</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+type ChangePasswordModalProps = {
+  visible: boolean;
+  onClose: () => void;
+  auth: ReturnType<typeof useAuthContext>;
+};
+
+function ChangePasswordModal({ visible, onClose, auth }: ChangePasswordModalProps) {
+  const [globalError, setGlobalError] = useState<string | null>(null);
+  const {
+    control,
+    handleSubmit,
+    setError,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
+  });
+
+  const handleClose = () => {
+    reset();
+    setGlobalError(null);
+    onClose();
+  };
+
+  const onSubmit = async (data: ChangePasswordFormData) => {
+    setGlobalError(null);
+    try {
+      await updateMe(auth, { currentPassword: data.currentPassword, newPassword: data.newPassword });
+      reset();
+      onClose();
+    } catch (err) {
+      if (err instanceof Response && err.status === 422) {
+        const body: ApiValidationError = await err.json();
+        let hasFieldError = false;
+        body.violations?.forEach((v) => {
+          if (v.propertyPath === 'currentPassword') {
+            setError('currentPassword', { message: v.message });
+            hasFieldError = true;
+          } else if (v.propertyPath === 'newPassword') {
+            setError('newPassword', { message: v.message });
+            hasFieldError = true;
+          }
+        });
+        if (!hasFieldError) setGlobalError('操作失败，请检查输入内容');
+      } else {
+        setGlobalError('操作失败，请稍后重试');
+      }
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
+      <View style={styles.overlay}>
+        <View style={styles.sheet}>
+          <Text style={styles.sheetTitle}>修改密码</Text>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>当前密码</Text>
+            <Controller
+              control={control}
+              name="currentPassword"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={[styles.input, errors.currentPassword && styles.inputError]}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  secureTextEntry
+                  placeholder="输入当前密码"
+                />
+              )}
+            />
+            {errors.currentPassword ? (
+              <Text style={styles.fieldError}>{errors.currentPassword.message}</Text>
+            ) : null}
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>新密码</Text>
+            <Controller
+              control={control}
+              name="newPassword"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={[styles.input, errors.newPassword && styles.inputError]}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  secureTextEntry
+                  placeholder="至少 8 个字符"
+                />
+              )}
+            />
+            {errors.newPassword ? (
+              <Text style={styles.fieldError}>{errors.newPassword.message}</Text>
             ) : null}
           </View>
 

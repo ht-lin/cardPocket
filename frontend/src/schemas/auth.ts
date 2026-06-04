@@ -29,3 +29,10 @@ export const updateUserNameSchema = z.object({
 });
 
 export type UpdateUserNameFormData = z.infer<typeof updateUserNameSchema>;
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, '请输入当前密码'),
+  newPassword: z.string().min(8, '新密码至少 8 个字符'),
+});
+
+export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
