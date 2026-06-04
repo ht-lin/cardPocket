@@ -37,3 +37,17 @@ export interface LoginResponse {
   token_type: string;
   expires_in: number;
 }
+
+export interface UserOutput {
+  id: string;
+  email: string;
+  userName: string;
+  emailVerified: boolean;
+  createdAt: string;
+}
+
+export interface UserUpdateRequest {
+  userName?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}

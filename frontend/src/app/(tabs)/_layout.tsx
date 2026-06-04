@@ -13,6 +13,7 @@ export default function TabLayout() {
       <Tabs.Screen name="index" options={{ title: '我的卡片' }} />
       <Tabs.Screen name="shared" options={{ title: '共享给我' }} />
       <Tabs.Screen name="friends" options={{ title: '好友' }} />
+      <Tabs.Screen name="profile" options={{ title: '我的' }} />
     </Tabs>
   );
 }
