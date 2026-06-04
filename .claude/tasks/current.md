@@ -154,15 +154,16 @@
 
 ## 待完成：用户模块 [BE-USER]
 
-### BE-USER-01：GET /api/users/me
+### BE-USER-01：GET /api/users/me ✅
 
-**先写测试** `tests/Integration/User/MeTest.php`：
-- [ ] `testGetMeSuccessfully`：返回当前用户信息（不含 password）
-- [ ] `testGetMeFailsWithoutAuth`：未认证返回 401
+**测试** `tests/Integration/User/MeTest.php`（3 个，全部通过）：
+- [x] `testGetMeSuccessfully`：返回当前用户信息（id UUID 格式、email、userName 精确值、emailVerified=false、createdAt ISO 8601，不含 password）
+- [x] `testGetMeReturnsEmailVerifiedTrueWhenVerified`：emailVerifiedAt 非 null 时 emailVerified=true
+- [x] `testGetMeFailsWithoutAuth`：未认证返回 401，响应体 code=401
 
-**再实现**：
-- [ ] 创建 `src/ApiResource/User/UserOutput.php`（GET /me 响应 DTO，不含 password）
-- [ ] 配置 API Platform 自定义 `/me` 端点，State Provider 返回 `UserOutput`
+**实现**：
+- [x] 创建 `src/ApiResource/User/UserOutput.php`（GET /me 响应 DTO，不含 password）
+- [x] 创建 `src/State/Provider/UserMeProvider.php`（注入 Security，返回当前用户 UserOutput）
 
 ### BE-USER-02：PATCH /api/users/me
 

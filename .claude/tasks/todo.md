@@ -24,7 +24,7 @@
 
 #### [BE-USER] 用户模块
 - [ ] BE-USER-00：创建 User DTO 类（UserRegisterInput / UserOutput / UserSearchOutput / UserUpdateInput）
-- [ ] BE-USER-01：实现 GET /api/users/me
+- [x] BE-USER-01：实现 GET /api/users/me
 - [ ] BE-USER-02：实现 PATCH /api/users/me（userName + 修改密码）
 - [ ] BE-USER-03：实现 GET /api/users/search（精确匹配，只返回 id+userName）
 - [ ] BE-USER-04：实现 DELETE /api/users/me（GDPR 级联清除）
