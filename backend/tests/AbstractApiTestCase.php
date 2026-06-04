@@ -27,6 +27,13 @@ abstract class AbstractApiTestCase extends ApiTestCase
         return $response->toArray()['access_token'];
     }
 
+    protected function decodeJwtPayload(string $token): array
+    {
+        $parts = explode('.', $token);
+
+        return json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
+    }
+
     /**
      * Make an authenticated request.
      * Use auth_bearer option — not an Authorization header string — to satisfy API Platform's client.

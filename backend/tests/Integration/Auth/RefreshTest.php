@@ -51,6 +51,10 @@ final class RefreshTest extends AbstractApiTestCase
 
         $oldToken = $em->getRepository(RefreshToken::class)->findOneBy(['refreshToken' => $oldRefreshToken]);
         $this->assertNull($oldToken, 'Old RefreshToken must be deleted after rotation');
+
+        $payload = $this->decodeJwtPayload($data['access_token']);
+        $this->assertArrayHasKey('email_verified', $payload);
+        $this->assertFalse($payload['email_verified']);
     }
 
     public function testRefreshFailsWithExpiredToken(): void

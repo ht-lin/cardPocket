@@ -40,6 +40,26 @@ final class LoginTest extends AbstractApiTestCase
         $em = static::getContainer()->get('doctrine')->getManager();
         $persisted = $em->getRepository(RefreshToken::class)->findOneBy(['refreshToken' => $data['refresh_token']]);
         $this->assertNotNull($persisted, 'RefreshToken must be persisted in the database');
+
+        $payload = $this->decodeJwtPayload($data['access_token']);
+        $this->assertFalse($payload['email_verified']);
+    }
+
+    public function testJwtContainsEmailVerifiedTrueForVerifiedUser(): void
+    {
+        UserFactory::createOne([
+            'email' => 'verified@example.com',
+            'emailVerifiedAt' => new \DateTimeImmutable(),
+        ]);
+
+        $client = static::createClient();
+        $response = $client->request('POST', self::ENDPOINT, [
+            'json' => ['email' => 'verified@example.com', 'password' => 'Password1!'],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $payload = $this->decodeJwtPayload($response->toArray()['access_token']);
+        $this->assertTrue($payload['email_verified']);
     }
 
     public function testLoginFailsWithWrongPassword(): void
