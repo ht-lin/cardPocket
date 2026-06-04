@@ -7,7 +7,16 @@
 
 ## 进行中
 
-### FE-AUTH-03：登录页面（当前任务）
+### FE-AUTH-04：JWT Token 管理（当前任务）
+
+---
+
+## 已完成（本轮）
+
+### FE-AUTH-03：登录页面 ✅
+- [x] 表单（email + password）+ Zod 验证
+- [x] 调用 `POST /api/auth/login`，成功后调用 `AuthContext.setTokens()`，跳转 `/(tabs)`
+- [x] 错误提示（401 凭证错误 + 验证邮件快捷链接、429 限流、网络错误）
 
 ---
 
