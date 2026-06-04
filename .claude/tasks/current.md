@@ -1,13 +1,13 @@
-# 当前任务：Phase 1 MVP — 后端认证模块
+# 当前任务：Phase 1 MVP — 前端基础设施
 
 > 开发顺序：后端 TDD → 前端同步  
-> 当前专注：**[BE-INFRA] 基础设施 + [BE-AUTH] 认证模块**
+> 当前专注：**[FE-INFRA] 前端基础设施**（BE-INFRA ✅ BE-AUTH ✅）
 
 ---
 
 ## 进行中
 
-### BE-AUTH-05：登出（下一个任务）
+### FE-INFRA-02：TypeScript strict 配置（下一个任务）
 
 ---
 
@@ -309,16 +309,19 @@
 
 **技术栈**：Expo React Native + Expo Router + TypeScript(strict) + React Query + expo-secure-store
 
-### FE-INFRA-01：Expo 项目初始化 + 依赖安装
+### ✅ FE-INFRA-01：Expo 项目初始化 + 依赖安装（已完成）
 
 **目标**：创建前端项目，安装所有 Phase 1 核心依赖
 
 **实现**：
-- `frontend/`：运行 `npx create-expo-app frontend --template expo-template-blank-typescript`
-- 安装依赖：`expo-router`、`expo-secure-store`、`expo-barcode-scanner`、`react-native-barcode-svg`、`react-native-svg`、`@tanstack/react-query`
-- 配置 `package.json` 的 `main` 字段指向 `expo-router/entry`
-
-**验收**：`npx expo start` 无报错，模拟器可加载空白页
+- [x] `frontend/`：`npx create-expo-app@latest` 使用 `expo-template-blank-typescript`（Expo SDK 56）
+- [x] 安装依赖：`expo-router`、`expo-secure-store`、`expo-barcode-scanner`、`react-native-barcode-svg`、`react-native-svg`、`@tanstack/react-query`
+- [x] 安装 expo-router peer deps：`expo-constants`、`expo-linking`、`react-native-safe-area-context`
+- [x] 配置 `package.json`：`"main": "expo-router/entry"`
+- [x] 配置 `app.json`：添加 `"scheme": "cardpocket"`（expo-router 深度链接必需）
+- [x] 添加 `"overrides": { "react-dom": { "react": "$react" } }` 解决 react-dom@19.2.7 与 Expo 钉版 react@19.2.3 的版本冲突
+- [x] 删除 `App.tsx`、`index.ts`，创建 `app/index.tsx` 空白占位页
+- [x] `expo-doctor` 21/21 checks passed；`tsc --noEmit` 无错误
 
 ### FE-INFRA-02：TypeScript strict 配置
 
