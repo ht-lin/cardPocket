@@ -97,6 +97,12 @@
 - [x] FE-AUTH-05：自动 Token 刷新（请求拦截 + 401 时自动 refresh）
 - [x] FE-AUTH-06：未验证用户的功能限制提示
 
+#### [FE-USER] 用户设置界面（后端 BE-USER 完成后）
+- [ ] FE-USER-01：个人信息页（展示 userName / email）
+- [ ] FE-USER-02：修改 userName（内联编辑 + 422 重名提示）
+- [ ] FE-USER-03：修改密码（当前密码验证 + 新密码 Zod schema）
+- [ ] FE-USER-04：账户注销确认流程（二次确认弹窗 + GDPR 说明）
+
 #### [FE-CARD] 卡片基础界面（后端 BE-CARD 完成后）
 - [ ] FE-CARD-01：我的卡片列表页
 - [ ] FE-CARD-02：添加卡片页（手动输入 + 条码类型选择 + 实时预览）

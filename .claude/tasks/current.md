@@ -476,6 +476,44 @@
 
 ---
 
+## 待完成：用户设置界面 [FE-USER]
+
+**依赖**：FE-AUTH 完成 + BE-USER 完成（BE-USER-01~05）
+
+**状态**：🔒 等待 BE-USER 完成后展开任务
+
+### FE-USER-01：个人信息页
+
+**先写测试**（手动验证）：
+- [ ] 已登录用户能看到自己的 userName 和 email
+- [ ] 页面正确调用 GET /api/users/me
+
+**再实现**：
+- [ ] `src/app/(tabs)/profile.tsx`：展示 userName / email，底部操作按钮
+- [ ] `src/services/userService.ts`：封装 `getMe()`、`updateMe()`、`deleteMe()`
+- [ ] Tab 栏增加"我的"入口
+
+### FE-USER-02：修改 userName
+
+- [ ] `testUpdateUserNameSuccessfully`：提交新 userName → PATCH /api/users/me → 页面刷新
+- [ ] `testUpdateUserNameFailsWithDuplicate`：422 重名提示回填到输入框
+
+### FE-USER-03：修改密码
+
+- [ ] `testChangePasswordSuccessfully`：当前密码 + 新密码 → PATCH /api/users/me
+- [ ] `testChangePasswordFailsWithWrongCurrentPassword`：当前密码错误 → 错误提示
+
+**实现**：Zod schema 验证（新密码强度规则与注册一致），参考 `src/schemas/auth.ts`
+
+### FE-USER-04：账户注销
+
+- [ ] `testDeleteAccountShowsConfirmDialog`：点击注销弹出二次确认
+- [ ] `testDeleteAccountSuccessfully`：确认后调用 DELETE /api/users/me，清除 token，跳转登录页
+
+**实现**：`clearTokens()` 来自 `useAuthContext`（参考 FE-AUTH-06 登出逻辑）
+
+---
+
 ## 待完成：卡片基础界面 [FE-CARD]
 
 **依赖**：FE-AUTH 完成 + BE-CARD 完成（BE-CARD-01~09）
