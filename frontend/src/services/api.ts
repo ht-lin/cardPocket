@@ -13,9 +13,9 @@ type ApiOptions = RequestInit & { _retry?: boolean };
 export async function apiFetch(
   path: string,
   options: ApiOptions,
-  auth: AuthHandlers,
+  auth?: AuthHandlers,
 ): Promise<Response> {
-  const token = auth.getAccessToken();
+  const token = auth?.getAccessToken();
 
   const headers = new Headers(options.headers);
   if (token) {
@@ -28,7 +28,7 @@ export async function apiFetch(
     headers,
   });
 
-  if (response.status === 401 && !options._retry) {
+  if (response.status === 401 && !options._retry && auth) {
     const refreshToken = auth.getRefreshToken();
     if (!refreshToken) {
       auth.clearTokens();

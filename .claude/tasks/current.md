@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-AUTH-01：注册页面（当前任务）
+### FE-AUTH-02：邮箱验证提示页（当前任务）
 
 ---
 
@@ -423,21 +423,27 @@
 
 ---
 
-## 待完成：认证界面 [FE-AUTH]
+## 已完成：认证界面 [FE-AUTH]（进行中）
 
 **依赖**：FE-INFRA + BE-AUTH ✅（BE-AUTH-01~06 均已完成）
 
-**状态**：⏸️ 待开始（BE-AUTH 已完成，FE-INFRA 完成后即可开始）
+### ✅ FE-AUTH-00：安装依赖
 
-### FE-AUTH-01：注册页面
+**实现**：
+- [x] `npx expo install react-hook-form zod @hookform/resolvers`
 
-- [ ] 表单验证（email 格式、password 长度）
-- [ ] GDPR 同意勾选
-- [ ] 调用 `POST /api/auth/register`，成功后跳转验证提示页
+### ✅ FE-AUTH-01：注册页面
+
+**实现**：
+- [x] `src/schemas/auth.ts`：Zod schema（email/password/userName/gdprConsent），兼容 Zod v4
+- [x] `src/types/api.ts`：添加 `RegisterRequest`、`RegisterResponse`、`ApiViolation`、`ApiValidationError`
+- [x] `src/app/(auth)/register.tsx`：react-hook-form + zodResolver，字段级 422 错误回填，提交中禁用按钮，GDPR Switch
+- [x] `src/app/(auth)/verify-email.tsx`：注册成功跳转目标占位页（FE-AUTH-02 基础）
+- [x] `src/services/api.ts`：`auth` 参数改为可选（`auth?: AuthHandlers`），公开端点无需传入
 
 ### FE-AUTH-02：邮箱验证提示页
 
-- [ ] 静态提示页："请去邮箱点击验证链接"
+- [ ] 静态提示页完善："请去邮箱点击验证链接"（占位已创建）
 - [ ] 重新发送验证邮件按钮（调用 `POST /api/auth/resend-verification`）
 
 ### FE-AUTH-03：登录页面
@@ -457,8 +463,6 @@
 ### FE-AUTH-06：未验证用户限制提示
 
 - [ ] 登录成功但邮箱未验证时，显示全屏提示 + 重发验证邮件入口
-
-**状态**：⏸️ 待开始
 
 ---
 
