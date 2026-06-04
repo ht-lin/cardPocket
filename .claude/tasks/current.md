@@ -7,16 +7,7 @@
 
 ## 进行中
 
-### FE-AUTH-04：JWT Token 管理（当前任务）
-
----
-
-## 已完成（本轮）
-
-### FE-AUTH-03：登录页面 ✅
-- [x] 表单（email + password）+ Zod 验证
-- [x] 调用 `POST /api/auth/login`，成功后调用 `AuthContext.setTokens()`，跳转 `/(tabs)`
-- [x] 错误提示（401 凭证错误 + 验证邮件快捷链接、429 限流、网络错误）
+### FE-AUTH-06：未验证用户限制提示（当前任务）
 
 ---
 
@@ -461,19 +452,19 @@
 - [x] `backend/src/State/Processor/ResendVerificationProcessor.php`：rate limit（3次/小时/邮箱），安全幂等（不泄露邮箱是否存在）
 - [x] `tests/Integration/Auth/ResendVerificationTest.php`：7 个集成测试（4 个 200 幂等场景 + 2 个 422 + missingField，空响应体断言，expiresAt 下界验证）
 
-### FE-AUTH-03：登录页面
+### ✅ FE-AUTH-03：登录页面
 
-- [ ] 表单（email + password）
-- [ ] 调用 `POST /api/auth/login`，成功后调用 `AuthContext.setTokens()`，跳转主页
-- [ ] 错误提示（401、未验证）
+- [x] 表单（email + password）+ Zod schema 验证
+- [x] 调用 `POST /api/auth/login`，成功后调用 `AuthContext.setTokens()`，跳转 `/(tabs)`
+- [x] 错误提示：401 凭证错误（含验证邮件快捷跳转链接）、429 限流、网络错误
 
-### FE-AUTH-04：JWT Token 管理
+### ✅ FE-AUTH-04：JWT Token 管理
 
-- [ ] 与 FE-INFRA-05 集成，确认 AccessToken 存内存、RefreshToken 存 SecureStore
+- [x] 与 FE-INFRA-05 集成完成：AccessToken 存内存（`AuthContext` state）、RefreshToken 存 SecureStore
 
-### FE-AUTH-05：自动 Token 刷新
+### ✅ FE-AUTH-05：自动 Token 刷新
 
-- [ ] 与 FE-INFRA-04 集成，确认 401 时自动 refresh 并重试
+- [x] 与 FE-INFRA-04 集成完成：`apiFetch` 拦截 401 → 自动调用 `/api/auth/refresh` → 重试原请求
 
 ### FE-AUTH-06：未验证用户限制提示
 
