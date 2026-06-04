@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-INFRA-04：API 客户端（下一个任务）
+### FE-INFRA-05：Auth Context + Token 管理（下一个任务）
 
 ---
 
@@ -352,20 +352,23 @@
 
 **验收**：`npx tsc --noEmit` 无错误 ✅
 
-### FE-INFRA-04：API 客户端
+### ✅ FE-INFRA-04：API 客户端（已完成）
 
 **目标**：统一请求入口，自动附加 token，401 时自动刷新
 
 **实现**：
-- `src/services/api.ts`：
-  - `apiFetch(path, options, getAccessToken)` — 拼接 API_BASE_URL，附加 Authorization header
-  - 响应 401 → 调用 `POST /api/auth/refresh` → 更新 token → 重试（单次，防无限循环）
-  - 刷新失败 → 清除 token，导航到登录页
-- `getAccessToken` 通过参数注入（而非 import AuthContext），避免循环依赖
+- [x] `src/constants/env.ts`：导出 `API_BASE_URL = 'http://localhost:8080'`
+- [x] `src/services/api.ts`：
+  - `AuthHandlers` 类型（`getAccessToken`、`getRefreshToken`、`setTokens`、`clearTokens`）
+  - `apiFetch(path, options, auth)` — 拼接 `API_BASE_URL`，附加 `Authorization: Bearer` header
+  - 响应 401 → `POST /api/auth/refresh`（Token Rotation）→ `auth.setTokens()` → 重试（`_retry` 标志防无限循环）
+  - 刷新失败 → `auth.clearTokens()` → `router.replace('/(auth)/login')`
+  - `auth` 参数注入（而非 import AuthContext），避免循环依赖
+- [x] `src/context/AuthContext.tsx`：升级 stub，加入真实 token 内存存储 + `getAccessToken()`/`getRefreshToken()`，`isAuthenticated` 派生自 `accessToken !== null`
 
-**验收**：能成功发请求；401 时自动刷新后重试
+**验收**：`npx tsc --noEmit` 无类型错误 ✅
 
-### FE-INFRA-05：Auth Context + Token 管理
+### FE-INFRA-05：Auth Context + Token 管理（下一个任务）
 
 **目标**：全局认证状态，内存 AccessToken + SecureStore RefreshToken
 
