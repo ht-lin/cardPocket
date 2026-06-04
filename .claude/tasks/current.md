@@ -20,7 +20,7 @@
 - [x] 验证：`docker compose up -d && docker ps` 正常运行
 
 ### BE-INFRA-02：Symfony 项目初始化
-- [x] `composer create-project symfony/skeleton api`
+- [x] `composer create-project symfony/skeleton backend`
 - [x] 安装依赖：
   ```
   composer require api-platform/api-pack

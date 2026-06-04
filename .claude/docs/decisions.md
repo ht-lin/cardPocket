@@ -290,7 +290,7 @@
   | `login_by_ip` | sliding_window | 10 次 | 1 分钟 |
   | `resend_verification_by_user` | sliding_window | 3 次 | 1 小时 |
 
-- Redis 服务：根目录 `docker-compose.yml` 中的 `redis_rate_limiter`（`redis:7-alpine`，`--maxmemory-policy noeviction`，本地端口 6379）；原 `api/compose.yaml` 已于 BE-AUTH-06 合并到根目录并删除
+- Redis 服务：根目录 `docker-compose.yml` 中的 `redis_rate_limiter`（`redis:7-alpine`，`--maxmemory-policy noeviction`，本地端口 6379）；原 `backend/compose.yaml` 已于 BE-AUTH-06 合并到根目录并删除
 - Cache pool：`config/packages/cache.yaml` 中的 `cache.rate_limiter`（`cache.adapter.redis`，读取环境变量 `REDIS_URL_RATE_LIMITER`）
 - Redis 客户端：使用 `predis/predis`（纯 PHP 实现），而非 php-redis C 扩展；原因：php-redis v6.x 的 `pubsub()` 签名与 Symfony `RedisProxy` 不兼容，导致测试环境 fatal error
 - 限速器集成：`UserRegisterProcessor`（`limiter.register_by_ip`）和 `LoginProcessor`（`limiter.login_by_ip`）通过 `#[Autowire(service: '...')]` 注入 `RateLimiterFactory`，超限时抛 `TooManyRequestsHttpException`（429）
