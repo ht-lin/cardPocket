@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-INFRA-05：Auth Context + Token 管理（下一个任务）
+### FE-INFRA-06：React Query 配置（下一个任务）
 
 ---
 
@@ -368,20 +368,22 @@
 
 **验收**：`npx tsc --noEmit` 无类型错误 ✅
 
-### FE-INFRA-05：Auth Context + Token 管理（下一个任务）
+### ✅ FE-INFRA-05：Auth Context + Token 管理（已完成）
 
 **目标**：全局认证状态，内存 AccessToken + SecureStore RefreshToken
 
 **实现**：
-- `src/context/AuthContext.tsx`（`AuthProvider`）：
-  - 内存中持有 `accessToken: string | null`（不持久化）
-  - 冷启动时从 SecureStore 读取 refreshToken，自动静默刷新获取 accessToken
-  - 暴露 `setTokens(accessToken, refreshToken)`、`clearTokens()`
-- `src/hooks/useAuth.ts`：消费 AuthContext，暴露 `user`、`login`、`logout`、`isLoading`
+- [x] `src/context/AuthContext.tsx`：
+  - `isLoading` 真实 state（初始 `true`，bootstrap 完成后 `false`）
+  - `useEffect` bootstrap：冷启动读 SecureStore → `POST /api/auth/refresh` 静默刷新 → 成功则进主页，失败则清除 token
+  - `setTokens()` fire-and-forget 写 SecureStore；`clearTokens()` fire-and-forget 删 SecureStore
+  - 内部 hook 改名为 `useAuthContext`（存储层，非组件直接使用）
+- [x] `src/hooks/useAuth.ts`：面向组件的业务 API hook，暴露 `isAuthenticated`、`isLoading`、`user`（从 JWT payload 解码 email）、`login`、`logout`
+- [x] `src/app/(tabs)/_layout.tsx`：import 更新为 `@/hooks/useAuth`
 
-**验收**：SecureStore 有 refreshToken 时冷启动自动进入主页；登出后清除 token，再次冷启动跳到登录页
+**验收**：`npx tsc --noEmit` 无类型错误 ✅
 
-### FE-INFRA-06：React Query 配置
+### FE-INFRA-06：React Query 配置（下一个任务）
 
 **目标**：全局 QueryClient 配置
 
