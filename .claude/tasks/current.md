@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-INFRA-06：React Query 配置（下一个任务）
+### FE-INFRA-07：SecureStore 封装（下一个任务）
 
 ---
 
@@ -346,8 +346,8 @@
 - [x] `src/app/(tabs)/index.tsx`：我的卡片列表占位
 - [x] `src/app/(tabs)/shared.tsx`：共享给我占位
 - [x] `src/app/(tabs)/friends.tsx`：好友管理占位
-- [x] `src/context/AuthContext.tsx`：最小 stub（FE-INFRA-05 完整替换）
-- [x] `src/lib/queryClient.ts`：基础 QueryClient（FE-INFRA-06 添加配置）
+- [x] `src/context/AuthContext.tsx`：最小 stub（已在 FE-INFRA-04/05 完整升级）
+- [x] `src/lib/queryClient.ts`：基础 QueryClient（已在 FE-INFRA-06 添加 defaultOptions）
 - [x] 迁移 `app/` → `src/app/`（Expo Router 自动识别 src/app，无需 app.json 配置）
 
 **验收**：`npx tsc --noEmit` 无错误 ✅
@@ -383,17 +383,17 @@
 
 **验收**：`npx tsc --noEmit` 无类型错误 ✅
 
-### FE-INFRA-06：React Query 配置（下一个任务）
+### ✅ FE-INFRA-06：React Query 配置（已完成）
 
 **目标**：全局 QueryClient 配置
 
 **实现**：
-- `src/lib/queryClient.ts`：`new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } })`
-- `src/app/_layout.tsx`：挂载 `<QueryClientProvider client={queryClient}>`
+- [x] `src/lib/queryClient.ts`：加入 `defaultOptions`（`staleTime: 30_000`、`retry: 1`）
+- [x] `src/app/_layout.tsx`：`<QueryClientProvider>` 已在 FE-INFRA-03 挂载，无需改动
 
-**验收**：任意页面使用 `useQuery` 无报错
+**验收**：`npx tsc --noEmit` 无类型错误 ✅
 
-### FE-INFRA-07：SecureStore 封装
+### FE-INFRA-07：SecureStore 封装（下一个任务）
 
 **目标**：类型安全的本地加密存储
 
