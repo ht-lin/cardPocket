@@ -7,15 +7,22 @@ namespace App\ApiResource\Card;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\State\Processor\CardCreateProcessor;
 use App\State\Processor\CardDeleteProcessor;
 use App\State\Processor\CardUpdateProcessor;
+use App\State\Provider\CardListProvider;
 use App\State\Provider\CardViewProvider;
 
 #[ApiResource(
     operations: [
+        new GetCollection(
+            uriTemplate: '/cards',
+            provider: CardListProvider::class,
+            name: 'api_cards_list',
+        ),
         new Post(
             uriTemplate: '/cards',
             input: CardCreateInput::class,

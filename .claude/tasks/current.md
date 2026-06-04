@@ -7,7 +7,7 @@
 
 ## 进行中
 
-（FE-AUTH + FE-USER 全部完成，BE-CARD-01 ✅ 完成，等待 BE-CARD-02 完成后开始 FE-CARD）
+（FE-AUTH + FE-USER 全部完成，BE-CARD-01 ✅ BE-CARD-02 ✅ 完成，等待 BE-CARD 全部完成后开始 FE-CARD）
 
 ---
 
@@ -257,15 +257,24 @@
 - [x] 实现 CRUD State Processors：`CardCreateProcessor`、`CardUpdateProcessor`、`CardDeleteProcessor`
 - [x] 生成并执行 Doctrine 迁移（`migrations/Version20260604161247.php`）
 
-### BE-CARD-02：GET /api/cards 含 Viewer 昵称隔离
+### BE-CARD-02：GET /api/cards 含 Viewer 昵称隔离 ✅
 
-**先写测试** `tests/Integration/Card/ListCardsTest.php`：
-- [ ] `testOwnerSeesOwnCards`
-- [ ] `testViewerSeesSharedCards`：共享卡片出现在列表中
-- [ ] `testViewerNicknameIsIncludedForViewer`：Viewer 能看到自己的 viewerNickname
-- [ ] `testViewerNicknameIsHiddenFromOwner`：Owner 看不到 Viewer 的昵称
+**测试** `tests/Integration/Card/ListCardsTest.php`（7 个，全部通过）：
+- [x] `testOwnerSeesOwnCards`
+- [x] `testViewerSeesSharedCards`：共享卡片出现在列表中
+- [x] `testViewerNicknameIsIncludedForViewer`：Viewer 能看到自己的 viewerNickname
+- [x] `testViewerNicknameIsHiddenFromOwner`：Owner 看不到 Viewer 的昵称
+- [x] `testListCardsFailsWithoutAuth`：未认证返回 401
+- [x] `testDeletedCardIsHiddenFromOwner`：软删除卡片不出现在列表中
+- [x] `testOwnerAndViewerCardsAreMerged`：同一用户自有卡 + 共享卡合并返回，isOwner 各自正确
 
-**再实现**：自定义 State Provider，判断当前用户是 Owner 还是 Viewer，返回对应的 `CardOwnerOutput` 或 `CardViewerOutput`
+**实现**：
+- [x] 创建 `src/Entity/CardShare.php`（最小实体：id, card, viewer, viewerNickname, createdAt；onDelete CASCADE）
+- [x] 创建 `src/Repository/CardShareRepository.php`（`findByViewer`，过滤 card.deletedAt IS NULL）
+- [x] 创建 `src/Factory/CardShareFactory.php`（Foundry v2）
+- [x] 创建 `src/State/Provider/CardListProvider.php`（owner 卡 → CardOwnerOutput；shared 卡 → CardViewerOutput）
+- [x] 在 `CardOwnerOutput` 注册 `GetCollection` 操作（`/cards`，provider: CardListProvider）
+- [x] 生成并执行 Doctrine 迁移（`migrations/Version20260604192248.php`，app_card_share 表）
 
 ---
 
