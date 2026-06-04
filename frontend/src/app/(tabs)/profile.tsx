@@ -6,13 +6,15 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Modal,
+  Alert,
   StyleSheet,
 } from 'react-native';
+import { router } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthContext } from '@/context/AuthContext';
-import { getMe, updateMe } from '@/services/userService';
+import { getMe, updateMe, deleteMe } from '@/services/userService';
 import {
   updateUserNameSchema,
   type UpdateUserNameFormData,
@@ -26,6 +28,33 @@ export default function ProfileScreen() {
   const queryClient = useQueryClient();
   const [userNameModalVisible, setUserNameModalVisible] = useState(false);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      '确认注销',
+      '此操作不可逆，账户及所有数据将被永久删除。确定要注销吗？',
+      [
+        { text: '取消', style: 'cancel' },
+        {
+          text: '确认注销',
+          style: 'destructive',
+          onPress: async () => {
+            setIsDeleting(true);
+            try {
+              await deleteMe(auth);
+              queryClient.clear();
+              auth.clearTokens();
+              router.replace('/(auth)/login');
+            } catch {
+              setIsDeleting(false);
+              Alert.alert('操作失败', '注销失败，请稍后重试');
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const { data: user, isLoading, isError } = useQuery({
     queryKey: ['users', 'me'],
@@ -52,8 +81,16 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.button} onPress={() => setPasswordModalVisible(true)}>
           <Text style={styles.buttonText}>修改密码</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.dangerButton]}>
-          <Text style={[styles.buttonText, styles.dangerText]}>注销账户</Text>
+        <TouchableOpacity
+          style={[styles.button, styles.dangerButton, isDeleting && styles.buttonDisabled]}
+          onPress={handleDeleteAccount}
+          disabled={isDeleting}
+        >
+          {isDeleting ? (
+            <ActivityIndicator color="#dc2626" />
+          ) : (
+            <Text style={[styles.buttonText, styles.dangerText]}>注销账户</Text>
+          )}
         </TouchableOpacity>
       </View>
 
