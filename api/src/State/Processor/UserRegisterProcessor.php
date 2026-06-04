@@ -11,7 +11,11 @@ use App\ApiResource\User\UserRegisterOutput;
 use App\Entity\User;
 use App\Service\EmailVerificationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 
 /**
  * @implements ProcessorInterface<UserRegisterInput, UserRegisterOutput>
@@ -22,6 +26,9 @@ final class UserRegisterProcessor implements ProcessorInterface
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly EmailVerificationService $emailVerificationService,
+        private readonly RequestStack $requestStack,
+        #[Autowire(service: 'limiter.register_by_ip')]
+        private readonly RateLimiterFactory $registerByIpLimiter,
     ) {
     }
 
@@ -32,6 +39,11 @@ final class UserRegisterProcessor implements ProcessorInterface
         array $context = [],
     ): UserRegisterOutput {
         assert($data instanceof UserRegisterInput);
+
+        $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? '127.0.0.1';
+        if (!$this->registerByIpLimiter->create($ip)->consume()->isAccepted()) {
+            throw new TooManyRequestsHttpException();
+        }
 
         $user = new User();
         $user->setEmail($data->email);

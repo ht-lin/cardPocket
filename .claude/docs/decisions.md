@@ -290,6 +290,9 @@
   | `login_by_ip` | sliding_window | 10 次 | 1 分钟 |
   | `resend_verification_by_user` | sliding_window | 3 次 | 1 小时 |
 
-- Redis 服务：`compose.yaml` 中的 `redis_rate_limiter`（`redis:7-alpine`，`--maxmemory-policy noeviction`，本地端口 6379）
+- Redis 服务：根目录 `docker-compose.yml` 中的 `redis_rate_limiter`（`redis:7-alpine`，`--maxmemory-policy noeviction`，本地端口 6379）；原 `api/compose.yaml` 已于 BE-AUTH-06 合并到根目录并删除
 - Cache pool：`config/packages/cache.yaml` 中的 `cache.rate_limiter`（`cache.adapter.redis`，读取环境变量 `REDIS_URL_RATE_LIMITER`）
-- 503 降级行为（Redis 不可用时拒绝请求）须通过专项集成测试覆盖：mock Redis 连接失败，验证受限端点返回 503 而非 200（BE-AUTH-06 编写代码时实现）
+- Redis 客户端：使用 `predis/predis`（纯 PHP 实现），而非 php-redis C 扩展；原因：php-redis v6.x 的 `pubsub()` 签名与 Symfony `RedisProxy` 不兼容，导致测试环境 fatal error
+- 限速器集成：`UserRegisterProcessor`（`limiter.register_by_ip`）和 `LoginProcessor`（`limiter.login_by_ip`）通过 `#[Autowire(service: '...')]` 注入 `RateLimiterFactory`，超限时抛 `TooManyRequestsHttpException`（429）
+- `testRegisterRateLimitReturns429` 测试：⏸️ 暂缓。Symfony 编译容器对私有服务的 `$privates[]` 直接访问导致 `getContainer()->set()` 无法替换，需调查更可靠的覆盖方式
+- 503 降级行为（Redis 不可用时拒绝请求）的集成测试同样待实现

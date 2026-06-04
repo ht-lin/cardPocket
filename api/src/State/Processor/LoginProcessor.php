@@ -13,8 +13,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 
 /**
  * @implements ProcessorInterface<LoginInput, LoginOutput>
@@ -28,12 +32,20 @@ final class LoginProcessor implements ProcessorInterface
         private readonly RefreshTokenGeneratorInterface $refreshTokenGenerator,
         private readonly RefreshTokenManagerInterface $refreshTokenManager,
         private readonly int $jwtTtl,
+        private readonly RequestStack $requestStack,
+        #[Autowire(service: 'limiter.login_by_ip')]
+        private readonly RateLimiterFactory $loginByIpLimiter,
     ) {
     }
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): LoginOutput
     {
         assert($data instanceof LoginInput);
+
+        $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? '127.0.0.1';
+        if (!$this->loginByIpLimiter->create($ip)->consume()->isAccepted()) {
+            throw new TooManyRequestsHttpException();
+        }
 
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $data->email]);
 

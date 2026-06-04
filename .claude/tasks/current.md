@@ -144,11 +144,11 @@
 
 ### BE-AUTH-06：速率限制
 
-- [ ] 安装配置 `symfony/rate-limiter`
-- [ ] 配置注册限制：5 次/小时/IP（sliding window）
-- [ ] 配置登录限制：10 次/分钟/IP
-- [ ] 配置验证邮件重发限制：3 次/小时/用户
-- [ ] 编写限制触发测试：`testRegisterRateLimitReturns429`
+- [x] 安装配置 `symfony/rate-limiter`
+- [x] 配置注册限制：5 次/小时/IP（sliding window）
+- [x] 配置登录限制：10 次/分钟/IP
+- [x] 配置验证邮件重发限制：3 次/小时/用户
+- [ ] 编写限制触发测试：`testRegisterRateLimitReturns429`（⏸️ 暂缓：Symfony 编译容器私有服务覆盖问题待调查）
 
 ---
 
