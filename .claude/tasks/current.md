@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-INFRA-07：SecureStore 封装（下一个任务）
+### FE-INFRA-08：开发环境配置（当前任务）
 
 ---
 
@@ -393,20 +393,21 @@
 
 **验收**：`npx tsc --noEmit` 无类型错误 ✅
 
-### FE-INFRA-07：SecureStore 封装（下一个任务）
+### FE-INFRA-07：SecureStore 封装
 
 **目标**：类型安全的本地加密存储
 
 **实现**：
-- `src/storage/secureStore.ts`：
+- [x] `src/storage/secureStore.ts`：
   - `getRefreshToken(): Promise<string | null>`
   - `setRefreshToken(token: string): Promise<void>`
   - `deleteRefreshToken(): Promise<void>`
   - `getItem<T>(key: string): Promise<T | null>`（JSON 序列化，供卡片缓存使用）
   - `setItem<T>(key: string, value: T): Promise<void>`
   - `deleteItem(key: string): Promise<void>`
+- [x] `src/context/AuthContext.tsx`：迁移至使用新封装（`setRefreshToken` 别名为 `persistRefreshToken` 避免与 useState setter 冲突）
 
-**验收**：`npx tsc --noEmit` 无类型错误
+**验收**：`npx tsc --noEmit` 无类型错误 ✅
 
 ### FE-INFRA-08：开发环境配置
 

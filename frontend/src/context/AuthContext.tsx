@@ -1,8 +1,10 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import * as SecureStore from 'expo-secure-store';
 import { API_BASE_URL } from '@/constants/env';
-
-const REFRESH_TOKEN_KEY = 'refresh_token';
+import {
+  getRefreshToken,
+  setRefreshToken as persistRefreshToken,
+  deleteRefreshToken,
+} from '@/storage/secureStore';
 
 type AuthContextValue = {
   isAuthenticated: boolean;
@@ -22,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function bootstrap() {
-      const stored = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+      const stored = await getRefreshToken();
       if (!stored) return;
 
       const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
@@ -35,9 +37,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { access_token, refresh_token } = await response.json();
         setAccessToken(access_token);
         setRefreshToken(refresh_token);
-        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refresh_token);
+        await persistRefreshToken(refresh_token);
       } else {
-        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+        await deleteRefreshToken();
       }
     }
 
@@ -56,12 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTokens: (access, refresh) => {
           setAccessToken(access);
           setRefreshToken(refresh);
-          SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refresh).catch(console.error);
+          persistRefreshToken(refresh).catch(console.error);
         },
         clearTokens: () => {
           setAccessToken(null);
           setRefreshToken(null);
-          SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY).catch(console.error);
+          deleteRefreshToken().catch(console.error);
         },
       }}
     >
