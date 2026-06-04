@@ -25,10 +25,10 @@
 #### [BE-USER] 用户模块
 - [ ] BE-USER-00：创建 User DTO 类（UserRegisterInput / UserOutput / UserSearchOutput / UserUpdateInput）
 - [x] BE-USER-01：实现 GET /api/users/me
-- [ ] BE-USER-02：实现 PATCH /api/users/me（userName + 修改密码）
-- [ ] BE-USER-03：实现 GET /api/users/search（精确匹配，只返回 id+userName）
-- [ ] BE-USER-04：实现 DELETE /api/users/me（GDPR 级联清除）
-- [ ] BE-USER-05：编写用户模块集成测试
+- [x] BE-USER-02：实现 PATCH /api/users/me（userName + 修改密码）
+- [x] BE-USER-03：实现 GET /api/users/search（精确匹配，只返回 id+userName）
+- [x] BE-USER-04：实现 DELETE /api/users/me（软删除；级联删除测试推迟到对应实体模块）
+- [ ] BE-USER-05：编写用户模块集成测试（级联删除：Cards/CardShares/Friendships）
 
 #### [BE-CARD] 卡片模块
 - [ ] BE-CARD-01：创建 Card 实体（含所有字段，expiresAt/archivedAt 预留）

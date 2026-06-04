@@ -191,15 +191,19 @@
 - [x] 创建 `src/ApiResource/User/UserSearchOutput.php`（只含 id + userName，GetCollection 操作）
 - [x] 创建 `src/State/Provider/UserSearchProvider.php`（邮箱验证检查，精确匹配 userName 或 email）
 
-### BE-USER-04：DELETE /api/users/me（GDPR）
+### BE-USER-04：DELETE /api/users/me（GDPR）✅
 
-**先写测试** `tests/Integration/User/DeleteAccountTest.php`：
-- [ ] `testDeleteAccountCascadesCards`：删后该用户的 Card 被删除
-- [ ] `testDeleteAccountCascadesCardShares`：删后相关 CardShare 被删除
-- [ ] `testDeleteAccountCascadesFriendships`：删后 Friendship 被删除
-- [ ] `testDeletedUserCannotLogin`：软删除后无法登录
+**测试** `tests/Integration/User/DeleteAccountTest.php`（3 个，全部通过）：
+- [x] `testDeleteAccountReturns204`：认证用户调用 DELETE → 204 No Content
+- [x] `testDeleteAccountFailsWithoutAuth`：未认证请求 → 401
+- [x] `testDeletedUserCannotLogin`：软删除后无法登录
+- [ ] `testDeleteAccountCascadesCards`：⏸️ 推迟到 BE-CARD-01（Card 实体创建后补充）
+- [ ] `testDeleteAccountCascadesCardShares`：⏸️ 推迟到 BE-SHARE（CardShare 实体创建后补充）
+- [ ] `testDeleteAccountCascadesFriendships`：⏸️ 推迟到 BE-FRIEND（Friendship 实体创建后补充）
 
-**再实现**：State Processor 执行级联清除，最后软删除 User
+**实现**：
+- [x] 创建 `src/State/Processor/DeleteAccountProcessor.php`（软删除：设置 `deletedAt = now()`）
+- [x] 在 `src/ApiResource/User/UserOutput.php` 注册 Delete 操作（`output: false, status: 204`）
 
 ---
 

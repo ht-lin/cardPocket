@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\ApiResource\User;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
+use App\State\Processor\DeleteAccountProcessor;
 use App\State\Processor\UserUpdateProcessor;
 use App\State\Provider\UserMeProvider;
 
@@ -23,6 +25,13 @@ use App\State\Provider\UserMeProvider;
             input: UserUpdateInput::class,
             processor: UserUpdateProcessor::class,
             name: 'api_users_me_update',
+        ),
+        new Delete(
+            uriTemplate: '/users/me',
+            output: false,
+            status: 204,
+            processor: DeleteAccountProcessor::class,
+            name: 'api_users_me_delete',
         ),
     ],
 )]

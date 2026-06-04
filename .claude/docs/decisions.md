@@ -332,3 +332,21 @@
 **权衡**：
 - 需要创建 Sentry 项目并管理 DSN 配置（环境变量）
 - 需注意 PII 过滤：用户邮箱、卡片内容等敏感字段不得上报到 Sentry（须配置 `beforeSend` 过滤）
+
+---
+
+## ADR-020：BE-USER-04 级联删除测试推迟到各实体模块
+
+**状态**：已采纳
+**日期**：2026-06-04
+
+**决策**：DELETE /api/users/me 的级联删除测试（Cards/CardShares/Friendships）推迟到对应实体创建时实现，BE-USER-04 只覆盖软删除核心逻辑（3 个测试：返回 204、未认证 401、软删除后无法登录）。
+
+**原因**：
+- 编写 BE-USER-04 时，Card/CardShare/Friendship 实体尚未创建，级联测试无法编译运行
+- 创建最小实体桩（stub）会与 BE-CARD-01/BE-FRIEND/BE-SHARE 的实体定义产生耦合，增加后续迁移摩擦
+- 软删除核心逻辑（`deletedAt`）完全独立于级联逻辑，可先行测试验证
+
+**权衡**：
+- BE-USER-04 的测试覆盖暂不完整，需在 BE-CARD/BE-FRIEND/BE-SHARE 模块中各自补充级联场景
+- `DeleteAccountProcessor` 预留了 `EntityManagerInterface` 注入，后续直接添加级联删除查询即可，扩展成本低
