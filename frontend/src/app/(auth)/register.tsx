@@ -46,7 +46,10 @@ export default function RegisterScreen() {
       });
 
       if (res.status === 201) {
-        router.replace('/(auth)/verify-email');
+        router.replace({
+          pathname: '/(auth)/verify-email',
+          params: { email: data.email },
+        });
         return;
       }
 

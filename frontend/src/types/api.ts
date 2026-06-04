@@ -21,3 +21,7 @@ export interface ApiViolation {
 export interface ApiValidationError {
   violations: ApiViolation[];
 }
+
+export interface ResendVerificationRequest {
+  email: string;
+}

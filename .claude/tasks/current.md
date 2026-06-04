@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-AUTH-02：邮箱验证提示页（当前任务）
+### FE-AUTH-03：登录页面（当前任务）
 
 ---
 
@@ -441,10 +441,15 @@
 - [x] `src/app/(auth)/verify-email.tsx`：注册成功跳转目标占位页（FE-AUTH-02 基础）
 - [x] `src/services/api.ts`：`auth` 参数改为可选（`auth?: AuthHandlers`），公开端点无需传入
 
-### FE-AUTH-02：邮箱验证提示页
+### ✅ FE-AUTH-02：邮箱验证提示页
 
-- [ ] 静态提示页完善："请去邮箱点击验证链接"（占位已创建）
-- [ ] 重新发送验证邮件按钮（调用 `POST /api/auth/resend-verification`）
+**实现**：
+- [x] `src/app/(auth)/verify-email.tsx`：完整实现，读取 email 路由参数，展示目标邮箱，5s 自动消失的发送状态提示
+- [x] `src/app/(auth)/register.tsx`：跳转时携带 `params: { email }` 参数
+- [x] `src/types/api.ts`：添加 `ResendVerificationRequest`
+- [x] `backend/src/ApiResource/Auth/ResendVerificationInput.php`：email 字段 + NotBlank + Email 验证
+- [x] `backend/src/ApiResource/Auth/ResendVerificationOutput.php`：`output: false`，status 200
+- [x] `backend/src/State/Processor/ResendVerificationProcessor.php`：rate limit（3次/小时/user），安全幂等（不泄露邮箱是否存在）
 
 ### FE-AUTH-03：登录页面
 

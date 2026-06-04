@@ -91,7 +91,7 @@
 #### [FE-AUTH] 认证界面（后端 BE-AUTH 完成后）
 - [x] FE-AUTH-00：安装 react-hook-form、zod、@hookform/resolvers
 - [x] FE-AUTH-01：注册页面（Zod schema 验证 + GDPR 同意勾选）
-- [ ] FE-AUTH-02：邮箱验证提示页（提示去邮箱验证）
+- [x] FE-AUTH-02：邮箱验证提示页（提示去邮箱验证）
 - [ ] FE-AUTH-03：登录页面（Zod schema 验证）
 - [ ] FE-AUTH-04：JWT Token 管理（AccessToken 存内存，RefreshToken 存 SecureStore）
 - [ ] FE-AUTH-05：自动 Token 刷新（请求拦截 + 401 时自动 refresh）
