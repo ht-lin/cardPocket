@@ -1,10 +1,26 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Modal,
+  StyleSheet,
+} from 'react-native';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthContext } from '@/context/AuthContext';
-import { getMe } from '@/services/userService';
+import { getMe, updateMe } from '@/services/userService';
+import { updateUserNameSchema, type UpdateUserNameFormData } from '@/schemas/auth';
+import type { ApiValidationError } from '@/types/api';
 
 export default function ProfileScreen() {
   const auth = useAuthContext();
+  const queryClient = useQueryClient();
+  const [userNameModalVisible, setUserNameModalVisible] = useState(false);
+
   const { data: user, isLoading, isError } = useQuery({
     queryKey: ['users', 'me'],
     queryFn: () => getMe(auth),
@@ -14,7 +30,7 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <View style={styles.info}>
         {isLoading && <ActivityIndicator size="large" />}
-        {isError && <Text style={styles.error}>加载失败，请重试</Text>}
+        {isError && <Text style={styles.loadError}>加载失败，请重试</Text>}
         {user && (
           <>
             <Text style={styles.userName}>{user.userName}</Text>
@@ -24,7 +40,7 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => setUserNameModalVisible(true)}>
           <Text style={styles.buttonText}>修改用户名</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button}>
@@ -34,7 +50,116 @@ export default function ProfileScreen() {
           <Text style={[styles.buttonText, styles.dangerText]}>注销账户</Text>
         </TouchableOpacity>
       </View>
+
+      <UpdateUserNameModal
+        visible={userNameModalVisible}
+        onClose={() => setUserNameModalVisible(false)}
+        onSuccess={async () => {
+          await queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+          setUserNameModalVisible(false);
+        }}
+        auth={auth}
+      />
     </View>
+  );
+}
+
+type UpdateUserNameModalProps = {
+  visible: boolean;
+  onClose: () => void;
+  onSuccess: () => Promise<void>;
+  auth: ReturnType<typeof useAuthContext>;
+};
+
+function UpdateUserNameModal({ visible, onClose, onSuccess, auth }: UpdateUserNameModalProps) {
+  const [globalError, setGlobalError] = useState<string | null>(null);
+  const {
+    control,
+    handleSubmit,
+    setError,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<UpdateUserNameFormData>({
+    resolver: zodResolver(updateUserNameSchema),
+  });
+
+  const handleClose = () => {
+    reset();
+    setGlobalError(null);
+    onClose();
+  };
+
+  const onSubmit = async (data: UpdateUserNameFormData) => {
+    setGlobalError(null);
+    try {
+      await updateMe(auth, { userName: data.userName });
+      reset();
+      await onSuccess();
+    } catch (err) {
+      if (err instanceof Response && err.status === 422) {
+        const body: ApiValidationError = await err.json();
+        let hasFieldError = false;
+        body.violations?.forEach((v) => {
+          if (v.propertyPath === 'userName') {
+            setError('userName', { message: v.message });
+            hasFieldError = true;
+          }
+        });
+        if (!hasFieldError) setGlobalError('操作失败，请检查输入内容');
+      } else {
+        setGlobalError('操作失败，请稍后重试');
+      }
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
+      <View style={styles.overlay}>
+        <View style={styles.sheet}>
+          <Text style={styles.sheetTitle}>修改用户名</Text>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>新用户名</Text>
+            <Controller
+              control={control}
+              name="userName"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={[styles.input, errors.userName && styles.inputError]}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  placeholder="输入新用户名"
+                />
+              )}
+            />
+            {errors.userName ? (
+              <Text style={styles.fieldError}>{errors.userName.message}</Text>
+            ) : null}
+          </View>
+
+          {globalError ? <Text style={styles.fieldError}>{globalError}</Text> : null}
+
+          <TouchableOpacity
+            style={[styles.button, styles.submitButton, isSubmitting && styles.buttonDisabled]}
+            onPress={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.submitText}>保存</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
+            <Text style={styles.buttonText}>取消</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -58,7 +183,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  error: {
+  loadError: {
     color: '#dc2626',
   },
   actions: {
@@ -81,5 +206,59 @@ const styles = StyleSheet.create({
   },
   dangerText: {
     color: '#dc2626',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 24,
+    gap: 16,
+  },
+  sheetTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  field: {
+    gap: 4,
+  },
+  label: {
+    fontSize: 14,
+    color: '#374151',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+  inputError: {
+    borderColor: '#dc2626',
+  },
+  fieldError: {
+    fontSize: 12,
+    color: '#dc2626',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  submitButton: {
+    backgroundColor: '#111827',
+    borderColor: '#111827',
+  },
+  submitText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  cancelButton: {
+    paddingVertical: 14,
+    alignItems: 'center',
   },
 });

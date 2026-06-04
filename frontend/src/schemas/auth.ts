@@ -20,3 +20,12 @@ export const loginSchema = z.object({
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
+
+export const updateUserNameSchema = z.object({
+  userName: z
+    .string()
+    .min(2, '用户名至少 2 个字符')
+    .max(50, '用户名不超过 50 个字符'),
+});
+
+export type UpdateUserNameFormData = z.infer<typeof updateUserNameSchema>;
