@@ -291,11 +291,192 @@
 
 前端模块只在对应后端模块**完全完成且测试通过**后才开始。
 
-| 后端模块完成 | 前端可开始 |
-|------------|-----------|
-| BE-INFRA + BE-AUTH | FE-AUTH（注册/登录/验证页面）|
-| BE-USER | FE-USER（个人设置页）|
-| BE-CARD | FE-CARD（卡片列表/添加/详情）|
-| BE-SYNC | FE-OFFLINE（离线缓存 + 增量同步）|
-| BE-FRIEND | FE-FRIEND（好友管理页面）|
-| BE-SHARE | FE-SHARE（共享管理 + 共享列表）|
+| 依赖 | 前端可开始 |
+|------|-----------|
+| 无（立即可开始） | FE-INFRA（前端基础设施）|
+| FE-INFRA + BE-AUTH ✅ | FE-AUTH（注册/登录/验证页面）|
+| FE-AUTH + BE-USER | FE-USER（个人设置页）|
+| FE-AUTH + BE-CARD | FE-CARD（卡片列表/添加/详情）|
+| FE-CARD + BE-SYNC | FE-OFFLINE（离线缓存 + 增量同步）|
+| FE-AUTH + BE-FRIEND | FE-FRIEND（好友管理页面）|
+| FE-CARD + FE-FRIEND + BE-SHARE | FE-SHARE（共享管理 + 共享列表）|
+
+---
+
+## 待完成：前端基础设施 [FE-INFRA]
+
+**依赖**：无（可与后端并行开发，立即可开始）
+
+**技术栈**：Expo React Native + Expo Router + TypeScript(strict) + React Query + expo-secure-store
+
+### FE-INFRA-01：Expo 项目初始化 + 依赖安装
+
+**目标**：创建前端项目，安装所有 Phase 1 核心依赖
+
+**实现**：
+- `frontend/`：运行 `npx create-expo-app frontend --template expo-template-blank-typescript`
+- 安装依赖：`expo-router`、`expo-secure-store`、`expo-barcode-scanner`、`react-native-barcode-svg`、`react-native-svg`、`@tanstack/react-query`
+- 配置 `package.json` 的 `main` 字段指向 `expo-router/entry`
+
+**验收**：`npx expo start` 无报错，模拟器可加载空白页
+
+### FE-INFRA-02：TypeScript strict 配置
+
+**目标**：启用严格类型检查，配置路径别名
+
+**实现**：
+- `frontend/tsconfig.json`：`strict: true`，`paths` 别名 `@/*` 指向 `./src/*`
+
+**验收**：`npx tsc --noEmit` 无错误
+
+### FE-INFRA-03：Expo Router 路由骨架
+
+**目标**：搭建完整路由结构和认证守卫
+
+**实现**：
+- `src/app/_layout.tsx`：根 layout（挂载 QueryClientProvider + AuthProvider，Stack 导航）
+- `src/app/(auth)/_layout.tsx`：认证路由组（未登录可访问）
+- `src/app/(auth)/login.tsx`：登录页占位
+- `src/app/(auth)/register.tsx`：注册页占位
+- `src/app/(tabs)/_layout.tsx`：主 Tab layout + 认证守卫（未登录跳转 `/(auth)/login`）
+- `src/app/(tabs)/index.tsx`：我的卡片列表占位
+- `src/app/(tabs)/shared.tsx`：共享给我占位
+- `src/app/(tabs)/friends.tsx`：好友管理占位
+
+**验收**：登录/未登录状态下路由跳转符合预期
+
+### FE-INFRA-04：API 客户端
+
+**目标**：统一请求入口，自动附加 token，401 时自动刷新
+
+**实现**：
+- `src/services/api.ts`：
+  - `apiFetch(path, options, getAccessToken)` — 拼接 API_BASE_URL，附加 Authorization header
+  - 响应 401 → 调用 `POST /api/auth/refresh` → 更新 token → 重试（单次，防无限循环）
+  - 刷新失败 → 清除 token，导航到登录页
+- `getAccessToken` 通过参数注入（而非 import AuthContext），避免循环依赖
+
+**验收**：能成功发请求；401 时自动刷新后重试
+
+### FE-INFRA-05：Auth Context + Token 管理
+
+**目标**：全局认证状态，内存 AccessToken + SecureStore RefreshToken
+
+**实现**：
+- `src/context/AuthContext.tsx`（`AuthProvider`）：
+  - 内存中持有 `accessToken: string | null`（不持久化）
+  - 冷启动时从 SecureStore 读取 refreshToken，自动静默刷新获取 accessToken
+  - 暴露 `setTokens(accessToken, refreshToken)`、`clearTokens()`
+- `src/hooks/useAuth.ts`：消费 AuthContext，暴露 `user`、`login`、`logout`、`isLoading`
+
+**验收**：SecureStore 有 refreshToken 时冷启动自动进入主页；登出后清除 token，再次冷启动跳到登录页
+
+### FE-INFRA-06：React Query 配置
+
+**目标**：全局 QueryClient 配置
+
+**实现**：
+- `src/lib/queryClient.ts`：`new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } })`
+- `src/app/_layout.tsx`：挂载 `<QueryClientProvider client={queryClient}>`
+
+**验收**：任意页面使用 `useQuery` 无报错
+
+### FE-INFRA-07：SecureStore 封装
+
+**目标**：类型安全的本地加密存储
+
+**实现**：
+- `src/storage/secureStore.ts`：
+  - `getRefreshToken(): Promise<string | null>`
+  - `setRefreshToken(token: string): Promise<void>`
+  - `deleteRefreshToken(): Promise<void>`
+  - `getItem<T>(key: string): Promise<T | null>`（JSON 序列化，供卡片缓存使用）
+  - `setItem<T>(key: string, value: T): Promise<void>`
+  - `deleteItem(key: string): Promise<void>`
+
+**验收**：`npx tsc --noEmit` 无类型错误
+
+### FE-INFRA-08：开发环境配置
+
+**目标**：环境变量管理，API 地址可配置
+
+**实现**：
+- `frontend/app.config.ts`：读取 `process.env.API_BASE_URL`，默认 `http://localhost:8000`，注入 `extra.apiBaseUrl`
+- `frontend/.env.local`（加入 `.gitignore`）：`API_BASE_URL=http://localhost:8000`
+- `src/services/api.ts`：通过 `Constants.expoConfig?.extra?.apiBaseUrl` 读取地址
+- `src/types/api.ts`：占位文件，后续按后端响应类型逐步填入
+
+**验收**：`npx expo start` 无报错；修改 `.env.local` 后 API 请求指向新地址
+
+**状态**：⏸️ 待开始
+
+---
+
+## 待完成：认证界面 [FE-AUTH]
+
+**依赖**：FE-INFRA + BE-AUTH ✅（BE-AUTH-01~06 均已完成）
+
+**状态**：⏸️ 待开始（BE-AUTH 已完成，FE-INFRA 完成后即可开始）
+
+### FE-AUTH-01：注册页面
+
+- [ ] 表单验证（email 格式、password 长度）
+- [ ] GDPR 同意勾选
+- [ ] 调用 `POST /api/auth/register`，成功后跳转验证提示页
+
+### FE-AUTH-02：邮箱验证提示页
+
+- [ ] 静态提示页："请去邮箱点击验证链接"
+- [ ] 重新发送验证邮件按钮（调用 `POST /api/auth/resend-verification`）
+
+### FE-AUTH-03：登录页面
+
+- [ ] 表单（email + password）
+- [ ] 调用 `POST /api/auth/login`，成功后调用 `AuthContext.setTokens()`，跳转主页
+- [ ] 错误提示（401、未验证）
+
+### FE-AUTH-04：JWT Token 管理
+
+- [ ] 与 FE-INFRA-05 集成，确认 AccessToken 存内存、RefreshToken 存 SecureStore
+
+### FE-AUTH-05：自动 Token 刷新
+
+- [ ] 与 FE-INFRA-04 集成，确认 401 时自动 refresh 并重试
+
+### FE-AUTH-06：未验证用户限制提示
+
+- [ ] 登录成功但邮箱未验证时，显示全屏提示 + 重发验证邮件入口
+
+**状态**：⏸️ 待开始
+
+---
+
+## 待完成：卡片基础界面 [FE-CARD]
+
+**依赖**：FE-AUTH 完成 + BE-CARD 完成（BE-CARD-01~09）
+
+**状态**：🔒 等待 FE-AUTH + BE-CARD 完成后展开任务
+
+---
+
+## 待完成：离线支持 [FE-OFFLINE]
+
+**依赖**：FE-CARD 完成 + BE-SYNC 完成（BE-SYNC-01~03）
+
+**状态**：🔒 等待 FE-CARD + BE-SYNC 完成后展开任务
+
+---
+
+## 待完成：好友界面 [FE-FRIEND]
+
+**依赖**：FE-AUTH 完成 + BE-FRIEND 完成（BE-FRIEND-01~08）
+
+**状态**：🔒 等待 FE-AUTH + BE-FRIEND 完成后展开任务
+
+---
+
+## 待完成：共享界面 [FE-SHARE]
+
+**依赖**：FE-CARD 完成 + FE-FRIEND 完成 + BE-SHARE 完成（BE-SHARE-01~08）
+
+**状态**：🔒 等待 FE-CARD + FE-FRIEND + BE-SHARE 完成后展开任务
