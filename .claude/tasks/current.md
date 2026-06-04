@@ -168,10 +168,10 @@
 ### BE-USER-02：PATCH /api/users/me
 
 **先写测试**：
-- [ ] `testUpdateUserNameSuccessfully`
-- [ ] `testUpdateUserNameFailsWithDuplicate`：已存在的 userName 返回 422
-- [ ] `testChangePasswordSuccessfully`
-- [ ] `testChangePasswordFailsWithWrongCurrentPassword`
+- [x] `testUpdateUserNameSuccessfully`
+- [x] `testUpdateUserNameFailsWithDuplicate`：已存在的 userName 返回 422
+- [x] `testChangePasswordSuccessfully`
+- [x] `testChangePasswordFailsWithWrongCurrentPassword`
 
 **再实现**：创建 `UserUpdateInput.php`，State Processor 读取后更新 Entity
 

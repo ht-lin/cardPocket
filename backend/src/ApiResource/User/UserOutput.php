@@ -6,6 +6,8 @@ namespace App\ApiResource\User;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Patch;
+use App\State\Processor\UserUpdateProcessor;
 use App\State\Provider\UserMeProvider;
 
 #[ApiResource(
@@ -14,6 +16,13 @@ use App\State\Provider\UserMeProvider;
             uriTemplate: '/users/me',
             provider: UserMeProvider::class,
             name: 'api_users_me',
+        ),
+        new Patch(
+            uriTemplate: '/users/me',
+            inputFormats: ['json' => ['application/json']],
+            input: UserUpdateInput::class,
+            processor: UserUpdateProcessor::class,
+            name: 'api_users_me_update',
         ),
     ],
 )]
