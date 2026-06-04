@@ -1,13 +1,14 @@
 import { useAuthContext } from '@/context/AuthContext';
 
-type User = { email: string };
+type User = { email: string; emailVerified: boolean };
 
 function decodeJwtPayload(token: string): User | null {
   try {
     const payload = token.split('.')[1];
     const decoded = JSON.parse(atob(payload)) as Record<string, unknown>;
     const email = (decoded['email'] ?? decoded['sub']) as string | undefined;
-    return email ? { email } : null;
+    if (!email) return null;
+    return { email, emailVerified: decoded['email_verified'] === true };
   } catch {
     return null;
   }

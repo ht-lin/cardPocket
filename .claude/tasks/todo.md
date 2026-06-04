@@ -95,7 +95,7 @@
 - [x] FE-AUTH-03：登录页面（Zod schema 验证）
 - [x] FE-AUTH-04：JWT Token 管理（AccessToken 存内存，RefreshToken 存 SecureStore）
 - [x] FE-AUTH-05：自动 Token 刷新（请求拦截 + 401 时自动 refresh）
-- [ ] FE-AUTH-06：未验证用户的功能限制提示
+- [x] FE-AUTH-06：未验证用户的功能限制提示
 
 #### [FE-CARD] 卡片基础界面（后端 BE-CARD 完成后）
 - [ ] FE-CARD-01：我的卡片列表页

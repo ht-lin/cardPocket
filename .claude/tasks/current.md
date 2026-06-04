@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-AUTH-06：未验证用户限制提示（当前任务）
+（FE-AUTH 全部完成，等待 BE-CARD 完成后开始 FE-CARD）
 
 ---
 
@@ -466,9 +466,13 @@
 
 - [x] 与 FE-INFRA-04 集成完成：`apiFetch` 拦截 401 → 自动调用 `/api/auth/refresh` → 重试原请求
 
-### FE-AUTH-06：未验证用户限制提示
+### ✅ FE-AUTH-06：未验证用户限制提示
 
-- [ ] 登录成功但邮箱未验证时，显示全屏提示 + 重发验证邮件入口
+**实现**：
+- [x] `backend/src/EventSubscriber/JWTCreatedSubscriber.php`：监听 `JWT_CREATED` 事件，向 JWT payload 注入 `email_verified` boolean claim
+- [x] `frontend/src/hooks/useAuth.ts`：`User` 类型增加 `emailVerified: boolean`，从 JWT 解析 `email_verified` claim
+- [x] `frontend/src/app/(tabs)/_layout.tsx`：新增守卫，未验证邮箱用户重定向到 `/(auth)/unverified-email`
+- [x] `frontend/src/app/(auth)/unverified-email.tsx`（新）：全屏提示页，含"已验证，进入应用"（刷新 JWT 校验 claim）、"重发验证邮件"（限流提示）、"退出登录"三个操作
 
 ---
 
