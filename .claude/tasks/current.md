@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-INFRA-03：Expo Router 路由骨架（下一个任务）
+### FE-INFRA-04：API 客户端（下一个任务）
 
 ---
 
@@ -333,21 +333,24 @@
 
 **验收**：`npx tsc --noEmit` 无错误 ✅
 
-### FE-INFRA-03：Expo Router 路由骨架
+### ✅ FE-INFRA-03：Expo Router 路由骨架
 
 **目标**：搭建完整路由结构和认证守卫
 
 **实现**：
-- `src/app/_layout.tsx`：根 layout（挂载 QueryClientProvider + AuthProvider，Stack 导航）
-- `src/app/(auth)/_layout.tsx`：认证路由组（未登录可访问）
-- `src/app/(auth)/login.tsx`：登录页占位
-- `src/app/(auth)/register.tsx`：注册页占位
-- `src/app/(tabs)/_layout.tsx`：主 Tab layout + 认证守卫（未登录跳转 `/(auth)/login`）
-- `src/app/(tabs)/index.tsx`：我的卡片列表占位
-- `src/app/(tabs)/shared.tsx`：共享给我占位
-- `src/app/(tabs)/friends.tsx`：好友管理占位
+- [x] `src/app/_layout.tsx`：根 layout（挂载 QueryClientProvider + AuthProvider，Stack 导航）
+- [x] `src/app/(auth)/_layout.tsx`：认证路由组（未登录可访问）
+- [x] `src/app/(auth)/login.tsx`：登录页占位
+- [x] `src/app/(auth)/register.tsx`：注册页占位
+- [x] `src/app/(tabs)/_layout.tsx`：主 Tab layout + `<Redirect>` 认证守卫（未登录跳转 `/(auth)/login`）
+- [x] `src/app/(tabs)/index.tsx`：我的卡片列表占位
+- [x] `src/app/(tabs)/shared.tsx`：共享给我占位
+- [x] `src/app/(tabs)/friends.tsx`：好友管理占位
+- [x] `src/context/AuthContext.tsx`：最小 stub（FE-INFRA-05 完整替换）
+- [x] `src/lib/queryClient.ts`：基础 QueryClient（FE-INFRA-06 添加配置）
+- [x] 迁移 `app/` → `src/app/`（Expo Router 自动识别 src/app，无需 app.json 配置）
 
-**验收**：登录/未登录状态下路由跳转符合预期
+**验收**：`npx tsc --noEmit` 无错误 ✅
 
 ### FE-INFRA-04：API 客户端
 
