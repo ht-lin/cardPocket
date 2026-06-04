@@ -7,7 +7,7 @@
 
 ## 进行中
 
-### FE-INFRA-02：TypeScript strict 配置（下一个任务）
+### FE-INFRA-03：Expo Router 路由骨架（下一个任务）
 
 ---
 
@@ -323,14 +323,15 @@
 - [x] 删除 `App.tsx`、`index.ts`，创建 `app/index.tsx` 空白占位页
 - [x] `expo-doctor` 21/21 checks passed；`tsc --noEmit` 无错误
 
-### FE-INFRA-02：TypeScript strict 配置
+### ✅ FE-INFRA-02：TypeScript strict 配置
 
 **目标**：启用严格类型检查，配置路径别名
 
 **实现**：
-- `frontend/tsconfig.json`：`strict: true`，`paths` 别名 `@/*` 指向 `./src/*`
+- [x] `frontend/tsconfig.json`：`strict: true`（FE-INFRA-01 已配置）
+- [x] `frontend/tsconfig.json`：`paths` 别名 `@/*` 指向 `./src/*`（TypeScript 6 废弃 `baseUrl`，直接用 `"./src/*"` 相对路径）
 
-**验收**：`npx tsc --noEmit` 无错误
+**验收**：`npx tsc --noEmit` 无错误 ✅
 
 ### FE-INFRA-03：Expo Router 路由骨架
 

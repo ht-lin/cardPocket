@@ -80,7 +80,7 @@
 
 #### [FE-INFRA] 前端基础设施（可与后端并行开始）
 - [x] FE-INFRA-01：Expo 项目初始化 + 依赖安装
-- [ ] FE-INFRA-02：TypeScript strict 配置
+- [x] FE-INFRA-02：TypeScript strict 配置
 - [ ] FE-INFRA-03：Expo Router 路由骨架（layout 文件 + Tab 结构）
 - [ ] FE-INFRA-04：API 客户端（fetch wrapper + Authorization header + 401 自动刷新）
 - [ ] FE-INFRA-05：Auth Context + Token 管理（内存 AccessToken + SecureStore RefreshToken）
