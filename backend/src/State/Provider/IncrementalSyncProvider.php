@@ -4,42 +4,29 @@ declare(strict_types=1);
 
 namespace App\State\Provider;
 
-use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\Card\CardOwnerOutput;
 use App\ApiResource\Card\CardSyncOutput;
 use App\ApiResource\Card\CardViewerOutput;
 use App\Entity\User;
+use App\Repository\CardDeletionRepository;
 use App\Repository\CardRepository;
 use App\Repository\CardShareRepository;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpFoundation\RequestStack;
 
-final class CardListProvider implements ProviderInterface
+final class IncrementalSyncProvider
 {
     public function __construct(
-        private readonly Security $security,
         private readonly CardRepository $cardRepository,
         private readonly CardShareRepository $cardShareRepository,
-        private readonly IncrementalSyncProvider $incrementalSyncProvider,
-        private readonly RequestStack $requestStack,
+        private readonly CardDeletionRepository $cardDeletionRepository,
     ) {
     }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): iterable|CardSyncOutput
+    public function provide(User $user, \DateTimeImmutable $since): CardSyncOutput
     {
-        /** @var User $user */
-        $user = $this->security->getUser();
+        $updated = [];
 
-        $updatedAfterParam = $this->requestStack->getCurrentRequest()?->query->get('updatedAfter');
-        if ($updatedAfterParam !== null) {
-            return $this->incrementalSyncProvider->provide($user, new \DateTimeImmutable($updatedAfterParam));
-        }
-
-        $result = [];
-
-        foreach ($this->cardRepository->findActiveByOwner($user) as $card) {
-            $result[] = new CardOwnerOutput(
+        foreach ($this->cardRepository->findUpdatedByOwnerSince($user, $since) as $card) {
+            $updated[] = new CardOwnerOutput(
                 id: (string) $card->getId(),
                 name: $card->getName(),
                 barcodeType: $card->getBarcodeType()->value,
@@ -50,9 +37,9 @@ final class CardListProvider implements ProviderInterface
             );
         }
 
-        foreach ($this->cardShareRepository->findByViewer($user) as $cardShare) {
+        foreach ($this->cardShareRepository->findUpdatedSharesSince($user, $since) as $cardShare) {
             $card = $cardShare->getCard();
-            $result[] = new CardViewerOutput(
+            $updated[] = new CardViewerOutput(
                 id: (string) $card->getId(),
                 name: $card->getName(),
                 barcodeType: $card->getBarcodeType()->value,
@@ -64,6 +51,11 @@ final class CardListProvider implements ProviderInterface
             );
         }
 
-        return $result;
+        $deleted = $this->cardDeletionRepository->findCardIdsByUserSince(
+            (string) $user->getId(),
+            $since,
+        );
+
+        return new CardSyncOutput(updated: $updated, deleted: $deleted);
     }
 }

@@ -7,7 +7,9 @@ namespace App\State\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\Card;
+use App\Entity\CardDeletion;
 use App\Entity\User;
+use App\Repository\CardShareRepository;
 use App\Security\Voter\CardVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -23,6 +25,7 @@ final class CardDeleteProcessor implements ProcessorInterface
     public function __construct(
         private readonly Security $security,
         private readonly EntityManagerInterface $entityManager,
+        private readonly CardShareRepository $cardShareRepository,
     ) {
     }
 
@@ -39,6 +42,20 @@ final class CardDeleteProcessor implements ProcessorInterface
 
         if (!$this->security->isGranted(CardVoter::CARD_DELETE, $card)) {
             throw new AccessDeniedHttpException();
+        }
+
+        $cardId = (string) $card->getId();
+
+        $ownerDeletion = new CardDeletion();
+        $ownerDeletion->setUserId((string) $user->getId());
+        $ownerDeletion->setCardId($cardId);
+        $this->entityManager->persist($ownerDeletion);
+
+        foreach ($this->cardShareRepository->findByCard($card) as $cardShare) {
+            $viewerDeletion = new CardDeletion();
+            $viewerDeletion->setUserId((string) $cardShare->getViewer()->getId());
+            $viewerDeletion->setCardId($cardId);
+            $this->entityManager->persist($viewerDeletion);
         }
 
         $card->setDeletedAt(new \DateTimeImmutable());

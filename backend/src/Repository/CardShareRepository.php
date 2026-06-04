@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Card;
 use App\Entity\CardShare;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -27,6 +28,30 @@ class CardShareRepository extends ServiceEntityRepository
             ->where('cs.viewer = :viewer')
             ->andWhere('c.deletedAt IS NULL')
             ->setParameter('viewer', $viewer)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return CardShare[] */
+    public function findByCard(Card $card): array
+    {
+        return $this->createQueryBuilder('cs')
+            ->where('cs.card = :card')
+            ->setParameter('card', $card)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return CardShare[] */
+    public function findUpdatedSharesSince(User $viewer, \DateTimeImmutable $since): array
+    {
+        return $this->createQueryBuilder('cs')
+            ->join('cs.card', 'c')
+            ->where('cs.viewer = :viewer')
+            ->andWhere('c.deletedAt IS NULL')
+            ->andWhere('c.updatedAt > :since OR cs.createdAt > :since')
+            ->setParameter('viewer', $viewer)
+            ->setParameter('since', $since)
             ->getQuery()
             ->getResult();
     }

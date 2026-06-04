@@ -29,4 +29,16 @@ class CardRepository extends ServiceEntityRepository
     {
         return $this->count(['owner' => $owner]);
     }
+
+    /** @return Card[] */
+    public function findUpdatedByOwnerSince(User $owner, \DateTimeImmutable $since): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.owner = :owner')
+            ->andWhere('c.updatedAt > :since')
+            ->setParameter('owner', $owner)
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getResult();
+    }
 }

@@ -278,16 +278,23 @@
 
 ---
 
-## 待完成：增量同步 [BE-SYNC]
+## ✅ 已完成：增量同步 [BE-SYNC]
 
-**先写测试** `tests/Integration/Card/IncrementalSyncTest.php`：
-- [ ] `testUpdatedAfterReturnsOnlyChangedCards`
-- [ ] `testDeletedIncludesRemovedCards`：被删除的 Card ID 在 deleted 数组中
-- [ ] `testDeletedIncludesRevokedShares`：被撤销共享的 Card ID 也在 deleted 数组中
+**测试** `tests/Integration/Card/IncrementalSyncTest.php`：
+- [x] `testUpdatedAfterReturnsOnlyChangedCards`
+- [x] `testDeletedIncludesRemovedCards`：被删除的 Card ID 在 deleted 数组中
+- [x] `testDeletedIncludesRevokedShares`：被撤销共享的 Card ID 也在 deleted 数组中
 
-**再实现**：
-- [ ] 实现 `IncrementalSyncProvider`（查询 updatedAt > lastSyncTimestamp + 查询已删除记录）
-- [ ] 建议：增加 `CardDeletion` 日志表，记录删除事件和撤销共享事件，供 deleted 查询使用
+**实现**：
+- [x] 创建 `src/Entity/CardDeletion.php`（日志表：userId, cardId, createdAt；无 FK 防级联破坏；联合索引 user_id+created_at）
+- [x] 创建 `src/Repository/CardDeletionRepository.php`（`findCardIdsByUserSince`）
+- [x] 创建 `src/ApiResource/Card/CardSyncOutput.php`（DTO：updated[], deleted[]）
+- [x] 创建 `src/State/Provider/IncrementalSyncProvider.php`（查询 updatedAt > since + CardDeletion 日志）
+- [x] 修改 `CardListProvider`（注入 RequestStack，检测 updatedAfter 参数，委托给 IncrementalSyncProvider）
+- [x] 修改 `CardDeleteProcessor`（软删除前写 CardDeletion 日志：owner + 所有 viewer）
+- [x] 扩展 `CardRepository`（`findUpdatedByOwnerSince`）
+- [x] 扩展 `CardShareRepository`（`findByCard`、`findUpdatedSharesSince`）
+- [x] 生成并执行 Doctrine 迁移（`migrations/Version20260604210840.php`，app_card_deletion 表）
 
 ---
 
