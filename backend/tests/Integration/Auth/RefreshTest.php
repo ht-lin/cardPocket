@@ -93,6 +93,28 @@ final class RefreshTest extends AbstractApiTestCase
         $this->assertArrayNotHasKey('refresh_token', $data);
     }
 
+    public function testRefreshJwtContainsEmailVerifiedTrueForVerifiedUser(): void
+    {
+        UserFactory::createOne([
+            'email' => 'verified@example.com',
+            'emailVerifiedAt' => new \DateTimeImmutable(),
+        ]);
+
+        $client = static::createClient();
+        $loginResponse = $client->request('POST', '/api/auth/login', [
+            'json' => ['email' => 'verified@example.com', 'password' => 'Password1!'],
+        ]);
+        $oldRefreshToken = $loginResponse->toArray()['refresh_token'];
+
+        $response = $client->request('POST', self::ENDPOINT, [
+            'json' => ['refresh_token' => $oldRefreshToken],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $payload = $this->decodeJwtPayload($response->toArray()['access_token']);
+        $this->assertTrue($payload['email_verified']);
+    }
+
     public function testOldRefreshTokenIsRevokedAfterRotation(): void
     {
         UserFactory::createOne(['email' => 'user@example.com']);

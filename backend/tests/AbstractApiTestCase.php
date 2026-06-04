@@ -30,6 +30,7 @@ abstract class AbstractApiTestCase extends ApiTestCase
     protected function decodeJwtPayload(string $token): array
     {
         $parts = explode('.', $token);
+        $this->assertCount(3, $parts, 'Token must be a three-part JWT');
 
         return json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
     }
