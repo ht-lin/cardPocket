@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function TabLayout() {
   const { isAuthenticated, isLoading } = useAuth();
