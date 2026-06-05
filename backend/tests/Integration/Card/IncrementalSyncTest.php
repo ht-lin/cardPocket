@@ -85,6 +85,53 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $this->assertEmpty($data['updated']);
     }
 
+    public function testUpdatedViewerNicknameAppearsInSync(): void
+    {
+        $owner  = UserFactory::createOne(['email' => 'owner@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+        $viewer = UserFactory::createOne(['email' => 'viewer@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+        $card   = CardFactory::createOne(['owner' => $owner]);
+        $share  = CardShareFactory::createOne(['card' => $card, 'viewer' => $viewer]);
+
+        // Backdate the share so it looks like an old entry
+        static::getContainer()->get('doctrine.orm.entity_manager')
+            ->getConnection()
+            ->executeStatement(
+                'UPDATE app_card_share SET updated_at = :past WHERE id = :id',
+                ['past' => '2020-01-01 00:00:00', 'id' => (string) $share->getId()],
+            );
+
+        $since = new \DateTimeImmutable('2025-01-01T00:00:00+00:00');
+
+        $client      = static::createClient();
+        $viewerToken = $this->getToken($client, 'viewer@example.com', 'Password1!');
+
+        // Viewer updates their nickname → triggers PreUpdate → cs.updatedAt = now
+        $this->authenticatedRequest(
+            $client,
+            'PATCH',
+            '/api/card-shares/' . $share->getId(),
+            $viewerToken,
+            ['json' => ['viewerNickname' => 'My Card']],
+        );
+        $this->assertResponseStatusCodeSame(200);
+
+        // Incremental sync should now include the card in `updated`
+        $response = $this->authenticatedRequest(
+            $client,
+            'GET',
+            '/api/cards?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
+            $viewerToken,
+            self::JSON_HEADER,
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = $response->toArray();
+
+        $this->assertArrayHasKey('updated', $data);
+        $cardIds = array_column($data['updated'], 'id');
+        $this->assertContains((string) $card->getId(), $cardIds);
+    }
+
     public function testDeletedIncludesRevokedShares(): void
     {
         $owner = UserFactory::createOne(['email' => 'owner@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);

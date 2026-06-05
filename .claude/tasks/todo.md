@@ -76,6 +76,29 @@
 - [x] BE-INFRA-04：配置 UUID 主键（Doctrine UuidType）
 - [x] BE-INFRA-05：配置 Doctrine 软删除过滤器（deletedAt is null）
 
+#### [BE-BUGFIX] 架构审查修复（2026-06-05 审查后）
+
+> 来源：架构审查报告。优先级：🔴 必修 → 🟡 应修 → 🔵 建议。
+
+**🔴 必修 — 影响数据一致性**
+
+- [ ] BE-BUGFIX-01：FriendDeleteProcessor — 解除好友删除 CardShare 时同步写入 CardDeletion 记录，供 Viewer 增量同步感知撤销（`src/State/Processor/FriendDeleteProcessor.php:50-57`）
+- [ ] BE-BUGFIX-02：CardShare 实体加 `updatedAt` 字段 + migration + 更新 `findUpdatedSharesSince` 条件为 `cs.updatedAt > :since`，否则 viewerNickname 修改永远不进增量同步（`src/Entity/CardShare.php`，`src/Repository/CardShareRepository.php:73`）
+- [ ] BE-BUGFIX-03：Friendship 双向唯一约束 — 在 migration 中添加 PostgreSQL 表达式索引 `UNIQUE(LEAST(requester_id::text,addressee_id::text), GREATEST(...))` 防止竞态条件产生 (A→B)+(B→A) 双记录（`src/Entity/Friendship.php:17`）
+
+**🟡 应修 — 边界 Case / 潜在 500**
+
+- [ ] BE-BUGFIX-04：security.yaml firewall `auth_public` pattern 补充 `resend-verification`，现状靠 LexikJWT pass-through 侥幸放行，应显式配置（`config/packages/security.yaml:25`）
+- [ ] BE-BUGFIX-05：UserRegisterProcessor — persist 前预检 email / userName 重复，抛 `UnprocessableEntityHttpException`（422），现状会触发 DB constraint 返回 500（`src/State/Processor/UserRegisterProcessor.php:48`）
+- [ ] BE-BUGFIX-06：UserUpdateProcessor — UUID 相等判断改用 `->equals()` 而非 `!==`（对象引用比较）（`src/State/Processor/UserUpdateProcessor.php:50`）
+- [ ] BE-BUGFIX-07：DeleteAccountProcessor — 提取 `CardShareRepository::deleteByOwner(User)` 批量删除，消除按卡片循环查询的 N+1（`src/State/Processor/DeleteAccountProcessor.php:39-43`）
+
+**🔵 建议 — 防御性设计**
+
+- [ ] BE-BUGFIX-08：CardRepository `findActiveByOwner` / `countActiveByOwner` — 显式加 `deletedAt IS NULL` 条件，不依赖全局 Filter 隐式过滤，方法名与实现语义对齐（`src/Repository/CardRepository.php:23-31`）
+- [ ] BE-BUGFIX-09：Card.owner FK 改为 `onDelete: 'CASCADE'`，与架构规格 ER 图一致（现状为 `RESTRICT`）（`src/Entity/Card.php:35`）
+- [ ] BE-BUGFIX-10：Phase 2 — 添加 Symfony Scheduler 定期清理 90 天前 `CardDeletion` 记录，防止表无限增长
+
 ### 前端
 
 #### [FE-INFRA] 前端基础设施（可与后端并行开始）

@@ -6,6 +6,7 @@ namespace App\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\Entity\CardDeletion;
 use App\Entity\Friendship;
 use App\Entity\User;
 use App\Enum\FriendshipStatus;
@@ -53,6 +54,10 @@ final class FriendDeleteProcessor implements ProcessorInterface
                 $friendship->getAddressee(),
             );
             foreach ($shares as $share) {
+                $deletion = new CardDeletion();
+                $deletion->setUserId((string) $share->getViewer()->getId());
+                $deletion->setCardId((string) $share->getCard()->getId());
+                $this->entityManager->persist($deletion);
                 $this->entityManager->remove($share);
             }
         }

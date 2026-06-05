@@ -75,7 +75,7 @@ class CardShareRepository extends ServiceEntityRepository
             ->join('cs.card', 'c')
             ->where('cs.viewer = :viewer')
             ->andWhere('c.deletedAt IS NULL')
-            ->andWhere('c.updatedAt > :since OR cs.createdAt > :since')
+            ->andWhere('c.updatedAt > :since OR cs.updatedAt > :since')
             ->setParameter('viewer', $viewer)
             ->setParameter('since', $since)
             ->getQuery()

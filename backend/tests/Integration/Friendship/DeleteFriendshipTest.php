@@ -81,6 +81,49 @@ final class DeleteFriendshipTest extends AbstractApiTestCase
         $this->assertSame('0', (string) $count);
     }
 
+    public function testRemoveFriendshipCreatesCardDeletionForViewer(): void
+    {
+        $userA = UserFactory::createOne(['email' => 'usera@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+        $userB = UserFactory::createOne(['email' => 'userb@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        $friendship = FriendshipFactory::createOne([
+            'requester' => $userA,
+            'addressee' => $userB,
+            'status'    => FriendshipStatus::ACCEPTED,
+        ]);
+
+        // A 的卡片共享给 B
+        $cardA = CardFactory::createOne(['owner' => $userA]);
+        CardShareFactory::createOne(['card' => $cardA, 'viewer' => $userB]);
+
+        // B 的卡片共享给 A
+        $cardB = CardFactory::createOne(['owner' => $userB]);
+        CardShareFactory::createOne(['card' => $cardB, 'viewer' => $userA]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'usera@example.com', 'Password1!');
+
+        $this->authenticatedRequest($client, 'DELETE', '/api/friendships/' . $friendship->getId(), $token);
+
+        $this->assertResponseStatusCodeSame(204);
+
+        $conn = static::getContainer()->get('doctrine')->getConnection();
+
+        // B 失去了 A 的卡片 → CardDeletion(userId=B, cardId=cardA)
+        $deletionForB = $conn->fetchOne(
+            'SELECT COUNT(*) FROM app_card_deletion WHERE user_id = ? AND card_id = ?',
+            [(string) $userB->getId(), (string) $cardA->getId()],
+        );
+        $this->assertSame('1', (string) $deletionForB);
+
+        // A 失去了 B 的卡片 → CardDeletion(userId=A, cardId=cardB)
+        $deletionForA = $conn->fetchOne(
+            'SELECT COUNT(*) FROM app_card_deletion WHERE user_id = ? AND card_id = ?',
+            [(string) $userA->getId(), (string) $cardB->getId()],
+        );
+        $this->assertSame('1', (string) $deletionForA);
+    }
+
     public function testNonParticipantCannotDeleteFriendship(): void
     {
         $requester  = UserFactory::createOne(['email' => 'requester@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
