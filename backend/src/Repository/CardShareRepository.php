@@ -43,6 +43,21 @@ class CardShareRepository extends ServiceEntityRepository
     }
 
     /** @return CardShare[] */
+    public function findSharesBetweenUsers(User $userA, User $userB): array
+    {
+        return $this->createQueryBuilder('cs')
+            ->join('cs.card', 'c')
+            ->where(
+                '(c.owner = :userA AND cs.viewer = :userB) OR (c.owner = :userB AND cs.viewer = :userA)'
+            )
+            ->andWhere('c.deletedAt IS NULL')
+            ->setParameter('userA', $userA)
+            ->setParameter('userB', $userB)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return CardShare[] */
     public function findUpdatedSharesSince(User $viewer, \DateTimeImmutable $since): array
     {
         return $this->createQueryBuilder('cs')

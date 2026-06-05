@@ -18,6 +18,12 @@ framework:
             interval: '1 hour'
             cache_pool: cache.rate_limiter
 
+        send_friend_request_by_user:
+            policy: sliding_window
+            limit: 20
+            interval: '1 day'
+            cache_pool: cache.rate_limiter
+
 when@dev:
     framework:
         rate_limiter:
@@ -26,6 +32,8 @@ when@dev:
             login_by_ip:
                 policy: no_limit
             resend_verification_by_user:
+                policy: no_limit
+            send_friend_request_by_user:
                 policy: no_limit
 
 when@test:
@@ -36,4 +44,6 @@ when@test:
             login_by_ip:
                 policy: no_limit
             resend_verification_by_user:
+                policy: no_limit
+            send_friend_request_by_user:
                 policy: no_limit

@@ -298,22 +298,37 @@
 
 ---
 
-## 待完成：好友模块 [BE-FRIEND]
+## ✅ 已完成：好友模块 [BE-FRIEND]
 
-**先写测试** `tests/Integration/Friendship/`：
-- [ ] `testSendFriendRequestSuccessfully`
-- [ ] `testCannotSendDuplicateRequest`：重复发请求返回 422
-- [ ] `testCannotSendRequestToSelf`：发给自己返回 422
-- [ ] `testAcceptFriendRequestSuccessfully`：只有 Addressee 能接受
-- [ ] `testRejectFriendRequestDeletesRecord`
-- [ ] `testRemoveFriendshipCascadesAllCardShares`：**关键测试**
+**测试** `tests/Integration/Friendship/`：
+- [x] `testSendFriendRequestSuccessfully`
+- [x] `testCannotSendDuplicateRequest`：重复发请求返回 422（含反向检查）
+- [x] `testCannotSendRequestToSelf`：发给自己返回 422
+- [x] `testAcceptFriendRequestSuccessfully`：只有 Addressee 能接受
+- [x] `testRejectFriendRequestDeletesRecord`
+- [x] `testRemoveFriendshipCascadesAllCardShares`：**关键测试**
   - A 共享 2 张卡给 B，B 共享 1 张卡给 A
   - A 解除与 B 的好友关系
   - 验证：3 条 CardShare 记录全部删除
 
-**再实现**：
-- 创建 Friendship DTO（`src/ApiResource/Friendship/`）：`FriendshipOutput.php`、`FriendshipCreateInput.php`
-- Friendship 实体 + 所有端点 + 应用层级联删除逻辑
+**实现**：
+- [x] 创建 `src/Enum/FriendshipStatus.php`（PENDING/ACCEPTED）
+- [x] 创建 `src/Entity/Friendship.php`（UUID PK、requester/addressee FK、status enum、timestamps、唯一约束）
+- [x] 创建 `src/Repository/FriendshipRepository.php`（findAcceptedByUser、findPendingForAddressee、findExistingBetweenUsers）
+- [x] 创建 `src/Factory/FriendshipFactory.php`（Foundry 工厂）
+- [x] 生成并执行 Doctrine 迁移（`migrations/Version20260605125646.php`，app_friendship 表）
+- [x] 创建 `src/ApiResource/Friendship/FriendSendInput.php`
+- [x] 创建 `src/ApiResource/Friendship/FriendRequestOutput.php`（POST /friendships + GET /friendships/requests）
+- [x] 创建 `src/ApiResource/Friendship/FriendshipOutput.php`（GET /friendships + PATCH /accept + DELETE）
+- [x] 创建 `src/Security/Voter/FriendshipVoter.php`（FRIENDSHIP_ACCEPT / FRIENDSHIP_DELETE）
+- [x] 创建 `src/State/Provider/FriendshipListProvider.php`
+- [x] 创建 `src/State/Provider/FriendRequestListProvider.php`
+- [x] 创建 `src/State/Provider/FriendshipViewProvider.php`（为 PATCH/DELETE 提供实体加载）
+- [x] 创建 `src/State/Processor/FriendSendProcessor.php`（含邮件验证 + 速率限制 20次/天 + 双向重复检查）
+- [x] 创建 `src/State/Processor/FriendAcceptProcessor.php`
+- [x] 创建 `src/State/Processor/FriendDeleteProcessor.php`（含 CardShare 级联删除）
+- [x] 扩展 `CardShareRepository`（`findSharesBetweenUsers`）
+- [x] 更新 `config/packages/rate_limiter.yaml`（send_friend_request_by_user）
 
 ---
 
