@@ -37,7 +37,17 @@ final class AcceptFriendshipRequestTest extends AbstractApiTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $data = $response->toArray();
+        $this->assertMatchesRegularExpression(
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/',
+            $data['id'],
+        );
         $this->assertSame('ACCEPTED', $data['status']);
+        $this->assertSame((string) $requester->getId(), $data['friend']['id']);
+        $this->assertIsString($data['friend']['userName']);
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+\-]\d{2}:\d{2}$/',
+            $data['createdAt'],
+        );
     }
 
     public function testOnlyAddresseeCanAcceptRequest(): void
@@ -63,5 +73,30 @@ final class AcceptFriendshipRequestTest extends AbstractApiTestCase
         );
 
         $this->assertResponseStatusCodeSame(403);
+    }
+
+    public function testAcceptNonExistentRequestReturns404(): void
+    {
+        UserFactory::createOne(['email' => 'addressee@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'addressee@example.com', 'Password1!');
+
+        $this->authenticatedRequest(
+            $client,
+            'PATCH',
+            '/api/friendships/00000000-0000-0000-0000-000000000000/accept',
+            $token,
+        );
+
+        $this->assertResponseStatusCodeSame(404);
+    }
+
+    public function testUnauthenticatedRequestReturns401(): void
+    {
+        $client = static::createClient();
+        $client->request('PATCH', '/api/friendships/00000000-0000-0000-0000-000000000000/accept');
+
+        $this->assertResponseStatusCodeSame(401);
     }
 }

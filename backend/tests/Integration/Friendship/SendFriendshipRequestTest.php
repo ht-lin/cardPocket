@@ -111,4 +111,16 @@ final class SendFriendshipRequestTest extends AbstractApiTestCase
 
         $this->assertResponseStatusCodeSame(422);
     }
+
+    public function testUnauthenticatedRequestReturns401(): void
+    {
+        $addressee = UserFactory::createOne(['email' => 'addressee@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        $client = static::createClient();
+        $client->request('POST', self::ENDPOINT, [
+            'json' => ['addresseeId' => (string) $addressee->getId()],
+        ]);
+
+        $this->assertResponseStatusCodeSame(401);
+    }
 }

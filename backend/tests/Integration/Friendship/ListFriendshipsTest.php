@@ -62,6 +62,24 @@ final class ListFriendshipsTest extends AbstractApiTestCase
         $this->assertArrayHasKey('requester', $data[0]);
     }
 
+    public function testOtherUsersFriendshipsAreNotReturned(): void
+    {
+        $me    = UserFactory::createOne(['email' => 'me@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+        $userB = UserFactory::createOne(['email' => 'userb@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+        $userC = UserFactory::createOne(['email' => 'userc@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        // B and C are friends — should not appear in me's list
+        FriendshipFactory::createOne(['requester' => $userB, 'addressee' => $userC, 'status' => FriendshipStatus::ACCEPTED]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'me@example.com', 'Password1!');
+
+        $response = $this->authenticatedRequest($client, 'GET', '/api/friendships', $token, self::JSON_HEADER);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertCount(0, $response->toArray());
+    }
+
     public function testUnauthenticatedRequestReturns401(): void
     {
         $client = static::createClient();

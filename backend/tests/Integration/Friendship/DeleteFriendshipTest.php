@@ -100,4 +100,24 @@ final class DeleteFriendshipTest extends AbstractApiTestCase
 
         $this->assertResponseStatusCodeSame(403);
     }
+
+    public function testDeleteNonExistentFriendshipReturns404(): void
+    {
+        UserFactory::createOne(['email' => 'user@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'user@example.com', 'Password1!');
+
+        $this->authenticatedRequest($client, 'DELETE', '/api/friendships/00000000-0000-0000-0000-000000000000', $token);
+
+        $this->assertResponseStatusCodeSame(404);
+    }
+
+    public function testUnauthenticatedRequestReturns401(): void
+    {
+        $client = static::createClient();
+        $client->request('DELETE', '/api/friendships/00000000-0000-0000-0000-000000000000');
+
+        $this->assertResponseStatusCodeSame(401);
+    }
 }
