@@ -44,6 +44,16 @@ class FriendshipRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** @return Friendship[] */
+    public function findAllInvolvingUser(User $user): array
+    {
+        return $this->createQueryBuilder('f')
+            ->where('f.requester = :user OR f.addressee = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findExistingBetweenUsers(User $userA, User $userB): ?Friendship
     {
         return $this->createQueryBuilder('f')

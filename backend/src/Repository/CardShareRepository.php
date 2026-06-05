@@ -57,6 +57,17 @@ class CardShareRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findByCardAndViewer(Card $card, User $viewer): ?CardShare
+    {
+        return $this->createQueryBuilder('cs')
+            ->where('cs.card = :card')
+            ->andWhere('cs.viewer = :viewer')
+            ->setParameter('card', $card)
+            ->setParameter('viewer', $viewer)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     /** @return CardShare[] */
     public function findUpdatedSharesSince(User $viewer, \DateTimeImmutable $since): array
     {
