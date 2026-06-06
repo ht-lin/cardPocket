@@ -22,7 +22,7 @@ security:
                 check_path: /api/auth/refresh
 
         auth_public:
-            pattern: ^/api/auth/(login|register|verify-email|logout)
+            pattern: ^/api/auth/(login|register|verify-email|logout|resend-verification)
             stateless: true
             security: false
 

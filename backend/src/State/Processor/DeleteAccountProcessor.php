@@ -36,10 +36,8 @@ final class DeleteAccountProcessor implements ProcessorInterface
             $this->entityManager->remove($share);
         }
 
+        $this->cardShareRepository->deleteByOwner($user);
         foreach ($this->cardRepository->findActiveByOwner($user) as $card) {
-            foreach ($this->cardShareRepository->findByCard($card) as $share) {
-                $this->entityManager->remove($share);
-            }
             $card->setDeletedAt(new \DateTimeImmutable());
         }
 

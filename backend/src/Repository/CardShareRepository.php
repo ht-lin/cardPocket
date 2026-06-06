@@ -68,6 +68,14 @@ class CardShareRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function deleteByOwner(User $owner): void
+    {
+        $this->getEntityManager()->createQuery(
+            'DELETE FROM App\Entity\CardShare cs
+             WHERE cs.card IN (SELECT c FROM App\Entity\Card c WHERE c.owner = :owner)'
+        )->setParameter('owner', $owner)->execute();
+    }
+
     /** @return CardShare[] */
     public function findUpdatedSharesSince(User $viewer, \DateTimeImmutable $since): array
     {

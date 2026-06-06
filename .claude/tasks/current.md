@@ -45,16 +45,16 @@
 
 ### 🟡 Step 2 — 边界 Case 修复
 
-- [ ] **BE-BUGFIX-04**：`security.yaml` `auth_public` pattern 加 `resend-verification`
+- [x] **BE-BUGFIX-04**：`security.yaml` `auth_public` pattern 加 `resend-verification`
   - 文件：`config/packages/security.yaml:25`
 
-- [ ] **BE-BUGFIX-05**：`UserRegisterProcessor` — 预检 email / userName 重复，返回 422
+- [x] **BE-BUGFIX-05**：`UserRegisterProcessor` — 预检 email / userName 重复，返回 422
   - 文件：`src/State/Processor/UserRegisterProcessor.php`
 
-- [ ] **BE-BUGFIX-06**：`UserUpdateProcessor` — UUID 比较改用 `->equals()`
+- [x] **BE-BUGFIX-06**：`UserUpdateProcessor` — UUID 比较改用 `->equals()`
   - 文件：`src/State/Processor/UserUpdateProcessor.php:50`
 
-- [ ] **BE-BUGFIX-07**：`DeleteAccountProcessor` — 消除 N+1，加 `CardShareRepository::deleteByOwner(User)`
+- [x] **BE-BUGFIX-07**：`DeleteAccountProcessor` — 消除 N+1，加 `CardShareRepository::deleteByOwner(User)`
   - 文件：`src/Repository/CardShareRepository.php`、`src/State/Processor/DeleteAccountProcessor.php`
 
 ### 🔵 Step 3 — 防御性设计（可与前端并行）
@@ -77,9 +77,9 @@
 
 ## Phase 1 完成标准
 
-- [x] 所有后端集成测试通过（134 tests, 1 skipped）
+- [x] 所有后端集成测试通过（142 tests, 1 skipped）
 - [x] 每个端点至少有 Happy Path + 401 + 403 测试
-- [ ] BE-BUGFIX Step 1+2 全部修复并补充测试
+- [x] BE-BUGFIX Step 1+2 全部修复并补充测试
 - [ ] OpenAPI 文档可访问（`/api/docs`）
 - [x] 速率限制配置完毕（注册/登录/好友请求）
 - [x] Docker Compose 启动后一键可运行测试

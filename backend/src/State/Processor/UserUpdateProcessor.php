@@ -47,7 +47,7 @@ final class UserUpdateProcessor implements ProcessorInterface
         if ($data->userName !== null) {
             $existing = $this->entityManager->getRepository(User::class)
                 ->findOneBy(['userName' => $data->userName]);
-            if ($existing !== null && $existing->getId() !== $user->getId()) {
+            if ($existing !== null && !$existing->getId()->equals($user->getId())) {
                 throw new UnprocessableEntityHttpException('This username is already taken.');
             }
             $user->setUserName($data->userName);

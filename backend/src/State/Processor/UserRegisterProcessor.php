@@ -13,9 +13,12 @@ use App\Service\EmailVerificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
+use ApiPlatform\Validator\Exception\ValidationException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationList;
 
 /**
  * @implements ProcessorInterface<UserRegisterInput, UserRegisterOutput>
@@ -43,6 +46,20 @@ final class UserRegisterProcessor implements ProcessorInterface
         $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? '127.0.0.1';
         if (!$this->registerByIpLimiter->create($ip)->consume()->isAccepted()) {
             throw new TooManyRequestsHttpException();
+        }
+
+        $violations = new ConstraintViolationList();
+
+        if ($this->entityManager->getRepository(User::class)->findOneBy(['email' => $data->email]) !== null) {
+            $violations->add(new ConstraintViolation('This email is already registered.', null, [], $data, 'email', $data->email));
+        }
+
+        if ($this->entityManager->getRepository(User::class)->findOneBy(['userName' => $data->userName]) !== null) {
+            $violations->add(new ConstraintViolation('This username is already taken.', null, [], $data, 'userName', $data->userName));
+        }
+
+        if (count($violations) > 0) {
+            throw new ValidationException($violations);
         }
 
         $user = new User();
