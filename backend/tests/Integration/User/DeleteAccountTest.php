@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\User;
 
+use App\Factory\CardDeletionFactory;
 use App\Factory\CardFactory;
 use App\Factory\CardShareFactory;
 use App\Factory\FriendshipFactory;
@@ -110,6 +111,75 @@ final class DeleteAccountTest extends AbstractApiTestCase
             [(string) $user->getId(), (string) $user->getId()],
         );
         $this->assertSame(0, $friendshipCount);
+    }
+
+    public function testDeleteAccountAnonymizesUserPersonalData(): void
+    {
+        $user = UserFactory::createOne(['email' => 'user@example.com']);
+        $userId = (string) $user->getId();
+
+        $client = static::createClient();
+        $token = $this->getToken($client, 'user@example.com', 'Password1!');
+
+        $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        $this->assertResponseStatusCodeSame(204);
+
+        $conn = static::getContainer()->get('doctrine')->getConnection();
+        $row = $conn->fetchAssociative(
+            'SELECT email, user_name, password FROM app_user WHERE id = ?',
+            [$userId],
+        );
+
+        $this->assertNotFalse($row);
+        $this->assertSame("deleted_{$userId}@deleted.invalid", $row['email']);
+        $this->assertSame("deleted_{$userId}", $row['user_name']);
+        $this->assertSame('', $row['password']);
+    }
+
+    public function testDeleteAccountAnonymizesCardContent(): void
+    {
+        $user = UserFactory::createOne(['email' => 'user@example.com']);
+        CardFactory::createMany(2, ['owner' => $user]);
+
+        $client = static::createClient();
+        $token = $this->getToken($client, 'user@example.com', 'Password1!');
+
+        $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        $this->assertResponseStatusCodeSame(204);
+
+        $conn = static::getContainer()->get('doctrine')->getConnection();
+        $userId = (string) $user->getId();
+        $nonEmptyCount = (int) $conn->fetchOne(
+            "SELECT COUNT(*) FROM app_card WHERE owner_id = ? AND (name != '' OR barcode_content != '')",
+            [$userId],
+        );
+        $this->assertSame(0, $nonEmptyCount);
+    }
+
+    public function testDeleteAccountClearsCardDeletionRecords(): void
+    {
+        $user = UserFactory::createOne(['email' => 'user@example.com']);
+        $userId = (string) $user->getId();
+        CardDeletionFactory::createMany(3, ['userId' => $userId]);
+
+        $client = static::createClient();
+        $token = $this->getToken($client, 'user@example.com', 'Password1!');
+
+        $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        $this->assertResponseStatusCodeSame(204);
+
+        $conn = static::getContainer()->get('doctrine')->getConnection();
+        $count = (int) $conn->fetchOne(
+            'SELECT COUNT(*) FROM app_card_deletion WHERE user_id = ?',
+            [$userId],
+        );
+        $this->assertSame(0, $count);
     }
 
     public function testDeletedUserCannotLogin(): void

@@ -1,3 +1,6 @@
+# All limiters use sliding_window, which stores counters in Redis with a TTL equal to
+# the interval. IP-keyed entries therefore expire automatically: register_by_ip after
+# 1 hour, login_by_ip after 1 minute. No persistent IP storage beyond these windows.
 framework:
     rate_limiter:
         register_by_ip:

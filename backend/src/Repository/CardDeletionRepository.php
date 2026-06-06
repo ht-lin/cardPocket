@@ -18,6 +18,16 @@ class CardDeletionRepository extends ServiceEntityRepository
         parent::__construct($registry, CardDeletion::class);
     }
 
+    public function deleteByUserId(string $userId): void
+    {
+        $this->createQueryBuilder('cd')
+            ->delete()
+            ->where('cd.userId = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->execute();
+    }
+
     /** @return string[] */
     public function findCardIdsByUserSince(string $userId, \DateTimeImmutable $since): array
     {
