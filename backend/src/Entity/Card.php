@@ -32,7 +32,7 @@ class Card
     private string $barcodeContent;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private User $owner;
 
     #[ORM\Column]

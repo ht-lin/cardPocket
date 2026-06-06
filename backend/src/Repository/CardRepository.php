@@ -22,12 +22,23 @@ class CardRepository extends ServiceEntityRepository
     /** @return Card[] */
     public function findActiveByOwner(User $owner): array
     {
-        return $this->findBy(['owner' => $owner]);
+        return $this->createQueryBuilder('c')
+            ->where('c.owner = :owner')
+            ->andWhere('c.deletedAt IS NULL')
+            ->setParameter('owner', $owner)
+            ->getQuery()
+            ->getResult();
     }
 
     public function countActiveByOwner(User $owner): int
     {
-        return $this->count(['owner' => $owner]);
+        return (int) $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->where('c.owner = :owner')
+            ->andWhere('c.deletedAt IS NULL')
+            ->setParameter('owner', $owner)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     /** @return Card[] */

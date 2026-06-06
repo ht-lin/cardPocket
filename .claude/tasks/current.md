@@ -13,7 +13,7 @@
 | BE-SYNC  | ✅ | 3  |
 | BE-FRIEND | ✅ | 6 |
 | BE-SHARE | ✅ | 20 |
-| **BE-BUGFIX** | 🔲 **架构审查修复（当前任务）** | — |
+| **BE-BUGFIX** | ✅ | — |
 | FE-INFRA | ✅ | — |
 | FE-AUTH  | ✅ | — |
 | FE-USER  | ✅ | — |
@@ -59,8 +59,8 @@
 
 ### 🔵 Step 3 — 防御性设计（可与前端并行）
 
-- [ ] **BE-BUGFIX-08**：`CardRepository::findActiveByOwner` / `countActiveByOwner` 显式加 `deletedAt IS NULL`
-- [ ] **BE-BUGFIX-09**：`Card.php` owner FK 改 `onDelete: 'CASCADE'`（需新 migration）
+- [x] **BE-BUGFIX-08**：`CardRepository::findActiveByOwner` / `countActiveByOwner` 显式加 `deletedAt IS NULL`
+- [x] **BE-BUGFIX-09**：`Card.php` owner FK 改 `onDelete: 'CASCADE'`（需新 migration）
 
 ---
 
@@ -77,7 +77,7 @@
 
 ## Phase 1 完成标准
 
-- [x] 所有后端集成测试通过（142 tests, 1 skipped）
+- [x] 所有后端集成测试通过（144 tests, 1 skipped）
 - [x] 每个端点至少有 Happy Path + 401 + 403 测试
 - [x] BE-BUGFIX Step 1+2 全部修复并补充测试
 - [ ] OpenAPI 文档可访问（`/api/docs`）
