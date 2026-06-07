@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { secureStore } from '@/lib/storage/secureStore';
+import { rawRefresh } from '@/lib/api/rawRefresh';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
 
@@ -20,13 +21,7 @@ client.interceptors.request.use((config) => {
 let refreshPromise: Promise<string> | null = null;
 
 async function doRefresh(): Promise<string> {
-  const rt = await secureStore.getRefreshToken();
-  if (!rt) throw new Error('No refresh token');
-  const { data } = await axios.post<{ access_token: string; refresh_token: string }>(
-    `${BASE_URL}/api/auth/refresh`,
-    { refresh_token: rt },
-    { headers: { 'Content-Type': 'application/json' } },
-  );
+  const data = await rawRefresh();
   useAuthStore.getState().setAccessToken(data.access_token);
   await secureStore.setRefreshToken(data.refresh_token);
   return data.access_token;

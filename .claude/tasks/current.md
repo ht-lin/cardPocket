@@ -15,8 +15,8 @@
 | BE-FRIEND | ✅ | 6 tests |
 | BE-SHARE | ✅ | 20 tests |
 | BE-BUGFIX | ✅ | Step 1~3 全部完成 |
-| **FE-INFRA** | 🚧 进行中 | 目录结构、theme.ts、authStore.ts 已创建；npm install 及骨架文件待完成 |
-| FE-AUTH | ⏳ 待开始 | 依赖 FE-INFRA |
+| **FE-INFRA** | ✅ | 路由骨架、Axios 拦截器、Zustand、SecureStore、TanStack Query、MSW 配置全部完成 |
+| FE-AUTH | ✅ | 登录/注册/会话恢复/Banner/登出，9 tests pass |
 | FE-USER | ⏳ 待开始 | 依赖 FE-INFRA |
 | FE-CARD | ⏳ 待开始 | 依赖 FE-INFRA + BE-CARD ✅ |
 | FE-OFFLINE | ⏳ 待开始 | 依赖 FE-CARD + BE-SYNC ✅ |
@@ -53,16 +53,34 @@
 
 ---
 
+## ✅ FE-AUTH 全部完成（2026-06-07）
+
+- [x] **FE-AUTH-01**：`app/(auth)/login.tsx`（RHF + `LoginInputSchema` + `useLogin` hook）
+- [x] **FE-AUTH-02**：`app/(auth)/register.tsx`（RHF + `RegisterInputSchema` + GDPR 勾选）
+- [x] **FE-AUTH-03**：`app/(auth)/verify-email.tsx`（路由参数传 email + 重发验证邮件按钮）
+- [x] **FE-AUTH-04**：`src/components/auth/EmailVerificationBanner.tsx`（未验证用户顶部 Banner，内置重发按钮）
+- [x] **FE-AUTH-05**：`src/hooks/useLogout.ts`（`onSettled` 保证网络故障时也能退出）
+- [x] **FE-AUTH-06**：`src/hooks/useSessionRestore.ts` + `src/lib/api/rawRefresh.ts`（冷启动会话恢复，`isRestoring` 防闪烁）
+- [x] **FE-AUTH-07**：`__tests__/interceptor.test.ts`（9 tests：token 注入 / 401 刷新 / 并发 refresh 去重）
+
+**MSW 配置扩展（伴随 FE-AUTH-07）**：
+- `axios` moduleNameMapper → `dist/node/axios.cjs`（修复 react-native 条件下加载 browser 版问题）
+- `@open-draft/deferred-promise` CJS stub（MSW 依赖，无 CJS 版本）
+- `rettime` stub 补全 `emitAsPromise` + `hooks`
+- 拦截器测试文件加 `@jest-environment node` 指令
+
+---
+
 ## Phase 1 完成标准
 
 - [x] 所有后端集成测试通过（144 tests, 1 skipped）
 - [x] 每个端点至少有 Happy Path + 401 + 403 测试
 - [x] BE-BUGFIX Step 1~3 全部修复并补充测试
-- [ ] OpenAPI 文档可访问（`/api/docs`）
+- [x] OpenAPI 文档可访问（`/api/docs`）
 - [x] 速率限制配置完毕（注册 / 登录 / 好友请求）
 - [x] Docker Compose 启动后一键可运行测试
 - [x] 前端 FE-INFRA 完成（npm install + 路由骨架可启动）
-- [ ] 前端 FE-AUTH 完成（登录 / 注册 / 会话恢复）
+- [x] 前端 FE-AUTH 完成（登录 / 注册 / 会话恢复）
 - [ ] 前端 FE-USER 完成（个人信息 / 修改 / 注销）
 - [ ] 前端 FE-CARD 完成（列表 / 添加 / 详情 / 扫码）
 - [ ] 前端 FE-OFFLINE 完成（离线缓存 + 增量同步）
