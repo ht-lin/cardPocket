@@ -25,38 +25,87 @@ Phase 3：Expo Web（PWA）+ Service Worker
 ### 前端（Expo React Native）
 
 ```
-src/
-├── app/                    # Expo Router 页面
-│   ├── (auth)/             # 认证相关页（注册/登录/验证）
-│   ├── (tabs)/             # 主 Tab 导航
-│   │   ├── index.tsx       # 我的卡片列表
-│   │   ├── shared.tsx      # 共享给我的卡片
-│   │   └── friends.tsx     # 好友管理
-│   └── cards/
-│       ├── [id].tsx        # 卡片详情（条码展示）
-│       ├── new.tsx         # 添加卡片
-│       └── [id]/shares.tsx # 共享管理
-├── components/             # 复用 UI 组件
-│   ├── BarcodeDisplay.tsx  # 条码渲染（react-native-barcode-svg）
-│   └── BarcodeScanner.tsx  # 相机扫码（expo-barcode-scanner）
-├── hooks/
-│   ├── useAuth.ts          # 认证状态 + Token 管理
-│   └── useCards.ts         # 卡片数据 + 离线同步
-├── services/
-│   ├── api.ts              # API 客户端（fetch + 自动刷新）
-│   └── sync.ts             # 离线同步逻辑
-└── storage/
-    └── secureStore.ts      # expo-secure-store 封装
+frontend/
+├── app/                         # Expo Router（文件系统路由）
+│   ├── _layout.tsx              # Root layout：Providers 挂载（Query + 字体）
+│   ├── (auth)/                  # 未登录可访问
+│   │   ├── _layout.tsx
+│   │   ├── login.tsx
+│   │   ├── register.tsx
+│   │   └── verify-email.tsx
+│   └── (app)/                   # Auth Guard 保护的路由
+│       ├── _layout.tsx          # 检查 Zustand isAuthenticated → redirect
+│       ├── (tabs)/
+│       │   ├── _layout.tsx
+│       │   ├── index.tsx        # 我的卡片列表
+│       │   ├── shared.tsx       # 共享给我的卡片
+│       │   └── friends.tsx      # 好友管理
+│       ├── cards/
+│       │   ├── new.tsx          # 添加卡片（手动输入 + 相机扫码）
+│       │   ├── [id].tsx         # 卡片详情（条码展示）
+│       │   └── [id]/shares.tsx  # 共享成员管理
+│       └── profile.tsx          # 用户设置
+└── src/
+    ├── components/
+    │   ├── ui/                  # 通用基础组件（Button、Input、Modal、Banner）
+    │   ├── cards/               # BarcodeDisplay、CardListItem、CardForm
+    │   ├── friends/             # FriendListItem、FriendRequestCard
+    │   └── auth/                # EmailVerificationBanner
+    ├── hooks/
+    │   ├── useCards.ts          # TanStack Query hooks（卡片 CRUD）
+    │   ├── useFriends.ts        # TanStack Query hooks（好友）
+    │   ├── useShares.ts         # TanStack Query hooks（共享）
+    │   └── useSync.ts           # AppState 触发增量同步
+    ├── lib/
+    │   ├── api/
+    │   │   ├── client.ts        # Axios 实例 + 拦截器
+    │   │   └── endpoints/       # auth.ts / cards.ts / users.ts / friends.ts / shares.ts
+    │   ├── storage/
+    │   │   ├── secureStore.ts   # expo-secure-store 封装（Refresh Token 专用）
+    │   │   └── db.ts            # expo-sqlite 封装（卡片离线缓存）
+    │   └── query/
+    │       └── keys.ts          # TanStack Query key 常量
+    ├── store/
+    │   └── authStore.ts         # Zustand store（user + accessToken 内存）
+    ├── schemas/                 # Zod schemas（form 验证 + API 响应解析）
+    │   ├── auth.ts
+    │   ├── card.ts
+    │   ├── friend.ts
+    │   └── cardShare.ts
+    └── theme.ts                 # 设计 Token（颜色/间距/圆角）
 ```
 
-**状态管理**：优先使用 React Query（服务端状态） + Context（认证状态），不引入 Redux。
+**状态管理**：
+- **TanStack Query v5**：所有服务端状态（卡片、好友、共享）
+- **Zustand**：客户端状态（user profile、accessToken 内存存储）
+- 不引入 Redux；UI 局部状态用组件 `useState`
 
-**表单处理**：使用 React Hook Form + Zod（Phase 1 认证界面起引入）。Zod schema 同时作为运行时验证与 TypeScript 类型来源（single source of truth）。
+**HTTP 客户端**：Axios 单实例
+- 请求拦截器：从 Zustand 读取 `accessToken` 注入 `Authorization: Bearer`
+- 响应拦截器：捕获 401 → 刷新 Token → 重试原请求；并发 401 共用同一次刷新（pending promise 队列）
+- TanStack Query 的 `queryFn` / `mutationFn` 全部调用 Axios endpoints，不直接用 axios
+
+**表单处理**：React Hook Form + Zod，所有表单统一使用。Zod schema 同时作为运行时验证与 TypeScript 类型来源（`z.infer<>`），不重复定义类型。
+
+**离线存储分层**：
+
+| 数据 | 存储 | 原因 |
+|-----|------|------|
+| Refresh Token | expo-secure-store | 敏感，硬件级加密 |
+| Access Token | Zustand 内存（不持久化） | 规范要求，15min 自动过期 |
+| 卡片数据缓存 | expo-sqlite | 支持 200+ 条记录，结构化查询；条码内容非高敏感 |
+| lastSyncTimestamp | expo-secure-store（单条） | 小数据，跟随 Refresh Token 生命周期 |
+
+**条码渲染**：
+- `QR_CODE` → `react-native-qrcode-svg`
+- 其余线性码（CODE_128 / EAN_13 / CODE_39 / PDF_417 / AZTEC / EAN_8 / UPC_A / DATA_MATRIX）→ `jsbarcode`（生成 SVG 字符串）+ `react-native-svg` 的 `SvgXml` 渲染
+- 两者共用 `react-native-svg`；`BarcodeDisplay` 组件内按 `barcodeType` 分支渲染
 
 **离线同步策略**：
-1. App 进入前台时触发 `GET /api/cards?updatedAfter=<lastSync>`
-2. 响应的 `updated` 覆盖本地缓存，`deleted` 从本地删除
-3. 本地缓存使用 expo-secure-store（AES-256）
+1. `useSync` hook 监听 `AppState` → `'active'`（防抖 1s）
+2. 触发 `GET /api/cards?updatedAfter=<lastSync>`
+3. `updated` → 写入 SQLite（insertOrReplace）；`deleted` → 从 SQLite 批量删除
+4. 更新 `lastSyncTimestamp`
 
 ---
 
@@ -149,6 +198,7 @@ Card
  archivedAt: datetime|null
  createdAt: datetime
  updatedAt: datetime
+ deletedAt: datetime|null
 
 CardShare
  id: uuid PK
@@ -181,13 +231,18 @@ PushToken [Phase 2]
 ### 级联关系
 
 ```
-User 删除
-  → Card (owner_id) CASCADE DELETE
-    → CardShare (card_id) CASCADE DELETE
-  → CardShare (viewer_id) CASCADE DELETE
-  → Friendship (requester_id 或 addressee_id) CASCADE DELETE
-    → CardShare（相关好友对的 CardShare）CASCADE DELETE
-  → PushToken (user_id) CASCADE DELETE
+User 删除（DeleteAccountProcessor 按序执行，优先于数据库 FK 级联）
+  → CardDeletion (userId)                物理删除（GDPR：清除个人标识符审计记录）
+  → CardShare (viewer_id=当前用户)        物理删除（应用层查询删除）
+  → CardShare (card.owner=当前用户)       物理删除（DQL 批量删除）
+  → Card (owner_id)                      软删除 + 字段匿名化
+                                           name → ''，barcodeContent → ''（GDPR Art. 17）
+  → Friendship (requester/addressee)     物理删除
+  → User                                 软删除 + 字段匿名化
+                                           email → deleted_{uuid}@deleted.invalid
+                                           userName → deleted_{uuid}
+                                           password → ''（GDPR Art. 17）
+  → PushToken (user_id)                  数据库 FK CASCADE DELETE（Phase 2 实体）
 
 Friendship 删除
   → 查找双方所有 CardShare（card.owner=A 且 viewer=B，或 card.owner=B 且 viewer=A）
@@ -268,7 +323,7 @@ Expo Dev Server (localhost:19000)
 | 授权 | Symfony Voter（每次操作独立判断） |
 | 速率限制 | symfony/rate-limiter（专用 Redis，noeviction，安全优先降级；见 ADR-017） |
 | 本地存储 | expo-secure-store（AES-256，TEE/SE）|
-| 数据库 | UUID 主键（防 ID 枚举），软删除（deletedAt） |
+| 数据库 | UUID 主键（防 ID 枚举），软删除（deletedAt）+ 账户删除时字段匿名化（GDPR Art. 17） |
 
 ---
 

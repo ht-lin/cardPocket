@@ -101,59 +101,73 @@
 
 ### 前端
 
-#### [FE-INFRA] 前端基础设施（可与后端并行开始）
-- [x] FE-INFRA-01：Expo 项目初始化 + 依赖安装
-- [x] FE-INFRA-02：TypeScript strict 配置
-- [x] FE-INFRA-03：Expo Router 路由骨架（layout 文件 + Tab 结构）
-- [x] FE-INFRA-04：API 客户端（fetch wrapper + Authorization header + 401 自动刷新）
-- [x] FE-INFRA-05：Auth Context + Token 管理（内存 AccessToken + SecureStore RefreshToken）
-- [x] FE-INFRA-06：React Query 配置（QueryClient + 全局 Provider）
-- [x] FE-INFRA-07：SecureStore 封装（类型安全读/写/删）
-- [x] FE-INFRA-08：开发环境配置（API_BASE_URL + app.config.ts）
+> 架构选型（2026-06-07 确认）：TanStack Query v5 + Zustand | Axios | React Hook Form + Zod | expo-sqlite（卡片缓存）| StyleSheet + theme.ts | Jest + RNTL + MSW | react-native-qrcode-svg + jsbarcode + react-native-svg
+
+#### [FE-INFRA] 前端基础设施
+
+- [x] FE-INFRA-01：更新依赖（移除 expo-barcode-scanner、react-native-barcode-svg；安装 axios、zustand、expo-camera、expo-brightness、react-native-qrcode-svg、jsbarcode、@react-native-community/netinfo）
+- [x] FE-INFRA-02：安装测试依赖（jest、@testing-library/react-native、msw、jest-expo）
+- [x] FE-INFRA-03：theme.ts（颜色 / 字体大小 / 间距 / 圆角设计 Token）
+- [x] FE-INFRA-04：Expo Router 路由骨架（`(auth)/` 和 `(app)/` 分组，Tab 结构，各 `_layout.tsx`）
+- [x] FE-INFRA-05：Axios client（`src/lib/api/client.ts`：实例 + 请求拦截器注入 Bearer Token + 响应拦截器处理 401 + 并发刷新去重 pending promise）
+- [x] FE-INFRA-06：endpoints/ 骨架（`auth.ts` / `cards.ts` / `users.ts` / `friends.ts` / `shares.ts`）
+- [x] FE-INFRA-07：Zustand authStore（`user` + `accessToken` 内存存储，`clear()`）
+- [x] FE-INFRA-08：secureStore.ts 封装（Refresh Token 专用，类型安全读/写/删）
+- [x] FE-INFRA-09：db.ts（expo-sqlite 初始化 + `cards` 表 + `insertOrReplace` / `selectAll` / `deleteByIds`）
+- [x] FE-INFRA-10：QueryProvider（TanStack Query v5 QueryClient 全局配置）
+- [x] FE-INFRA-11：`(app)/_layout.tsx` Auth Guard（读 Zustand `isAuthenticated` → 未登录 `router.replace('/(auth)/login')`）
+- [x] FE-INFRA-12：MSW + Jest 测试基础配置（`__tests__/setup.ts`，server handlers 骨架）
+- [x] FE-INFRA-13：Zod schemas 骨架（`schemas/auth.ts` / `card.ts` / `friend.ts` / `cardShare.ts`）
 
 #### [FE-AUTH] 认证界面（后端 BE-AUTH 完成后）
-- [x] FE-AUTH-00：安装 react-hook-form、zod、@hookform/resolvers
-- [x] FE-AUTH-01：注册页面（Zod schema 验证 + GDPR 同意勾选）
-- [x] FE-AUTH-02：邮箱验证提示页（提示去邮箱验证）
-- [x] FE-AUTH-03：登录页面（Zod schema 验证）
-- [x] FE-AUTH-04：JWT Token 管理（AccessToken 存内存，RefreshToken 存 SecureStore）
-- [x] FE-AUTH-05：自动 Token 刷新（请求拦截 + 401 时自动 refresh）
-- [x] FE-AUTH-06：未验证用户的功能限制提示
+
+- [ ] FE-AUTH-01：登录页（React Hook Form + `LoginSchema` + 调用 `auth.ts` endpoint + 写 Zustand + 写 SecureStore RefreshToken）
+- [ ] FE-AUTH-02：注册页（React Hook Form + `RegisterSchema` + GDPR 同意勾选）
+- [ ] FE-AUTH-03：邮箱验证等待页（提示文案 + 重发验证邮件按钮）
+- [ ] FE-AUTH-04：`EmailVerificationBanner` 组件（已登录但 `emailVerifiedAt` 为 null 时顶部显示）
+- [ ] FE-AUTH-05：登出功能（`POST /api/auth/logout` + `authStore.clear()` + 清 SecureStore）
+- [ ] FE-AUTH-06：App 启动会话恢复（读 SecureStore RefreshToken → `POST /refresh` → 写 Zustand user + accessToken）
+- [ ] FE-AUTH-07：**测试**：Axios 拦截器（token 注入 / 401 触发刷新 / 并发 401 只发一次 refresh）
 
 #### [FE-USER] 用户设置界面（后端 BE-USER 完成后）
-- [x] FE-USER-01：个人信息页（展示 userName / email）
-- [x] FE-USER-02：修改 userName（内联编辑 + 422 重名提示）
-- [x] FE-USER-03：修改密码（当前密码验证 + 新密码 Zod schema）
-- [x] FE-USER-04：账户注销确认流程（二次确认弹窗 + GDPR 说明）
 
-#### [FE-CARD] 卡片基础界面（后端 BE-CARD 完成后）
-- [ ] FE-CARD-01：我的卡片列表页
-- [ ] FE-CARD-02：添加卡片页（手动输入 + 条码类型选择 + 实时预览）
-- [ ] FE-CARD-03：相机扫码（expo-barcode-scanner）
-- [ ] FE-CARD-04：卡片详情页（条码展示 + 屏幕亮度提升）
-- [ ] FE-CARD-05：编辑卡片名称
-- [ ] FE-CARD-06：删除卡片（确认弹窗）
-- [ ] FE-CARD-07：BarcodeDisplay 组件（支持所有 9 种条码类型）
+- [ ] FE-USER-01：个人信息页（展示 `userName` / `email`）
+- [ ] FE-USER-02：修改 userName（React Hook Form + 422 重名错误提示）
+- [ ] FE-USER-03：修改密码（当前密码验证 + `ChangePasswordSchema` Zod 规则）
+- [ ] FE-USER-04：账户注销确认流程（二次确认弹窗 + GDPR 数据清除说明）
+
+#### [FE-CARD] 卡片模块（后端 BE-CARD 完成后）
+
+- [ ] FE-CARD-01：`BarcodeDisplay` 组件（`QR_CODE` → `react-native-qrcode-svg`；其余 → `jsbarcode` 生成 SVG 字符串 + `SvgXml` 渲染；按 `barcodeType` 分支）
+- [ ] FE-CARD-02：我的卡片列表页（从 SQLite 读取展示，后台 TanStack Query 刷新）
+- [ ] FE-CARD-03：卡片详情页（`BarcodeDisplay` 展示 + `expo-brightness` 进入时最大化亮度 / 离开时恢复）
+- [ ] FE-CARD-04：添加卡片页（手动输入条码 + 条码类型 Picker + `BarcodeDisplay` 实时预览）
+- [ ] FE-CARD-05：相机扫码页（`expo-camera` + `onBarcodeScanned` 回调，扫码后跳添加页预填）
+- [ ] FE-CARD-06：编辑卡片名称（React Hook Form + `PATCH /api/cards/{id}`）
+- [ ] FE-CARD-07：删除卡片（确认弹窗 + `DELETE /api/cards/{id}` + 删 SQLite 缓存记录）
+- [ ] FE-CARD-08：**测试**：`BarcodeDisplay` 组件（9 种 barcodeType 均正确分支渲染）
 
 #### [FE-OFFLINE] 离线支持（后端 BE-SYNC 完成后）
-- [ ] FE-OFFLINE-01：expo-secure-store 封装（读/写/删卡片缓存）
-- [ ] FE-OFFLINE-02：进入前台时触发增量同步（AppState 监听，1秒防抖）
-- [ ] FE-OFFLINE-03：处理 deleted 列表（从本地缓存移除）
-- [ ] FE-OFFLINE-04：离线状态展示（banner 提示）
 
-#### [FE-FRIEND] 好友界面（后端 BE-FRIEND 完成后）
-- [ ] FE-FRIEND-01：用户搜索页（输入 userName 或 email 精确搜索）
-- [ ] FE-FRIEND-02：发送好友请求（搜索结果页内操作）
-- [ ] FE-FRIEND-03：好友请求列表页（接受/拒绝）
-- [ ] FE-FRIEND-04：好友列表页
+- [ ] FE-OFFLINE-01：`useSync` hook（`AppState` 'active' → `GET /api/cards?updatedAfter=lastSync` → 写 SQLite，防抖 1s）
+- [ ] FE-OFFLINE-02：处理增量同步 `deleted` 列表（`db.deleteByIds(deleted)`）
+- [ ] FE-OFFLINE-03：离线状态 Banner（`@react-native-community/netinfo` 检测无网络时显示）
+- [ ] FE-OFFLINE-04：**测试**：`useSync` hook（updated 写入 SQLite / deleted 删除 / lastSyncTimestamp 更新）
 
-#### [FE-SHARE] 共享界面（后端 BE-SHARE 完成后）
-- [ ] FE-SHARE-01：卡片共享管理页（查看成员列表 + 添加 + 移除）
-- [ ] FE-SHARE-02：从好友列表选择共享对象
-- [ ] FE-SHARE-03：共享给我的卡片列表页
-- [ ] FE-SHARE-04：Viewer 设置私有昵称（内联编辑）
-- [ ] FE-SHARE-05：Viewer 退出共享（确认弹窗）
-- [ ] FE-SHARE-06：解除好友时提示共享会被撤销
+#### [FE-FRIEND] 好友模块（后端 BE-FRIEND 完成后）
+
+- [ ] FE-FRIEND-01：用户搜索页（输入 userName 或 email，防抖 300ms，`GET /api/users/search`）
+- [ ] FE-FRIEND-02：发送好友请求（搜索结果内操作 + Optimistic Update）
+- [ ] FE-FRIEND-03：好友请求列表页（接受 / 拒绝 PENDING 请求）
+- [ ] FE-FRIEND-04：好友列表页（含解除好友按钮 + 弹窗提示"将同时撤销所有共享"）
+
+#### [FE-SHARE] 共享模块（后端 BE-SHARE 完成后）
+
+- [ ] FE-SHARE-01：卡片共享管理页（Owner 视图：成员列表 + 添加 + 移除）
+- [ ] FE-SHARE-02：从好友列表选择共享对象（`POST /api/cards/{id}/shares`）
+- [ ] FE-SHARE-03：共享给我的卡片列表页（Viewer 视图）
+- [ ] FE-SHARE-04：Viewer 设置私有昵称（内联编辑 + `PATCH /api/card-shares/{id}`）
+- [ ] FE-SHARE-05：Viewer 退出共享（确认弹窗 + `DELETE /api/card-shares/{id}`）
 
 ---
 

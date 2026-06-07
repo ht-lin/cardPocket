@@ -1,77 +1,55 @@
 # 当前任务：Phase 1 MVP
 
 > 开发顺序：后端 TDD → 前端同步 | 已完成模块详情见 **completed.md**
+> 前端架构选型（2026-06-07 重新规划）：TanStack Query v5 + Zustand | Axios | RHF + Zod | expo-sqlite | StyleSheet + theme.ts | Jest + RNTL + MSW | react-native-qrcode-svg + jsbarcode + react-native-svg
 
 ## 模块状态
 
-| 模块 | 状态 | 测试数 |
-|------|------|--------|
-| BE-INFRA | ✅ | — |
-| BE-AUTH  | ✅ | 37 |
-| BE-USER  | ✅ | 17 |
-| BE-CARD  | ✅ | 28 |
-| BE-SYNC  | ✅ | 3  |
-| BE-FRIEND | ✅ | 6 |
-| BE-SHARE | ✅ | 20 |
-| **BE-BUGFIX** | ✅ | — |
-| FE-INFRA | ✅ | — |
-| FE-AUTH  | ✅ | — |
-| FE-USER  | ✅ | — |
-| FE-CARD  | 🔒 等待 BE-BUGFIX | — |
-| FE-FRIEND | 🔒 等待 BE-BUGFIX | — |
-| FE-SHARE  | 🔒 等待 FE-CARD + FE-FRIEND | — |
-
-> BE-USER 测试数从 15 → 17（补充 `testDeleteAccountCascadesCardShares` + `testDeleteAccountCascadesFriendships`）
-
----
-
-## BE-BUGFIX 架构修复清单（按优先级逐步执行）
-
-> 2026-06-05 架构审查后发现。全部完成后方可开始前端模块。
-
-### 🔴 Step 1 — 数据一致性 Bug（必须先修）
-
-- [x] **BE-BUGFIX-01**：`FriendDeleteProcessor` — 删除 CardShare 时为每个 Viewer 写 `CardDeletion` 记录
-  - 文件：`src/State/Processor/FriendDeleteProcessor.php`
-  - 要点：遍历 `$shares`，每个 share 在 `remove()` 前 `persist(new CardDeletion(...))` for viewer
-  - 需补充测试：解除好友后增量同步能感知到 deleted 卡片
-
-- [x] **BE-BUGFIX-02**：`CardShare` 加 `updatedAt` — viewerNickname 更新进增量同步
-  - 文件：`src/Entity/CardShare.php`（加字段 + `#[ORM\PreUpdate]`）、`src/Repository/CardShareRepository.php`（`findUpdatedSharesSince` 改用 `cs.updatedAt`）
-  - 需新建 migration
-
-- [x] **BE-BUGFIX-03**：Friendship 双向唯一约束 — 新 migration 加表达式索引
-  - SQL：`CREATE UNIQUE INDEX IF NOT EXISTS uniq_friendship_pair ON app_friendship (LEAST(requester_id::text, addressee_id::text), GREATEST(requester_id::text, addressee_id::text))`
-
-### 🟡 Step 2 — 边界 Case 修复
-
-- [x] **BE-BUGFIX-04**：`security.yaml` `auth_public` pattern 加 `resend-verification`
-  - 文件：`config/packages/security.yaml:25`
-
-- [x] **BE-BUGFIX-05**：`UserRegisterProcessor` — 预检 email / userName 重复，返回 422
-  - 文件：`src/State/Processor/UserRegisterProcessor.php`
-
-- [x] **BE-BUGFIX-06**：`UserUpdateProcessor` — UUID 比较改用 `->equals()`
-  - 文件：`src/State/Processor/UserUpdateProcessor.php:50`
-
-- [x] **BE-BUGFIX-07**：`DeleteAccountProcessor` — 消除 N+1，加 `CardShareRepository::deleteByOwner(User)`
-  - 文件：`src/Repository/CardShareRepository.php`、`src/State/Processor/DeleteAccountProcessor.php`
-
-### 🔵 Step 3 — 防御性设计（可与前端并行）
-
-- [x] **BE-BUGFIX-08**：`CardRepository::findActiveByOwner` / `countActiveByOwner` 显式加 `deletedAt IS NULL`
-- [x] **BE-BUGFIX-09**：`Card.php` owner FK 改 `onDelete: 'CASCADE'`（需新 migration）
-
----
-
-## 待解锁前端模块
-
-| 模块 | 依赖 | 状态 |
+| 模块 | 状态 | 备注 |
 |------|------|------|
-| FE-CARD（卡片列表/添加/详情） | BE-BUGFIX Step 1+2 ✅ | 等待 BE-BUGFIX |
-| FE-FRIEND（好友管理页面） | BE-BUGFIX Step 1+2 ✅ | 等待 BE-BUGFIX |
-| FE-OFFLINE（离线缓存 + 增量同步） | FE-CARD + BE-SYNC ✅ | 等待 FE-CARD |
-| FE-SHARE（共享管理） | FE-CARD + FE-FRIEND + BE-SHARE ✅ | 等待 FE-CARD + FE-FRIEND |
+| BE-INFRA | ✅ | — |
+| BE-AUTH | ✅ | 37 tests |
+| BE-USER | ✅ | 17 tests |
+| BE-CARD | ✅ | 28 tests |
+| BE-SYNC | ✅ | 3 tests |
+| BE-FRIEND | ✅ | 6 tests |
+| BE-SHARE | ✅ | 20 tests |
+| BE-BUGFIX | ✅ | Step 1~3 全部完成 |
+| **FE-INFRA** | 🚧 进行中 | 目录结构、theme.ts、authStore.ts 已创建；npm install 及骨架文件待完成 |
+| FE-AUTH | ⏳ 待开始 | 依赖 FE-INFRA |
+| FE-USER | ⏳ 待开始 | 依赖 FE-INFRA |
+| FE-CARD | ⏳ 待开始 | 依赖 FE-INFRA + BE-CARD ✅ |
+| FE-OFFLINE | ⏳ 待开始 | 依赖 FE-CARD + BE-SYNC ✅ |
+| FE-FRIEND | ⏳ 待开始 | 依赖 FE-INFRA + BE-FRIEND ✅ |
+| FE-SHARE | ⏳ 待开始 | 依赖 FE-CARD + FE-FRIEND |
+
+---
+
+## 当前焦点：FE-INFRA 前端基础设施
+
+> 前端已于 2026-06-07 完整重置（旧代码/依赖/缓存全部清除），从新架构重建。
+
+### 已完成
+
+- [x] 旧前端代码（`src/`）、缓存（`dist/`、`.expo/`）、依赖（`node_modules/`、`package-lock.json`）全部删除
+- [x] `app.json` 更新（移除 `expo-barcode-scanner`，加入 `expo-camera` + 相机权限说明，名称改为 `CardPocket`）
+- [x] `package.json` 更新为新依赖（axios、zustand、expo-sqlite、expo-camera、expo-brightness、react-native-qrcode-svg、jsbarcode、@react-native-community/netinfo、jest + RNTL + MSW 等）
+- [x] 新目录骨架创建（`app/(auth)/`、`app/(app)/(tabs)/`、`src/components/`、`src/hooks/`、`src/lib/`、`src/store/`、`src/schemas/` 等）
+- [x] `src/theme.ts`（颜色 / 字体 / 间距 / 圆角设计 Token）
+- [x] `src/store/authStore.ts`（Zustand：user + accessToken 内存存储）
+
+### ✅ FE-INFRA 全部完成（2026-06-07）
+
+- [x] **FE-INFRA-01b**：`npm install`（react@19.2.7、@testing-library/react-native@^14.0.0、jsbarcode 等）
+- [x] **FE-INFRA-04**：路由骨架（`app/_layout.tsx`、`(auth)/` 3 个页面、`(app)/_layout.tsx`、`(tabs)/` 3 个 tab 页）
+- [x] **FE-INFRA-05**：`src/lib/api/client.ts`（Axios + 401 拦截 + 并发刷新去重）
+- [x] **FE-INFRA-06**：`src/lib/api/endpoints/`（auth/cards/users/friends/shares 5 个文件）
+- [x] **FE-INFRA-08**：`src/lib/storage/secureStore.ts`（Refresh Token + lastSync 封装）
+- [x] **FE-INFRA-09**：`src/lib/storage/db.ts`（expo-sqlite v15 async API + cards 表）
+- [x] **FE-INFRA-10**：`src/lib/query/QueryProvider.tsx` + `keys.ts`（TanStack Query v5）
+- [x] **FE-INFRA-11**：`app/(app)/_layout.tsx` Auth Guard（`<Redirect href="/login" />`）
+- [x] **FE-INFRA-12**：Jest + MSW 配置（rettime CJS stub + moduleNameMapper 解决 ESM 兼容性）
+- [x] **FE-INFRA-13**：Zod schemas（`auth.ts` / `card.ts` / `friend.ts` / `cardShare.ts`）
 
 ---
 
@@ -79,7 +57,14 @@
 
 - [x] 所有后端集成测试通过（144 tests, 1 skipped）
 - [x] 每个端点至少有 Happy Path + 401 + 403 测试
-- [x] BE-BUGFIX Step 1+2 全部修复并补充测试
+- [x] BE-BUGFIX Step 1~3 全部修复并补充测试
 - [ ] OpenAPI 文档可访问（`/api/docs`）
-- [x] 速率限制配置完毕（注册/登录/好友请求）
+- [x] 速率限制配置完毕（注册 / 登录 / 好友请求）
 - [x] Docker Compose 启动后一键可运行测试
+- [x] 前端 FE-INFRA 完成（npm install + 路由骨架可启动）
+- [ ] 前端 FE-AUTH 完成（登录 / 注册 / 会话恢复）
+- [ ] 前端 FE-USER 完成（个人信息 / 修改 / 注销）
+- [ ] 前端 FE-CARD 完成（列表 / 添加 / 详情 / 扫码）
+- [ ] 前端 FE-OFFLINE 完成（离线缓存 + 增量同步）
+- [ ] 前端 FE-FRIEND 完成（好友管理）
+- [ ] 前端 FE-SHARE 完成（共享管理）

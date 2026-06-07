@@ -1,38 +1,51 @@
 import { z } from 'zod';
 
-export const registerSchema = z.object({
-  email: z.string().email('请输入有效的邮箱地址'),
-  password: z.string().min(8, '密码至少 8 个字符'),
-  userName: z
-    .string()
-    .min(2, '用户名至少 2 个字符')
-    .max(50, '用户名不超过 50 个字符'),
-  gdprConsent: z.literal(true, {
-    error: () => ({ message: '请同意隐私政策与服务条款' }),
-  }),
+export const LoginInputSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
 });
+export type LoginInput = z.infer<typeof LoginInputSchema>;
 
-export type RegisterFormData = z.infer<typeof registerSchema>;
-
-export const loginSchema = z.object({
-  email: z.string().email('请输入有效的邮箱地址'),
-  password: z.string().min(1, '请输入密码'),
+export const RegisterInputSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  userName: z.string().min(3).max(50),
+  gdprConsent: z.literal(true),
 });
+export type RegisterInput = z.infer<typeof RegisterInputSchema>;
 
-export type LoginFormData = z.infer<typeof loginSchema>;
-
-export const updateUserNameSchema = z.object({
-  userName: z
-    .string()
-    .min(2, '用户名至少 2 个字符')
-    .max(50, '用户名不超过 50 个字符'),
+export const AuthResponseSchema = z.object({
+  access_token: z.string(),
+  refresh_token: z.string(),
+  token_type: z.string(),
+  expires_in: z.number(),
 });
+export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 
-export type UpdateUserNameFormData = z.infer<typeof updateUserNameSchema>;
-
-export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, '请输入当前密码'),
-  newPassword: z.string().min(8, '新密码至少 8 个字符'),
+export const RefreshResponseSchema = z.object({
+  access_token: z.string(),
+  refresh_token: z.string(),
+  expires_in: z.number(),
 });
+export type RefreshResponse = z.infer<typeof RefreshResponseSchema>;
 
-export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
+export const UserOutputSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  userName: z.string(),
+  emailVerifiedAt: z.string().nullable(),
+});
+export type UserOutput = z.infer<typeof UserOutputSchema>;
+
+export const UserUpdateInputSchema = z.object({
+  userName: z.string().min(3).max(50).optional(),
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(8).optional(),
+});
+export type UserUpdateInput = z.infer<typeof UserUpdateInputSchema>;
+
+export const UserSearchOutputSchema = z.object({
+  id: z.string(),
+  userName: z.string(),
+});
+export type UserSearchOutput = z.infer<typeof UserSearchOutputSchema>;

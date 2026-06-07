@@ -301,7 +301,7 @@
 
 ## ADR-018：前端表单处理使用 React Hook Form + Zod
 
-**状态**：已采纳
+**状态**：已采纳（2026-06-07 前端架构重新规划后确认保留）
 **日期**：2026-06-04
 
 **决策**：从 Phase 1 认证界面起，所有前端表单使用 `react-hook-form` 管理状态，通过 `@hookform/resolvers/zod` 桥接 `zod` schema 进行验证。
@@ -337,7 +337,7 @@
 
 ## ADR-020：BE-USER-04 级联删除测试推迟到各实体模块
 
-**状态**：已采纳
+**状态**：已完成（2026-06-06）
 **日期**：2026-06-04
 
 **决策**：DELETE /api/users/me 的级联删除测试（Cards/CardShares/Friendships）推迟到对应实体创建时实现，BE-USER-04 只覆盖软删除核心逻辑（3 个测试：返回 204、未认证 401、软删除后无法登录）。
@@ -350,3 +350,168 @@
 **权衡**：
 - BE-USER-04 的测试覆盖暂不完整，需在 BE-CARD/BE-FRIEND/BE-SHARE 模块中各自补充级联场景
 - `DeleteAccountProcessor` 预留了 `EntityManagerInterface` 注入，后续直接添加级联删除查询即可，扩展成本低
+
+**后续**：级联测试已在 BE-SHARE 阶段全部补齐；GDPR 匿名化测试（3 个）在 BE-GDPR 阶段追加（见 ADR-021）。`DeleteAccountTest.php` 现共 9 个测试。
+
+---
+
+## ADR-021：账户删除使用软删除 + 字段匿名化，而非物理删除
+
+**状态**：已采纳
+**日期**：2026-06-06
+
+**决策**：`DELETE /api/users/me` 时，User 和 Card 记录保留行但立即覆写所有个人数据字段：User 的 `email`/`userName`/`password` 替换为无意义占位符，Card 的 `name`/`barcodeContent` 清空。`CardDeletion` 审计行则物理删除。详见 `DeleteAccountProcessor.php`。
+
+**原因**：
+- **外键完整性**：Card、CardShare、Friendship、RefreshToken 均有 FK 指向 User；物理删除 User 需要先删所有子记录或依赖 DB CASCADE，逻辑复杂且多步操作难以原子化
+- **GDPR Art. 17 合规**：软删除后立即匿名化等同于"删除"个人数据的效果——email/userName/password 被覆写为无意义值，原始数据不可恢复，满足被遗忘权要求
+- **`email`/`userName` UNIQUE 约束**：替换为 `deleted_{uuid}@deleted.invalid` / `deleted_{uuid}` 格式保证唯一性（UUID 天然唯一）
+- **`CardDeletion` 特殊处理**：该表以普通 VARCHAR 存储 `userId`（无 FK 约束），不受 User 软删除保护，必须物理清除，否则 userId 永久残留构成 GDPR 违规
+
+**权衡**：
+- 匿名化后的 User/Card 行仍占用数据库空间（极小，每行约 100-200 字节）
+- 前端 JWT 中携带的旧 email 在账户删除后立即失效（email 已变更，任何 JWT 验证都将因找不到用户而 401），无需额外的 token 黑名单机制
+
+---
+
+## ADR-022：前端状态管理：TanStack Query v5 + Zustand
+
+**状态**：已采纳
+**日期**：2026-06-07
+
+**决策**：服务端状态（卡片、好友、共享数据）由 TanStack Query v5 管理；客户端状态（user profile、accessToken）由 Zustand 管理。不引入 Redux 或 Context-based auth state。
+
+**原因**：
+- TanStack Query 提供缓存、后台重新获取、Optimistic Update 等开箱即用能力，适合 REST API 数据
+- Zustand 比 React Context 更适合多处读取的全局状态（如 Axios 拦截器直接调用 `useAuthStore.getState()` 读取 accessToken，不需要在组件树外传递 Context）
+- 两者职责清晰，无重叠：Query 管"服务器数据的副本"，Zustand 管"当前会话的身份"
+
+**Token 存储规则**：
+- `accessToken`：Zustand 内存，不持久化（符合安全规范）
+- `refreshToken`：expo-secure-store（硬件加密）
+- `user` profile：Zustand 内存（App 重启后通过 `/refresh` 接口重新获取）
+
+**权衡**：Zustand 增加一个依赖，但比手写 Context + useReducer 更少样板代码。
+
+---
+
+## ADR-023：前端 HTTP 客户端使用 Axios
+
+**状态**：已采纳
+**日期**：2026-06-07
+
+**决策**：使用 Axios（单实例）作为 HTTP 客户端，不使用原生 `fetch` 包装。
+
+**原因**：
+- Axios 拦截器链（interceptors）是处理"请求注入 token + 响应处理 401 + 并发刷新去重"最直观的方式，避免手写状态机
+- 响应拦截器天然支持异步等待（`async/await`），刷新逻辑清晰
+- Axios 自动序列化请求体为 JSON，自动解析响应 JSON，减少样板代码
+
+**并发 401 去重方案**：
+```ts
+let pendingRefresh: Promise<string> | null = null;
+
+// 响应拦截器内
+if (!pendingRefresh) {
+  pendingRefresh = refreshAccessToken().finally(() => { pendingRefresh = null; });
+}
+const newToken = await pendingRefresh;
+// 用 newToken 重试原请求
+```
+
+**权衡**：Axios 比原生 fetch 多一个依赖（~14KB gzip），对 React Native 包体积影响可忽略。
+
+---
+
+## ADR-024：前端不引入 UI 组件库，使用 StyleSheet + 设计 Token
+
+**状态**：已采纳
+**日期**：2026-06-07
+
+**决策**：前端 UI 全部使用 React Native 原生 `StyleSheet` + `src/theme.ts` 设计 Token 文件，不引入 NativeWind、Tamagui、GlueStack 等 UI 库。
+
+**原因**：
+- CardPocket UI 极简（列表、条码展示、基础表单），不需要复杂组件库
+- 任何第三方 UI 库都增加 Expo SDK 升级时的兼容摩擦
+- `theme.ts` 统一颜色/间距/圆角常量，足以保证设计一致性
+
+**权衡**：Button、Input、Modal 等基础组件需自行封装（成本低，一次性工作）。若将来暗色模式需求强烈，可引入 Shopify Restyle。
+
+---
+
+## ADR-025：前端离线卡片缓存使用 expo-sqlite
+
+**状态**：已采纳
+**日期**：2026-06-07
+
+**决策**：卡片数据离线缓存存储在 `expo-sqlite`（`cards` 表），不使用 expo-secure-store 分条存储。Refresh Token 继续使用 expo-secure-store。
+
+**原因**：
+- expo-secure-store 单条 2KB 上限（iOS Keychain 约束），200 张卡的结构化查询无法高效实现
+- expo-sqlite 是 Expo 56 内置模块，无需额外安装；支持事务、索引、SQL 查询
+- 卡片条码内容的敏感级别：是会员卡条码（给收银台扫描用），非密码/金融数据，存明文 SQLite 可接受
+
+**权衡**：SQLite 文件在 App 沙盒内（iOS/Android 均受系统级文件保护），安全性远高于 AsyncStorage，略低于 Keychain。对本项目场景可接受。
+
+---
+
+## ADR-026：条码渲染使用两个专用库（QR + 线性码分离）
+
+**状态**：已采纳
+**日期**：2026-06-07
+
+**决策**：
+- `QR_CODE` → `react-native-qrcode-svg`
+- 其余线性条码（CODE_128 / EAN_13 / CODE_39 / PDF_417 / AZTEC / EAN_8 / UPC_A / DATA_MATRIX）→ `jsbarcode` 生成 SVG 字符串 + `react-native-svg` 的 `SvgXml` 渲染
+- 两者均基于 `react-native-svg`，无额外 SVG 依赖
+
+**渲染方式**：`jsbarcode` 通过虚拟 SVG 节点生成 SVG 标记字符串，`BarcodeDisplay` 用 `SvgXml` 显示：
+```tsx
+type === 'QR_CODE' ? <QRCode value={content} /> : <SvgXml xml={getBarcodeSvg(content, type)} />
+```
+
+**原因**：
+- 原 `react-native-barcode-svg` 维护不活跃，API 覆盖不完整
+- 原选 `@kichiyaki/react-native-barcode-generator` 但该包最新版本为 0.6.7，npm 无 1.x 版本，可靠性存疑
+- `jsbarcode` 是业界标准条码库（3.12.x），支持所有所需格式，活跃维护，纯 JS 实现
+- `react-native-qrcode-svg` 是 QR 渲染的事实标准，支持纠错级别、Logo 嵌入（Phase 2 外观自定义用）
+- `BarcodeDisplay` 组件内按 `barcodeType` 分支：`type === 'QR_CODE' ? <QRCode /> : <SvgXml />`
+
+**权衡**：jsbarcode 是 Web 库，需配合虚拟 SVG 节点或手动 XML 生成在 RN 中使用；实现略复杂，但格式覆盖完整、依赖可靠性高于 @kichiyaki。
+
+---
+
+## ADR-027：取消生物识别解锁功能（US-21）
+
+**状态**：已采纳
+**日期**：2026-06-07
+
+**决策**：US-21（离开 App 一段时间后需要生物识别重新解锁）从项目范围中移除，不在任何 Phase 实现。
+
+**原因**：
+- CardPocket 存储的是会员卡条码，不是密码/支付信息，数据敏感级别不要求生物识别保护
+- 增加 `expo-local-authentication` 依赖 + AppState 锁屏状态机的实现复杂度与安全收益不成比例
+- MVP 应聚焦核心功能（卡片管理 + 共享），锁屏是体验附加功能
+
+**权衡**：部分用户可能希望保护卡包（如家庭共用设备），但该需求属于 Phase 2+ 的体验完善，且可单独引入不影响核心架构。
+
+---
+
+## ADR-028：前端测试策略：Phase 1 写关键测试（Jest + RNTL + MSW）
+
+**状态**：已采纳
+**日期**：2026-06-07
+
+**决策**：Phase 1 编写关键路径测试，不追求 100% 覆盖率。工具链：Jest + React Native Testing Library（RNTL）+ MSW（Mock Service Worker）。不引入 E2E 测试（Maestro/Detox 推迟到 Phase 2）。
+
+**测试重点**：
+1. Zod schemas（form 验证规则正确性）
+2. Axios 拦截器（token 注入 + 401 刷新 + 并发去重）
+3. `useSync` hook（增量同步逻辑：updated 写入 / deleted 删除）
+4. `BarcodeDisplay` 组件（9 种类型均正确分支）
+5. 认证流程屏幕（登录成功/失败，RNTL + MSW）
+
+**原因**：
+- 上述 5 类是"改动频繁、出错代价高"的关键路径，测试 ROI 最高
+- MSW 在 React Native 中通过 `msw/native` 拦截 fetch/axios，无需启动真实后端
+- RNTL 鼓励测试用户行为而非实现细节，避免脆性快照测试
