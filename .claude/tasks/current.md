@@ -18,14 +18,14 @@
 | **FE-INFRA** | ✅ | 路由骨架、Axios 拦截器、Zustand、SecureStore、TanStack Query、MSW 配置全部完成 |
 | FE-AUTH | ✅ | 登录/注册/会话恢复/Banner/登出，9 tests pass |
 | FE-USER | ✅ | 设置页 + 修改用户名/密码 + 注销 |
-| FE-CARD | ⏳ 待开始 | 依赖 FE-INFRA + BE-CARD ✅ |
+| FE-CARD | ✅ | 9 tests pass |
 | FE-OFFLINE | ⏳ 待开始 | 依赖 FE-CARD + BE-SYNC ✅ |
 | FE-FRIEND | ⏳ 待开始 | 依赖 FE-INFRA + BE-FRIEND ✅ |
 | FE-SHARE | ⏳ 待开始 | 依赖 FE-CARD + FE-FRIEND |
 
 ---
 
-## 当前焦点：FE-INFRA 前端基础设施
+## 当前焦点：FE-OFFLINE / FE-FRIEND / FE-SHARE
 
 > 前端已于 2026-06-07 完整重置（旧代码/依赖/缓存全部清除），从新架构重建。
 
@@ -83,6 +83,28 @@
 
 ---
 
+## ✅ FE-CARD 全部完成（2026-06-08）
+
+- [x] **FE-CARD-01**：`src/components/cards/BarcodeDisplay.tsx`（QR_CODE → react-native-qrcode-svg；CODE_128/EAN_13/EAN_8/CODE_39/UPC_A → jsbarcode + @xmldom/xmldom 生成 SVG + SvgXml 渲染；PDF_417/AZTEC/DATA_MATRIX → 文字占位符）
+- [x] **FE-CARD-02**：`app/(app)/(tabs)/index.tsx` 卡片列表（FlatList + 下拉刷新 + FAB 添加/扫码按钮 + 空状态）
+- [x] **FE-CARD-03**：`app/(app)/cards/[id].tsx` 详情页（expo-brightness useFocusEffect 自动最大亮度 + 编辑 Modal + Alert 删除确认）
+- [x] **FE-CARD-04**：`app/(app)/cards/add.tsx` 添加页（RHF + CardCreateInputSchema + 自定义 Modal 类型选择器 + BarcodeDisplay 实时预览 + 扫码预填支持）
+- [x] **FE-CARD-05**：`app/(app)/cards/scan.tsx` 扫码页（useCameraPermissions + CameraView + expo-camera BarcodeType 映射 + router.replace 跳添加页）
+- [x] **FE-CARD-06**：编辑卡片名称（详情页内联 Modal + useUpdateCard hook + RHF）
+- [x] **FE-CARD-07**：删除卡片（Alert.alert 确认 + useDeleteCard hook + SQLite 同步删除）
+- [x] **FE-CARD-08**：`__tests__/BarcodeDisplay.test.tsx`（9 种 barcodeType 渲染分支测试，9/9 通过）
+
+**新增文件**：`src/lib/storage/cardMapper.ts`、`src/components/cards/BarcodeDisplay.tsx`、`src/components/cards/CardListItem.tsx`、`src/hooks/useSyncCards.ts`、`src/hooks/useCards.ts`、`src/hooks/useCreateCard.ts`、`src/hooks/useUpdateCard.ts`、`src/hooks/useDeleteCard.ts`、`app/(app)/cards/[id].tsx`、`app/(app)/cards/add.tsx`、`app/(app)/cards/scan.tsx`、`__tests__/BarcodeDisplay.test.tsx`
+
+**修改文件**：`app/(app)/_layout.tsx`（Slot → Stack）、`app/(app)/(tabs)/index.tsx`（stub → 完整列表页）、`src/lib/storage/db.ts`（+`selectCardById`）
+
+**关键技术点**：
+- 同步策略：始终使用 `updatedAfter` 端点（首次用 epoch），避免处理分页响应格式
+- RNTL v14 `render()` 是 async，必须 `await`；jest.mock 工厂禁用顶层 import 变量
+- expo-camera `BarcodeScanningResult.type` 是 `string`，barcodeTypes 参数用 `CameraBarcodeType[]`
+
+---
+
 ## Phase 1 完成标准
 
 - [x] 所有后端集成测试通过（144 tests, 1 skipped）
@@ -94,7 +116,7 @@
 - [x] 前端 FE-INFRA 完成（npm install + 路由骨架可启动）
 - [x] 前端 FE-AUTH 完成（登录 / 注册 / 会话恢复）
 - [x] 前端 FE-USER 完成（个人信息 / 修改 / 注销）
-- [ ] 前端 FE-CARD 完成（列表 / 添加 / 详情 / 扫码）
+- [x] 前端 FE-CARD 完成（列表 / 添加 / 详情 / 扫码）
 - [ ] 前端 FE-OFFLINE 完成（离线缓存 + 增量同步）
 - [ ] 前端 FE-FRIEND 完成（好友管理）
 - [ ] 前端 FE-SHARE 完成（共享管理）

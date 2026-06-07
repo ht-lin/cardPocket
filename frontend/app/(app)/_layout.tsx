@@ -1,5 +1,5 @@
-import { Redirect, Slot } from 'expo-router';
 import { View } from 'react-native';
+import { Stack, Redirect } from 'expo-router';
 import { useAuthStore } from '@/store/authStore';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 
@@ -15,7 +15,12 @@ export default function AppLayout() {
   return (
     <View style={{ flex: 1 }}>
       <EmailVerificationBanner />
-      <Slot />
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="cards/[id]" options={{ title: '卡片详情' }} />
+        <Stack.Screen name="cards/add" options={{ title: '添加卡片' }} />
+        <Stack.Screen name="cards/scan" options={{ title: '扫码添加' }} />
+      </Stack>
     </View>
   );
 }

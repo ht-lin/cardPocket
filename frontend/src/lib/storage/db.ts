@@ -85,3 +85,8 @@ export async function deleteCardsByIds(ids: string[]): Promise<void> {
   const placeholders = ids.map(() => '?').join(', ');
   await database.runAsync(`DELETE FROM cards WHERE id IN (${placeholders})`, ids);
 }
+
+export async function selectCardById(id: string): Promise<CardRow | null> {
+  const database = await getDb();
+  return database.getFirstAsync<CardRow>('SELECT * FROM cards WHERE id = ?', id);
+}

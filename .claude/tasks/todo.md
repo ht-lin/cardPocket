@@ -138,14 +138,14 @@
 
 #### [FE-CARD] 卡片模块（后端 BE-CARD 完成后）
 
-- [ ] FE-CARD-01：`BarcodeDisplay` 组件（`QR_CODE` → `react-native-qrcode-svg`；其余 → `jsbarcode` 生成 SVG 字符串 + `SvgXml` 渲染；按 `barcodeType` 分支）
-- [ ] FE-CARD-02：我的卡片列表页（从 SQLite 读取展示，后台 TanStack Query 刷新）
-- [ ] FE-CARD-03：卡片详情页（`BarcodeDisplay` 展示 + `expo-brightness` 进入时最大化亮度 / 离开时恢复）
-- [ ] FE-CARD-04：添加卡片页（手动输入条码 + 条码类型 Picker + `BarcodeDisplay` 实时预览）
-- [ ] FE-CARD-05：相机扫码页（`expo-camera` + `onBarcodeScanned` 回调，扫码后跳添加页预填）
-- [ ] FE-CARD-06：编辑卡片名称（React Hook Form + `PATCH /api/cards/{id}`）
-- [ ] FE-CARD-07：删除卡片（确认弹窗 + `DELETE /api/cards/{id}` + 删 SQLite 缓存记录）
-- [ ] FE-CARD-08：**测试**：`BarcodeDisplay` 组件（9 种 barcodeType 均正确分支渲染）
+- [x] FE-CARD-01：`BarcodeDisplay` 组件（`QR_CODE` → `react-native-qrcode-svg`；其余 → `jsbarcode` 生成 SVG 字符串 + `SvgXml` 渲染；按 `barcodeType` 分支）
+- [x] FE-CARD-02：我的卡片列表页（从 SQLite 读取展示，后台 TanStack Query 刷新）
+- [x] FE-CARD-03：卡片详情页（`BarcodeDisplay` 展示 + `expo-brightness` 进入时最大化亮度 / 离开时恢复）
+- [x] FE-CARD-04：添加卡片页（手动输入条码 + 条码类型 Picker + `BarcodeDisplay` 实时预览）
+- [x] FE-CARD-05：相机扫码页（`expo-camera` + `onBarcodeScanned` 回调，扫码后跳添加页预填）
+- [x] FE-CARD-06：编辑卡片名称（React Hook Form + `PATCH /api/cards/{id}`）
+- [x] FE-CARD-07：删除卡片（确认弹窗 + `DELETE /api/cards/{id}` + 删 SQLite 缓存记录）
+- [x] FE-CARD-08：**测试**：`BarcodeDisplay` 组件（9 种 barcodeType 均正确分支渲染）
 
 #### [FE-OFFLINE] 离线支持（后端 BE-SYNC 完成后）
 
