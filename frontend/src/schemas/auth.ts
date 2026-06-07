@@ -49,3 +49,20 @@ export const UserSearchOutputSchema = z.object({
   userName: z.string(),
 });
 export type UserSearchOutput = z.infer<typeof UserSearchOutputSchema>;
+
+export const UpdateUsernameFormSchema = z.object({
+  userName: z.string().min(3, '用户名至少 3 位').max(50, '用户名最多 50 位'),
+});
+export type UpdateUsernameFormInput = z.infer<typeof UpdateUsernameFormSchema>;
+
+export const ChangePasswordFormSchema = z
+  .object({
+    currentPassword: z.string().min(1, '请输入当前密码'),
+    newPassword: z.string().min(8, '新密码至少 8 位'),
+    confirmNewPassword: z.string().min(8, '确认密码至少 8 位'),
+  })
+  .refine((d) => d.newPassword === d.confirmNewPassword, {
+    message: '两次密码不一致',
+    path: ['confirmNewPassword'],
+  });
+export type ChangePasswordFormInput = z.infer<typeof ChangePasswordFormSchema>;

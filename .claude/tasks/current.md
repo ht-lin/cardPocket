@@ -17,7 +17,7 @@
 | BE-BUGFIX | ✅ | Step 1~3 全部完成 |
 | **FE-INFRA** | ✅ | 路由骨架、Axios 拦截器、Zustand、SecureStore、TanStack Query、MSW 配置全部完成 |
 | FE-AUTH | ✅ | 登录/注册/会话恢复/Banner/登出，9 tests pass |
-| FE-USER | ⏳ 待开始 | 依赖 FE-INFRA |
+| FE-USER | ✅ | 设置页 + 修改用户名/密码 + 注销 |
 | FE-CARD | ⏳ 待开始 | 依赖 FE-INFRA + BE-CARD ✅ |
 | FE-OFFLINE | ⏳ 待开始 | 依赖 FE-CARD + BE-SYNC ✅ |
 | FE-FRIEND | ⏳ 待开始 | 依赖 FE-INFRA + BE-FRIEND ✅ |
@@ -71,6 +71,18 @@
 
 ---
 
+## ✅ FE-USER 全部完成（2026-06-07）
+
+- [x] **FE-USER-01**：`app/(app)/(tabs)/settings.tsx` 展示 `userName` / `email`（只读）
+- [x] **FE-USER-02**：inline 修改用户名表单（RHF + `UpdateUsernameFormSchema` + 422 重名错误提示）
+- [x] **FE-USER-03**：inline 修改密码表单（RHF + `ChangePasswordFormSchema`：当前密码 + 新密码 + 确认，400 错误提示）
+- [x] **FE-USER-04**：注销账户二次确认 Modal（GDPR 数据清除说明 + `useDeleteAccount` → clear + redirect）
+
+**新增文件**：`hooks/useUpdateUserName.ts` / `hooks/useChangePassword.ts` / `hooks/useDeleteAccount.ts`
+**修改文件**：`schemas/auth.ts`（+2 form schemas）、`app/(app)/(tabs)/_layout.tsx`（+设置 Tab）
+
+---
+
 ## Phase 1 完成标准
 
 - [x] 所有后端集成测试通过（144 tests, 1 skipped）
@@ -81,7 +93,7 @@
 - [x] Docker Compose 启动后一键可运行测试
 - [x] 前端 FE-INFRA 完成（npm install + 路由骨架可启动）
 - [x] 前端 FE-AUTH 完成（登录 / 注册 / 会话恢复）
-- [ ] 前端 FE-USER 完成（个人信息 / 修改 / 注销）
+- [x] 前端 FE-USER 完成（个人信息 / 修改 / 注销）
 - [ ] 前端 FE-CARD 完成（列表 / 添加 / 详情 / 扫码）
 - [ ] 前端 FE-OFFLINE 完成（离线缓存 + 增量同步）
 - [ ] 前端 FE-FRIEND 完成（好友管理）

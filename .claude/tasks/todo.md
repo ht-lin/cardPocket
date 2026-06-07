@@ -18,61 +18,61 @@
 - [x] BE-AUTH-07：实现 POST /api/auth/login（返回 AccessToken + RefreshToken）
 - [x] BE-AUTH-08：实现 Refresh Token Rotation（`single_use: true` + `AuthenticationSuccessSubscriber`）
 - [x] BE-AUTH-09：实现 POST /api/auth/refresh
-- [ ] BE-AUTH-10：实现 POST /api/auth/logout（使 RefreshToken 失效）
-- [ ] BE-AUTH-11：配置速率限制（注册 5/h/IP，登录 10/min/IP，验证邮件 3/h/user）
-- [ ] BE-AUTH-12：编写所有认证端点的集成测试
+- [x] BE-AUTH-10：实现 POST /api/auth/logout（使 RefreshToken 失效）
+- [x] BE-AUTH-11：配置速率限制（注册 5/h/IP，登录 10/min/IP，验证邮件 3/h/user）
+- [x] BE-AUTH-12：编写所有认证端点的集成测试
 
 #### [BE-USER] 用户模块
-- [ ] BE-USER-00：创建 User DTO 类（UserRegisterInput / UserOutput / UserSearchOutput / UserUpdateInput）
+- [x] BE-USER-00：创建 User DTO 类（UserRegisterInput / UserOutput / UserSearchOutput / UserUpdateInput）
 - [x] BE-USER-01：实现 GET /api/users/me
 - [x] BE-USER-02：实现 PATCH /api/users/me（userName + 修改密码）
 - [x] BE-USER-03：实现 GET /api/users/search（精确匹配，只返回 id+userName）
 - [x] BE-USER-04：实现 DELETE /api/users/me（软删除；级联删除测试推迟到对应实体模块）
-- [ ] BE-USER-05：编写用户模块集成测试（级联删除：Cards/CardShares/Friendships）
+- [x] BE-USER-05：编写用户模块集成测试（级联删除：Cards/CardShares/Friendships）
 
 #### [BE-CARD] 卡片模块
-- [ ] BE-CARD-01：创建 Card 实体（含所有字段，expiresAt/archivedAt 预留）
-- [ ] BE-CARD-02：创建 Card 数据库迁移
-- [ ] BE-CARD-02b：创建 Card DTO 类（CardCreateInput / CardUpdateInput / CardOwnerOutput / CardViewerOutput）
-- [ ] BE-CARD-03：创建 CardVoter（CARD_VIEW, CARD_EDIT, CARD_DELETE）
-- [ ] BE-CARD-04：实现 POST /api/cards（含邮箱验证门控 + 200张上限）
-- [ ] BE-CARD-05：实现 GET /api/cards（含共享卡片，viewerNickname 隔离）
-- [ ] BE-CARD-06：实现 GET /api/cards/{id}
-- [ ] BE-CARD-07：实现 PATCH /api/cards/{id}（barcodeType/Content 静默忽略）
-- [ ] BE-CARD-08：实现 DELETE /api/cards/{id}
-- [ ] BE-CARD-09：编写卡片模块集成测试
+- [x] BE-CARD-01：创建 Card 实体（含所有字段，expiresAt/archivedAt 预留）
+- [x] BE-CARD-02：创建 Card 数据库迁移
+- [x] BE-CARD-02b：创建 Card DTO 类（CardCreateInput / CardUpdateInput / CardOwnerOutput / CardViewerOutput）
+- [x] BE-CARD-03：创建 CardVoter（CARD_VIEW, CARD_EDIT, CARD_DELETE）
+- [x] BE-CARD-04：实现 POST /api/cards（含邮箱验证门控 + 200张上限）
+- [x] BE-CARD-05：实现 GET /api/cards（含共享卡片，viewerNickname 隔离）
+- [x] BE-CARD-06：实现 GET /api/cards/{id}
+- [x] BE-CARD-07：实现 PATCH /api/cards/{id}（barcodeType/Content 静默忽略）
+- [x] BE-CARD-08：实现 DELETE /api/cards/{id}
+- [x] BE-CARD-09：编写卡片模块集成测试
 
 #### [BE-SYNC] 增量同步
-- [ ] BE-SYNC-01：实现 GET /api/cards?updatedAfter=（返回 updated + deleted）
-- [ ] BE-SYNC-02：deleted 列表包含已删除 Card + 已撤销共享的 Card ID
-- [ ] BE-SYNC-03：编写增量同步集成测试
+- [x] BE-SYNC-01：实现 GET /api/cards?updatedAfter=（返回 updated + deleted）
+- [x] BE-SYNC-02：deleted 列表包含已删除 Card + 已撤销共享的 Card ID
+- [x] BE-SYNC-03：编写增量同步集成测试
 
 #### [BE-FRIEND] 好友模块
-- [ ] BE-FRIEND-00：创建 Friendship DTO 类（FriendshipOutput / FriendshipCreateInput）
-- [ ] BE-FRIEND-01：创建 Friendship 实体（含联合唯一约束）
-- [ ] BE-FRIEND-02：创建 Friendship 数据库迁移
-- [ ] BE-FRIEND-03：实现 POST /api/friendships（含邮箱验证门控 + 20/day 限制）
-- [ ] BE-FRIEND-04：实现 GET /api/friendships（ACCEPTED 列表）
-- [ ] BE-FRIEND-05：实现 GET /api/friendships/requests（PENDING 列表）
-- [ ] BE-FRIEND-06：实现 PATCH /api/friendships/{id}/accept
-- [ ] BE-FRIEND-07：实现 DELETE /api/friendships/{id}（含 CardShare 级联删除逻辑）
-- [ ] BE-FRIEND-08：编写好友模块集成测试（含级联删除测试）
+- [x] BE-FRIEND-00：创建 Friendship DTO 类（FriendshipOutput / FriendshipCreateInput）
+- [x] BE-FRIEND-01：创建 Friendship 实体（含联合唯一约束）
+- [x] BE-FRIEND-02：创建 Friendship 数据库迁移
+- [x] BE-FRIEND-03：实现 POST /api/friendships（含邮箱验证门控 + 20/day 限制）
+- [x] BE-FRIEND-04：实现 GET /api/friendships（ACCEPTED 列表）
+- [x] BE-FRIEND-05：实现 GET /api/friendships/requests（PENDING 列表）
+- [x] BE-FRIEND-06：实现 PATCH /api/friendships/{id}/accept
+- [x] BE-FRIEND-07：实现 DELETE /api/friendships/{id}（含 CardShare 级联删除逻辑）
+- [x] BE-FRIEND-08：编写好友模块集成测试（含级联删除测试）
 
 #### [BE-SHARE] 共享模块
-- [ ] BE-SHARE-00：创建 CardShare DTO 类（CardShareOutput / CardShareCreateInput / CardShareUpdateInput）
-- [ ] BE-SHARE-01：创建 CardShare 实体（含联合唯一约束）
-- [ ] BE-SHARE-02：创建 CardShare 数据库迁移
-- [ ] BE-SHARE-03：创建 CardShareVoter
-- [ ] BE-SHARE-04：实现 POST /api/cards/{id}/shares（含好友前置验证）
-- [ ] BE-SHARE-05：实现 GET /api/cards/{id}/shares（Owner only）
-- [ ] BE-SHARE-06：实现 PATCH /api/card-shares/{id}（Viewer 设置 viewerNickname）
-- [ ] BE-SHARE-07：实现 DELETE /api/card-shares/{id}（Owner 移除 或 Viewer 退出）
-- [ ] BE-SHARE-08：编写共享模块集成测试
+- [x] BE-SHARE-00：创建 CardShare DTO 类（CardShareOutput / CardShareCreateInput / CardShareUpdateInput）
+- [x] BE-SHARE-01：创建 CardShare 实体（含联合唯一约束）
+- [x] BE-SHARE-02：创建 CardShare 数据库迁移
+- [x] BE-SHARE-03：创建 CardShareVoter
+- [x] BE-SHARE-04：实现 POST /api/cards/{id}/shares（含好友前置验证）
+- [x] BE-SHARE-05：实现 GET /api/cards/{id}/shares（Owner only）
+- [x] BE-SHARE-06：实现 PATCH /api/card-shares/{id}（Viewer 设置 viewerNickname）
+- [x] BE-SHARE-07：实现 DELETE /api/card-shares/{id}（Owner 移除 或 Viewer 退出）
+- [x] BE-SHARE-08：编写共享模块集成测试
 
 #### [BE-INFRA] 基础设施
 - [x] BE-INFRA-01：Docker Compose 配置（PostgreSQL dev + test 两个数据库）
 - [x] BE-INFRA-02：配置测试数据库（DAMA 事务隔离，每次测试自动回滚）
-- [ ] BE-INFRA-03：配置 symfony/rate-limiter
+- [x] BE-INFRA-03：配置 symfony/rate-limiter
 - [x] BE-INFRA-04：配置 UUID 主键（Doctrine UuidType）
 - [x] BE-INFRA-05：配置 Doctrine 软删除过滤器（deletedAt is null）
 
@@ -82,21 +82,21 @@
 
 **🔴 必修 — 影响数据一致性**
 
-- [ ] BE-BUGFIX-01：FriendDeleteProcessor — 解除好友删除 CardShare 时同步写入 CardDeletion 记录，供 Viewer 增量同步感知撤销（`src/State/Processor/FriendDeleteProcessor.php:50-57`）
-- [ ] BE-BUGFIX-02：CardShare 实体加 `updatedAt` 字段 + migration + 更新 `findUpdatedSharesSince` 条件为 `cs.updatedAt > :since`，否则 viewerNickname 修改永远不进增量同步（`src/Entity/CardShare.php`，`src/Repository/CardShareRepository.php:73`）
-- [ ] BE-BUGFIX-03：Friendship 双向唯一约束 — 在 migration 中添加 PostgreSQL 表达式索引 `UNIQUE(LEAST(requester_id::text,addressee_id::text), GREATEST(...))` 防止竞态条件产生 (A→B)+(B→A) 双记录（`src/Entity/Friendship.php:17`）
+- [x] BE-BUGFIX-01：FriendDeleteProcessor — 解除好友删除 CardShare 时同步写入 CardDeletion 记录，供 Viewer 增量同步感知撤销（`src/State/Processor/FriendDeleteProcessor.php:50-57`）
+- [x] BE-BUGFIX-02：CardShare 实体加 `updatedAt` 字段 + migration + 更新 `findUpdatedSharesSince` 条件为 `cs.updatedAt > :since`，否则 viewerNickname 修改永远不进增量同步（`src/Entity/CardShare.php`，`src/Repository/CardShareRepository.php:73`）
+- [x] BE-BUGFIX-03：Friendship 双向唯一约束 — 在 migration 中添加 PostgreSQL 表达式索引 `UNIQUE(LEAST(requester_id::text,addressee_id::text), GREATEST(...))` 防止竞态条件产生 (A→B)+(B→A) 双记录（`src/Entity/Friendship.php:17`）
 
 **🟡 应修 — 边界 Case / 潜在 500**
 
-- [ ] BE-BUGFIX-04：security.yaml firewall `auth_public` pattern 补充 `resend-verification`，现状靠 LexikJWT pass-through 侥幸放行，应显式配置（`config/packages/security.yaml:25`）
-- [ ] BE-BUGFIX-05：UserRegisterProcessor — persist 前预检 email / userName 重复，抛 `UnprocessableEntityHttpException`（422），现状会触发 DB constraint 返回 500（`src/State/Processor/UserRegisterProcessor.php:48`）
-- [ ] BE-BUGFIX-06：UserUpdateProcessor — UUID 相等判断改用 `->equals()` 而非 `!==`（对象引用比较）（`src/State/Processor/UserUpdateProcessor.php:50`）
-- [ ] BE-BUGFIX-07：DeleteAccountProcessor — 提取 `CardShareRepository::deleteByOwner(User)` 批量删除，消除按卡片循环查询的 N+1（`src/State/Processor/DeleteAccountProcessor.php:39-43`）
+- [x] BE-BUGFIX-04：security.yaml firewall `auth_public` pattern 补充 `resend-verification`，现状靠 LexikJWT pass-through 侥幸放行，应显式配置（`config/packages/security.yaml:25`）
+- [x] BE-BUGFIX-05：UserRegisterProcessor — persist 前预检 email / userName 重复，抛 `UnprocessableEntityHttpException`（422），现状会触发 DB constraint 返回 500（`src/State/Processor/UserRegisterProcessor.php:48`）
+- [x] BE-BUGFIX-06：UserUpdateProcessor — UUID 相等判断改用 `->equals()` 而非 `!==`（对象引用比较）（`src/State/Processor/UserUpdateProcessor.php:50`）
+- [x] BE-BUGFIX-07：DeleteAccountProcessor — 提取 `CardShareRepository::deleteByOwner(User)` 批量删除，消除按卡片循环查询的 N+1（`src/State/Processor/DeleteAccountProcessor.php:39-43`）
 
 **🔵 建议 — 防御性设计**
 
-- [ ] BE-BUGFIX-08：CardRepository `findActiveByOwner` / `countActiveByOwner` — 显式加 `deletedAt IS NULL` 条件，不依赖全局 Filter 隐式过滤，方法名与实现语义对齐（`src/Repository/CardRepository.php:23-31`）
-- [ ] BE-BUGFIX-09：Card.owner FK 改为 `onDelete: 'CASCADE'`，与架构规格 ER 图一致（现状为 `RESTRICT`）（`src/Entity/Card.php:35`）
+- [x] BE-BUGFIX-08：CardRepository `findActiveByOwner` / `countActiveByOwner` — 显式加 `deletedAt IS NULL` 条件，不依赖全局 Filter 隐式过滤，方法名与实现语义对齐（`src/Repository/CardRepository.php:23-31`）
+- [x] BE-BUGFIX-09：Card.owner FK 改为 `onDelete: 'CASCADE'`，与架构规格 ER 图一致（现状为 `RESTRICT`）（`src/Entity/Card.php:35`）
 - [ ] BE-BUGFIX-10：Phase 2 — 添加 Symfony Scheduler 定期清理 90 天前 `CardDeletion` 记录，防止表无限增长
 
 ### 前端
@@ -121,20 +121,20 @@
 
 #### [FE-AUTH] 认证界面（后端 BE-AUTH 完成后）
 
-- [ ] FE-AUTH-01：登录页（React Hook Form + `LoginSchema` + 调用 `auth.ts` endpoint + 写 Zustand + 写 SecureStore RefreshToken）
-- [ ] FE-AUTH-02：注册页（React Hook Form + `RegisterSchema` + GDPR 同意勾选）
-- [ ] FE-AUTH-03：邮箱验证等待页（提示文案 + 重发验证邮件按钮）
-- [ ] FE-AUTH-04：`EmailVerificationBanner` 组件（已登录但 `emailVerifiedAt` 为 null 时顶部显示）
-- [ ] FE-AUTH-05：登出功能（`POST /api/auth/logout` + `authStore.clear()` + 清 SecureStore）
-- [ ] FE-AUTH-06：App 启动会话恢复（读 SecureStore RefreshToken → `POST /refresh` → 写 Zustand user + accessToken）
-- [ ] FE-AUTH-07：**测试**：Axios 拦截器（token 注入 / 401 触发刷新 / 并发 401 只发一次 refresh）
+- [x] FE-AUTH-01：登录页（React Hook Form + `LoginSchema` + 调用 `auth.ts` endpoint + 写 Zustand + 写 SecureStore RefreshToken）
+- [x] FE-AUTH-02：注册页（React Hook Form + `RegisterSchema` + GDPR 同意勾选）
+- [x] FE-AUTH-03：邮箱验证等待页（提示文案 + 重发验证邮件按钮）
+- [x] FE-AUTH-04：`EmailVerificationBanner` 组件（已登录但 `emailVerifiedAt` 为 null 时顶部显示）
+- [x] FE-AUTH-05：登出功能（`POST /api/auth/logout` + `authStore.clear()` + 清 SecureStore）
+- [x] FE-AUTH-06：App 启动会话恢复（读 SecureStore RefreshToken → `POST /refresh` → 写 Zustand user + accessToken）
+- [x] FE-AUTH-07：**测试**：Axios 拦截器（token 注入 / 401 触发刷新 / 并发 401 只发一次 refresh）
 
 #### [FE-USER] 用户设置界面（后端 BE-USER 完成后）
 
-- [ ] FE-USER-01：个人信息页（展示 `userName` / `email`）
-- [ ] FE-USER-02：修改 userName（React Hook Form + 422 重名错误提示）
-- [ ] FE-USER-03：修改密码（当前密码验证 + `ChangePasswordSchema` Zod 规则）
-- [ ] FE-USER-04：账户注销确认流程（二次确认弹窗 + GDPR 数据清除说明）
+- [x] FE-USER-01：个人信息页（展示 `userName` / `email`）
+- [x] FE-USER-02：修改 userName（React Hook Form + 422 重名错误提示）
+- [x] FE-USER-03：修改密码（当前密码验证 + `ChangePasswordSchema` Zod 规则）
+- [x] FE-USER-04：账户注销确认流程（二次确认弹窗 + GDPR 数据清除说明）
 
 #### [FE-CARD] 卡片模块（后端 BE-CARD 完成后）
 

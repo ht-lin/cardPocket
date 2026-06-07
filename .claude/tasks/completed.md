@@ -96,10 +96,10 @@
 
 实现：`UserSearchOutput.php`、`UserSearchProvider.php`
 
-### BE-USER-04：DELETE /api/users/me（3 个测试 + 1 个级联）
+### BE-USER-04：DELETE /api/users/me（9 个测试）
 - [x] `testDeleteAccountReturns204`、`testDeleteAccountFailsWithoutAuth`、`testDeletedUserCannotLogin`、`testDeleteAccountCascadesCards`
-- [ ] `testDeleteAccountCascadesCardShares`（⏸️ 推迟到 BE-SHARE）
-- [ ] `testDeleteAccountCascadesFriendships`（⏸️ 推迟到 BE-FRIEND）
+- [x] `testDeleteAccountCascadesCardShares`（在 BE-SHARE 阶段实现）、`testDeleteAccountCascadesFriendships`（在 BE-SHARE 阶段实现）
+- [x] `testDeleteAccountAnonymizesUserPersonalData`、`testDeleteAccountAnonymizesCardContent`、`testDeleteAccountClearsCardDeletionRecords`（在 BE-GDPR 阶段实现）
 
 实现：`DeleteAccountProcessor.php`
 
@@ -186,6 +186,35 @@
 | `src/Repository/CardShareRepository.php` | 新增 `findByCardAndViewer()` |
 | `src/Repository/FriendshipRepository.php` | 新增 `findAllInvolvingUser()` |
 | `src/State/Processor/DeleteAccountProcessor.php` | 补充删除账号时级联清理 CardShare + Friendship |
+
+---
+
+## ✅ GDPR 合规修复 [BE-GDPR]
+
+### BE-GDPR-01：账户删除匿名化（3 个测试）
+- [x] `testDeleteAccountAnonymizesUserPersonalData` — email/userName/password 替换为占位符
+- [x] `testDeleteAccountAnonymizesCardContent` — name/barcodeContent 清空
+- [x] `testDeleteAccountClearsCardDeletionRecords` — CardDeletion 审计行物理删除
+
+### BE-GDPR-02：IP 地址保留策略文档化
+- [x] `rate_limiter.yaml` 补充注释：sliding_window TTL 与窗口时长一致，IP 数据自动过期
+
+### BE-GDPR-03：HTTPS 强制（生产环境）
+- [x] `framework.yaml` 添加 `trusted_proxies`（prod）确保 X-Forwarded-Proto 受信
+- [x] `HstsHeaderSubscriber.php` 新建（prod-only），所有响应注入 HSTS 头
+
+### 实现文件
+
+| 文件 | 说明 |
+|------|------|
+| `src/State/Processor/DeleteAccountProcessor.php` | 注入 CardDeletionRepository + User/Card 匿名化 |
+| `src/Repository/CardDeletionRepository.php` | 新增 `deleteByUserId(string $userId): void` |
+| `src/EventSubscriber/HstsHeaderSubscriber.php` | prod-only HSTS 响应头 |
+| `src/Factory/CardDeletionFactory.php` | Foundry 工厂（测试用） |
+| `tests/Integration/User/DeleteAccountTest.php` | 追加 3 个 GDPR 测试 |
+| `config/packages/framework.yaml` | prod trusted_proxies 配置 |
+| `config/packages/rate_limiter.yaml` | TTL 说明注释 |
+| `config/services.yaml` | when@prod 注册 HstsHeaderSubscriber |
 
 ---
 

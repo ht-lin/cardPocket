@@ -132,65 +132,139 @@ class CardStateProvider implements ProviderInterface
 
 - `strict: true`（tsconfig.json）
 - 不用 `any`；用 `unknown` + 类型守卫代替
-- API 响应类型在 `src/types/api.ts` 中统一定义
+- 类型从 Zod schema 派生（`z.infer<typeof Schema>`），不手写重复类型定义
 
 ### 文件组织
 
-- 页面（Screen）放在 `src/app/` 下，使用 Expo Router 约定
-- 复用组件放在 `src/components/`
-- 业务逻辑 Hook 放在 `src/hooks/`，命名 `use{Feature}.ts`
-- API 调用集中在 `src/services/api.ts`，不在组件里直接 fetch
+```
+app/                  # Expo Router 路由文件（页面层，只做布局和调用 hooks）
+src/components/       # 复用 UI 组件
+src/hooks/            # 业务逻辑 Hook（use{Feature}.ts）
+src/lib/api/client.ts # Axios 实例，不在其他地方 import axios
+src/lib/api/endpoints/ # 每个资源一个文件（cards.ts / auth.ts / ...）
+src/store/            # Zustand stores
+src/schemas/          # Zod schemas
+src/theme.ts          # 设计 Token（唯一样式常量来源）
+```
+
+- 组件里不直接调用 `axios`，只调用 `src/lib/api/endpoints/` 里的函数
+- `queryFn` / `mutationFn` 只调用 endpoint 函数，不写请求逻辑
 
 ### 命名规范
 
-- 组件：`PascalCase`（`BarcodeDisplay.tsx`）
+- 组件文件：`PascalCase`（`BarcodeDisplay.tsx`）
 - Hook：`camelCase` + `use` 前缀（`useCards.ts`）
+- Zustand store：`camelCase` + `Store` 后缀（`authStore.ts`）
 - 常量：`SCREAMING_SNAKE_CASE`（`MAX_CARDS_PER_USER = 200`）
-- 类型/接口：`PascalCase`（`type CardDto = {...}`）
+- Zod schema：`PascalCase` + `Schema` 后缀（`LoginSchema`），派生类型去掉后缀（`type Login = z.infer<typeof LoginSchema>`）
 
 ### API 调用规范
 
-- 使用 React Query（TanStack Query）管理服务端状态
-- 每个资源有对应的 Query Key 常量
-
 ```typescript
-// 好
-const CARD_KEYS = {
+// src/lib/query/keys.ts — Query Key 常量
+export const CARD_KEYS = {
   all: ['cards'] as const,
   list: () => [...CARD_KEYS.all, 'list'] as const,
   detail: (id: string) => [...CARD_KEYS.all, 'detail', id] as const,
 };
 
-// API 层统一处理 Token 刷新
-async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
-  // 自动附加 Authorization header，自动 refresh 过期 token
+// src/lib/api/endpoints/cards.ts — endpoint 函数
+export async function fetchCards(): Promise<CardOwnerOutput[]> {
+  const { data } = await apiClient.get('/api/cards');
+  return CardOwnerOutputSchema.array().parse(data);
 }
+
+// src/hooks/useCards.ts — TanStack Query hook
+export function useCards() {
+  return useQuery({ queryKey: CARD_KEYS.list(), queryFn: fetchCards });
+}
+```
+
+### Zustand Store 规范
+
+```typescript
+// src/store/authStore.ts
+type AuthState = {
+  user: UserProfile | null;
+  accessToken: string | null;      // 内存只读，绝不持久化
+  setUser: (user: UserProfile) => void;
+  setAccessToken: (token: string | null) => void;
+  clear: () => void;
+};
+
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  accessToken: null,
+  setUser: (user) => set({ user }),
+  setAccessToken: (token) => set({ accessToken: token }),
+  clear: () => set({ user: null, accessToken: null }),
+}));
+
+// 在拦截器等非 Hook 环境读取状态（不需要订阅）：
+useAuthStore.getState().accessToken;
 ```
 
 ### 离线数据规范
 
-- 所有卡片数据存入 `expo-secure-store`，key 格式：`card_{uuid}`
-- 最后同步时间存为：`lastSyncTimestamp`（ISO 8601 字符串）
-- 进入前台（AppState change to 'active'）时触发同步，防抖 1 秒
+- **卡片缓存**：expo-sqlite（`cards` 表），key 为 UUID
+- **Refresh Token**：expo-secure-store，key 为固定字符串 `refresh_token`
+- **lastSyncTimestamp**：expo-secure-store，key 为 `last_sync_ts`（ISO 8601 字符串）
+- **Access Token**：Zustand 内存，App 重启后通过 `/refresh` 重新获取，**绝不写入任何持久化存储**
+- 进入前台（`AppState` change to `'active'`）时触发同步，防抖 1 秒
+
+### 条码渲染规范
+
+```tsx
+// BarcodeDisplay 组件内的分支逻辑
+import QRCode from 'react-native-qrcode-svg';
+import Barcode from '@kichiyaki/react-native-barcode-generator';
+
+// QR_CODE 用 react-native-qrcode-svg
+// 其余所有类型用 @kichiyaki/react-native-barcode-generator
+export function BarcodeDisplay({ content, type }: BarcodeDisplayProps) {
+  if (type === 'QR_CODE') {
+    return <QRCode value={content} size={200} />;
+  }
+  return <Barcode value={content} format={type} width={2} height={80} />;
+}
+```
 
 ### 组件规范
 
 - 优先使用函数组件 + Hook，不使用 class 组件
 - Props 类型定义紧跟组件定义上方
-- 条件渲染优先三元运算符（简短时），复杂逻辑提取到变量
+- 条件渲染短时用三元，复杂时提取变量
 
 ```tsx
 // 好
 type BarcodeDisplayProps = {
   content: string;
   type: BarcodeType;
-  onPress?: () => void;
 };
 
-export function BarcodeDisplay({ content, type, onPress }: BarcodeDisplayProps) {
-  return <Pressable onPress={onPress}>...</Pressable>;
+export function BarcodeDisplay({ content, type }: BarcodeDisplayProps) {
+  if (type === 'QR_CODE') { ... }
+  return <Barcode ... />;
 }
 ```
+
+### 表单规范
+
+```typescript
+// schemas/auth.ts
+export const LoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+export type Login = z.infer<typeof LoginSchema>;
+
+// 页面中
+const { control, handleSubmit } = useForm<Login>({
+  resolver: zodResolver(LoginSchema),
+});
+```
+
+- 对于单字段无验证需求的输入（如实时搜索框），可直接用 `useState`，不强制用 RHF
 
 ---
 
