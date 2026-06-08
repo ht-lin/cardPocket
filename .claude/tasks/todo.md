@@ -149,10 +149,10 @@
 
 #### [FE-OFFLINE] 离线支持（后端 BE-SYNC 完成后）
 
-- [ ] FE-OFFLINE-01：`useSync` hook（`AppState` 'active' → `GET /api/cards?updatedAfter=lastSync` → 写 SQLite，防抖 1s）
-- [ ] FE-OFFLINE-02：处理增量同步 `deleted` 列表（`db.deleteByIds(deleted)`）
-- [ ] FE-OFFLINE-03：离线状态 Banner（`@react-native-community/netinfo` 检测无网络时显示）
-- [ ] FE-OFFLINE-04：**测试**：`useSync` hook（updated 写入 SQLite / deleted 删除 / lastSyncTimestamp 更新）
+- [x] FE-OFFLINE-01：`useSync` hook（`AppState` 'active' → `GET /api/cards?updatedAfter=lastSync` → 写 SQLite，防抖 1s）
+- [x] FE-OFFLINE-02：处理增量同步 `deleted` 列表（`db.deleteByIds(deleted)`）
+- [x] FE-OFFLINE-03：离线状态 Banner（`@react-native-community/netinfo` 检测无网络时显示）
+- [x] FE-OFFLINE-04：**测试**：`useSync` hook（updated 写入 SQLite / deleted 删除 / lastSyncTimestamp 更新）
 
 #### [FE-FRIEND] 好友模块（后端 BE-FRIEND 完成后）
 

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { AppState } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { selectAllCards } from '@/lib/storage/db';
 import { queryKeys } from '@/lib/query/keys';
@@ -15,6 +16,21 @@ export function useCards() {
 
   useEffect(() => {
     sync.mutate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => sync.mutate(), 1000);
+      }
+    });
+    return () => {
+      sub.remove();
+      if (timer) clearTimeout(timer);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { Stack, Redirect } from 'expo-router';
 import { useAuthStore } from '@/store/authStore';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
+import { OfflineBanner } from '@/components/shared/OfflineBanner';
 
 export default function AppLayout() {
   const { accessToken, isRestoring } = useAuthStore((s) => ({
@@ -15,6 +16,7 @@ export default function AppLayout() {
   return (
     <View style={{ flex: 1 }}>
       <EmailVerificationBanner />
+      <OfflineBanner />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="cards/[id]" options={{ title: '卡片详情' }} />

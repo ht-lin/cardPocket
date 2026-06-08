@@ -19,13 +19,13 @@
 | FE-AUTH | ✅ | 登录/注册/会话恢复/Banner/登出，9 tests pass |
 | FE-USER | ✅ | 设置页 + 修改用户名/密码 + 注销 |
 | FE-CARD | ✅ | 9 tests pass |
-| FE-OFFLINE | ⏳ 待开始 | 依赖 FE-CARD + BE-SYNC ✅ |
+| FE-OFFLINE | ✅ | 7 tests pass |
 | FE-FRIEND | ⏳ 待开始 | 依赖 FE-INFRA + BE-FRIEND ✅ |
 | FE-SHARE | ⏳ 待开始 | 依赖 FE-CARD + FE-FRIEND |
 
 ---
 
-## 当前焦点：FE-OFFLINE / FE-FRIEND / FE-SHARE
+## 当前焦点：FE-FRIEND / FE-SHARE
 
 > 前端已于 2026-06-07 完整重置（旧代码/依赖/缓存全部清除），从新架构重建。
 
@@ -105,6 +105,18 @@
 
 ---
 
+## ✅ FE-OFFLINE 全部完成（2026-06-08）
+
+- [x] **FE-OFFLINE-01**：`useCards.ts` 新增 `AppState` 'active' 监听 + 1s 防抖，切换到前台自动触发增量同步
+- [x] **FE-OFFLINE-02**：`useSyncCards.ts` 已在 FE-CARD 阶段实现 deleted 列表处理（`deleteCardsByIds`）
+- [x] **FE-OFFLINE-03**：`src/components/shared/OfflineBanner.tsx`（`useNetInfo` 检测断网，`isConnected === false` 时显示红色 Banner），挂载至 `app/(app)/_layout.tsx`
+- [x] **FE-OFFLINE-04**：`__tests__/useSyncCards.test.tsx`（7 tests：updated 写入 / deleted 删除 / setLastSync 更新 / updatedAfter 参数传递 / epoch 回退 / 空数组边界）
+
+**修改文件**：`src/hooks/useCards.ts`（+AppState listener）、`app/(app)/_layout.tsx`（+OfflineBanner）
+**新增文件**：`src/components/shared/OfflineBanner.tsx`、`__tests__/useSyncCards.test.tsx`
+
+---
+
 ## Phase 1 完成标准
 
 - [x] 所有后端集成测试通过（144 tests, 1 skipped）
@@ -117,6 +129,6 @@
 - [x] 前端 FE-AUTH 完成（登录 / 注册 / 会话恢复）
 - [x] 前端 FE-USER 完成（个人信息 / 修改 / 注销）
 - [x] 前端 FE-CARD 完成（列表 / 添加 / 详情 / 扫码）
-- [ ] 前端 FE-OFFLINE 完成（离线缓存 + 增量同步）
+- [x] 前端 FE-OFFLINE 完成（离线缓存 + 增量同步）
 - [ ] 前端 FE-FRIEND 完成（好友管理）
 - [ ] 前端 FE-SHARE 完成（共享管理）
