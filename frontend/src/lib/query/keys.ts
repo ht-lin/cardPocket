@@ -3,6 +3,7 @@ export const queryKeys = {
   cards: {
     all: ['cards'] as const,
     detail: (id: string) => ['cards', id] as const,
+    shared: ['cards', 'shared'] as const,
   },
   friends: {
     all: ['friends'] as const,

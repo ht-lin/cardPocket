@@ -2,16 +2,17 @@ import { z } from 'zod';
 
 export const CardShareOutputSchema = z.object({
   id: z.string(),
-  cardId: z.string(),
-  viewerId: z.string(),
+  viewer: z.object({
+    id: z.string(),
+    userName: z.string(),
+  }),
   viewerNickname: z.string().nullable(),
-  sharedAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string(),
 });
 export type CardShareOutput = z.infer<typeof CardShareOutputSchema>;
 
 export const CardShareCreateInputSchema = z.object({
-  viewerEmail: z.string().email(),
+  viewerId: z.string(),
 });
 export type CardShareCreateInput = z.infer<typeof CardShareCreateInputSchema>;
 

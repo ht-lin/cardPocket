@@ -12,6 +12,7 @@ final readonly class CardViewerOutput
         public string $barcodeType,
         public string $barcodeContent,
         public bool $isOwner,
+        public string $shareId,
         public ?string $viewerNickname,
         public string $createdAt,
         public string $updatedAt,

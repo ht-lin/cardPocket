@@ -163,11 +163,11 @@
 
 #### [FE-SHARE] 共享模块（后端 BE-SHARE 完成后）
 
-- [ ] FE-SHARE-01：卡片共享管理页（Owner 视图：成员列表 + 添加 + 移除）
-- [ ] FE-SHARE-02：从好友列表选择共享对象（`POST /api/cards/{id}/shares`）
-- [ ] FE-SHARE-03：共享给我的卡片列表页（Viewer 视图）
-- [ ] FE-SHARE-04：Viewer 设置私有昵称（内联编辑 + `PATCH /api/card-shares/{id}`）
-- [ ] FE-SHARE-05：Viewer 退出共享（确认弹窗 + `DELETE /api/card-shares/{id}`）
+- [x] FE-SHARE-01：卡片共享管理页（Owner 视图：成员列表 + 添加 + 移除）
+- [x] FE-SHARE-02：从好友列表选择共享对象（`POST /api/cards/{id}/shares`）
+- [x] FE-SHARE-03：共享给我的卡片列表页（Viewer 视图）
+- [x] FE-SHARE-04：Viewer 设置私有昵称（内联编辑 + `PATCH /api/card-shares/{id}`）
+- [x] FE-SHARE-05：Viewer 退出共享（确认弹窗 + `DELETE /api/card-shares/{id}`）
 
 ---
 

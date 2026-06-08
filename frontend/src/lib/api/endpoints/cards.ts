@@ -1,6 +1,7 @@
 import { client } from '@/lib/api/client';
 import type {
   CardOwnerOutput,
+  CardViewerOutput,
   CardCreateInput,
   CardUpdateInput,
 } from '@/schemas/card';
@@ -10,7 +11,7 @@ export type CardListParams = {
 };
 
 export type CardSyncResponse = {
-  updated: CardOwnerOutput[];
+  updated: (CardOwnerOutput | CardViewerOutput)[];
   deleted: string[];
 };
 

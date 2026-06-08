@@ -18,18 +18,32 @@ export const CardOwnerOutputSchema = z.object({
   name: z.string(),
   barcodeType: BarcodeTypeSchema,
   barcodeContent: z.string(),
-  color: z.string().nullable(),
-  gradient: z.unknown().nullable(),
-  icon: z.string().nullable(),
-  expiresAt: z.string().nullable(),
-  archivedAt: z.string().nullable(),
-  createdAt: z.string(),
+  isOwner: z.literal(true),
+  color: z.string().nullable().optional(),
+  gradient: z.unknown().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  expiresAt: z.string().nullable().optional(),
+  archivedAt: z.string().nullable().optional(),
+  createdAt: z.string().optional(),
   updatedAt: z.string(),
 });
 export type CardOwnerOutput = z.infer<typeof CardOwnerOutputSchema>;
 
-export const CardViewerOutputSchema = CardOwnerOutputSchema.extend({
+export const CardViewerOutputSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  barcodeType: BarcodeTypeSchema,
+  barcodeContent: z.string(),
+  isOwner: z.literal(false),
+  shareId: z.string(),
   viewerNickname: z.string().nullable(),
+  color: z.string().nullable().optional(),
+  gradient: z.unknown().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  expiresAt: z.string().nullable().optional(),
+  archivedAt: z.string().nullable().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string(),
 });
 export type CardViewerOutput = z.infer<typeof CardViewerOutputSchema>;
 

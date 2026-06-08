@@ -31,6 +31,7 @@ jest.mock('@/lib/storage/secureStore', () => ({
 
 jest.mock('@/lib/storage/cardMapper', () => ({
   toCardRow: jest.fn((card: unknown) => card),
+  toViewerCardRow: jest.fn((card: unknown) => card),
 }));
 
 // ---------------------------------------------------------------------------
@@ -61,6 +62,7 @@ const CARD_1 = {
   name: 'Test Card',
   barcodeType: 'QR_CODE',
   barcodeContent: '1234',
+  isOwner: true as const,
   color: null,
   gradient: null,
   icon: null,

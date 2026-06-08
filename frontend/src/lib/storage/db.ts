@@ -13,6 +13,7 @@ export type CardRow = {
   created_at: string;
   updated_at: string;
   is_shared: number;
+  share_id: string | null;
   viewer_nickname: string | null;
 };
 
@@ -41,9 +42,15 @@ export async function initDb(): Promise<void> {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       is_shared INTEGER NOT NULL DEFAULT 0,
+      share_id TEXT,
       viewer_nickname TEXT
     );
   `);
+  try {
+    await database.execAsync('ALTER TABLE cards ADD COLUMN share_id TEXT;');
+  } catch {
+    // column already exists
+  }
 }
 
 export async function insertOrReplaceCards(cards: CardRow[]): Promise<void> {
@@ -54,8 +61,8 @@ export async function insertOrReplaceCards(cards: CardRow[]): Promise<void> {
       await database.runAsync(
         `INSERT OR REPLACE INTO cards
           (id, name, barcode_type, barcode_content, color, gradient, icon,
-           expires_at, archived_at, created_at, updated_at, is_shared, viewer_nickname)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           expires_at, archived_at, created_at, updated_at, is_shared, share_id, viewer_nickname)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         card.id,
         card.name,
         card.barcode_type,
@@ -68,6 +75,7 @@ export async function insertOrReplaceCards(cards: CardRow[]): Promise<void> {
         card.created_at,
         card.updated_at,
         card.is_shared,
+        card.share_id,
         card.viewer_nickname,
       );
     }
@@ -89,4 +97,23 @@ export async function deleteCardsByIds(ids: string[]): Promise<void> {
 export async function selectCardById(id: string): Promise<CardRow | null> {
   const database = await getDb();
   return database.getFirstAsync<CardRow>('SELECT * FROM cards WHERE id = ?', id);
+}
+
+export async function selectSharedCards(): Promise<CardRow[]> {
+  const database = await getDb();
+  return database.getAllAsync<CardRow>(
+    'SELECT * FROM cards WHERE is_shared = 1 ORDER BY created_at DESC',
+  );
+}
+
+export async function updateCardNicknameByShareId(
+  shareId: string,
+  nickname: string | null,
+): Promise<void> {
+  const database = await getDb();
+  await database.runAsync(
+    'UPDATE cards SET viewer_nickname = ? WHERE share_id = ?',
+    nickname,
+    shareId,
+  );
 }

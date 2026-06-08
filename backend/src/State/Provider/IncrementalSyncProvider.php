@@ -45,6 +45,7 @@ final class IncrementalSyncProvider
                 barcodeType: $card->getBarcodeType()->value,
                 barcodeContent: $card->getBarcodeContent(),
                 isOwner: false,
+                shareId: (string) $cardShare->getId(),
                 viewerNickname: $cardShare->getViewerNickname(),
                 createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
                 updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),

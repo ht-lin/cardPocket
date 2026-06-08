@@ -21,11 +21,11 @@
 | FE-CARD | ✅ | 9 tests pass |
 | FE-OFFLINE | ✅ | 7 tests pass |
 | FE-FRIEND | ✅ | 10 tests pass |
-| FE-SHARE | ⏳ 待开始 | 依赖 FE-CARD + FE-FRIEND |
+| FE-SHARE | ✅ | 11 tests pass |
 
 ---
 
-## 当前焦点：FE-SHARE
+## ✅ FE-SHARE 全部完成（2026-06-08）
 
 > 前端已于 2026-06-07 完整重置（旧代码/依赖/缓存全部清除），从新架构重建。
 
@@ -138,6 +138,32 @@
 
 ---
 
+## ✅ FE-SHARE 全部完成（2026-06-08）
+
+- [x] **FE-SHARE-01**：`cards/[id].tsx` Owner 视角新增"共享管理"区块（`useGetShares` 加载成员列表 + `ShareMemberItem` 展示 + 移除按钮）
+- [x] **FE-SHARE-02**：`FriendPickerModal`（好友列表选择 + 过滤已共享好友 + `useCreateShare` Optimistic 乐观更新）
+- [x] **FE-SHARE-03**：`app/(app)/(tabs)/shared.tsx` Viewer 共享卡片列表（`useSharedCards` 读 SQLite `is_shared=1` + 点击跳详情）
+- [x] **FE-SHARE-04**：`cards/[id].tsx` Viewer 视角"设置昵称"Modal（RHF + `useUpdateShareNickname` → PATCH + 写 SQLite）
+- [x] **FE-SHARE-05**：`cards/[id].tsx` Viewer 视角"退出共享"Alert 确认（`useViewerLeaveShare` → DELETE + `deleteCardsByIds` + `router.back()`）
+
+**后端补丁**（同步修复）：`CardViewerOutput.php` + `CardListProvider.php` + `IncrementalSyncProvider.php` 加 `shareId` 字段（Viewer 操作 PATCH/DELETE 所需）
+
+**Schema 修复**：
+- `cardShare.ts`：`CardShareCreateInput` 从 `viewerEmail` 改为 `viewerId`；`CardShareOutput` 改为嵌套 `viewer: {id, userName}`
+- `card.ts`：`CardOwnerOutput`（+`isOwner: true`）/ `CardViewerOutput`（+`isOwner: false, shareId`）分离
+- `endpoints/cards.ts`：`CardSyncResponse.updated` 改为联合类型
+
+**数据层**：`db.ts`（+`share_id` 列 + 迁移 + `selectSharedCards()` + `updateCardNicknameByShareId()`）、`cardMapper.ts`（+`toViewerCardRow()`）、`useSyncCards.ts`（按 `isOwner` 路由 mapper）
+
+**新增文件**：
+- `src/hooks/`：`useGetShares.ts`、`useCreateShare.ts`、`useOwnerRemoveShare.ts`、`useViewerLeaveShare.ts`、`useUpdateShareNickname.ts`、`useSharedCards.ts`
+- `src/components/shared/`：`ShareMemberItem.tsx`、`FriendPickerModal.tsx`
+- `__tests__/`：`useGetShares.test.tsx`、`useCreateShare.test.tsx`、`useOwnerRemoveShare.test.tsx`、`useViewerLeaveShare.test.tsx`、`useUpdateShareNickname.test.tsx`
+
+**测试**：11 新测试全部通过，全量 46/46 通过
+
+---
+
 ## Phase 1 完成标准
 
 - [x] 所有后端集成测试通过（144 tests, 1 skipped）
@@ -152,4 +178,4 @@
 - [x] 前端 FE-CARD 完成（列表 / 添加 / 详情 / 扫码）
 - [x] 前端 FE-OFFLINE 完成（离线缓存 + 增量同步）
 - [x] 前端 FE-FRIEND 完成（好友管理）
-- [ ] 前端 FE-SHARE 完成（共享管理）
+- [x] 前端 FE-SHARE 完成（共享管理）

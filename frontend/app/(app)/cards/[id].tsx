@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useLocalSearchParams, useFocusEffect, router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,7 +22,12 @@ import { selectCardById } from '@/lib/storage/db';
 import { queryKeys } from '@/lib/query/keys';
 import { useUpdateCard } from '@/hooks/useUpdateCard';
 import { useDeleteCard } from '@/hooks/useDeleteCard';
+import { useGetShares } from '@/hooks/useGetShares';
+import { useUpdateShareNickname } from '@/hooks/useUpdateShareNickname';
+import { useViewerLeaveShare } from '@/hooks/useViewerLeaveShare';
 import { BarcodeDisplay } from '@/components/cards/BarcodeDisplay';
+import { ShareMemberItem } from '@/components/shared/ShareMemberItem';
+import { FriendPickerModal } from '@/components/shared/FriendPickerModal';
 import type { BarcodeType } from '@/schemas/card';
 import { colors, spacing, fontSize, radius } from '@/theme';
 
@@ -31,9 +36,16 @@ const EditNameSchema = z.object({
 });
 type EditNameInput = z.infer<typeof EditNameSchema>;
 
+const NicknameSchema = z.object({
+  viewerNickname: z.string().max(100, '昵称最多 100 字'),
+});
+type NicknameInput = z.infer<typeof NicknameSchema>;
+
 export default function CardDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [editVisible, setEditVisible] = useState(false);
+  const [nicknameVisible, setNicknameVisible] = useState(false);
+  const [friendPickerVisible, setFriendPickerVisible] = useState(false);
 
   const { data: card, isLoading } = useQuery({
     queryKey: queryKeys.cards.detail(id),
@@ -41,13 +53,28 @@ export default function CardDetailScreen() {
     staleTime: Infinity,
   });
 
+  const isOwner = card ? card.is_shared === 0 : true;
+
   const updateCard = useUpdateCard();
   const deleteCard = useDeleteCard();
+  const updateNickname = useUpdateShareNickname();
+  const leaveShare = useViewerLeaveShare();
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<EditNameInput>({
-    resolver: zodResolver(EditNameSchema),
-    defaultValues: { name: card?.name ?? '' },
-  });
+  const { data: shares = [], isLoading: sharesLoading } = useGetShares(
+    isOwner && !!card ? card.id : '',
+  );
+
+  const { control: nameControl, handleSubmit: handleNameSubmit, reset: resetName, formState: { errors: nameErrors } } =
+    useForm<EditNameInput>({
+      resolver: zodResolver(EditNameSchema),
+      defaultValues: { name: card?.name ?? '' },
+    });
+
+  const { control: nickControl, handleSubmit: handleNickSubmit, reset: resetNick, formState: { errors: nickErrors } } =
+    useForm<NicknameInput>({
+      resolver: zodResolver(NicknameSchema),
+      defaultValues: { viewerNickname: card?.viewer_nickname ?? '' },
+    });
 
   useFocusEffect(
     useCallback(() => {
@@ -65,15 +92,29 @@ export default function CardDetailScreen() {
   );
 
   const openEdit = () => {
-    reset({ name: card?.name ?? '' });
+    resetName({ name: card?.name ?? '' });
     setEditVisible(true);
   };
 
-  const onSubmitEdit = handleSubmit((data) => {
+  const onSubmitEdit = handleNameSubmit((data) => {
     if (!card) return;
     updateCard.mutate(
       { id: card.id, data: { name: data.name } },
       { onSuccess: () => setEditVisible(false) },
+    );
+  });
+
+  const openNickname = () => {
+    resetNick({ viewerNickname: card?.viewer_nickname ?? '' });
+    setNicknameVisible(true);
+  };
+
+  const onSubmitNickname = handleNickSubmit((data) => {
+    if (!card?.share_id) return;
+    const nickname = data.viewerNickname.trim() || null;
+    updateNickname.mutate(
+      { shareId: card.share_id, viewerNickname: nickname },
+      { onSuccess: () => setNicknameVisible(false) },
     );
   });
 
@@ -84,6 +125,23 @@ export default function CardDetailScreen() {
         text: '删除',
         style: 'destructive',
         onPress: () => deleteCard.mutate(id),
+      },
+    ]);
+  };
+
+  const confirmLeave = () => {
+    Alert.alert('退出共享', '确认退出该卡片的共享？退出后将无法查看此卡片。', [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '退出',
+        style: 'destructive',
+        onPress: () => {
+          if (!card?.share_id) return;
+          leaveShare.mutate(
+            { shareId: card.share_id, cardId: card.id },
+            { onSuccess: () => router.back() },
+          );
+        },
       },
     ]);
   };
@@ -104,10 +162,14 @@ export default function CardDetailScreen() {
     );
   }
 
+  const existingViewerIds = shares.map((s) => s.viewer.id);
+
   return (
     <>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.name}>{card.name}</Text>
+        <Text style={styles.name}>
+          {!isOwner && card.viewer_nickname ? card.viewer_nickname : card.name}
+        </Text>
 
         <View style={styles.barcodeCard}>
           <BarcodeDisplay
@@ -118,19 +180,63 @@ export default function CardDetailScreen() {
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionBtn} onPress={openEdit} activeOpacity={0.7}>
-            <Text style={styles.actionBtnText}>编辑名称</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionBtn, styles.dangerBtn]}
-            onPress={confirmDelete}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.actionBtnText, styles.dangerText]}>删除卡片</Text>
-          </TouchableOpacity>
+          {isOwner ? (
+            <>
+              <TouchableOpacity style={styles.actionBtn} onPress={openEdit} activeOpacity={0.7}>
+                <Text style={styles.actionBtnText}>编辑名称</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.dangerBtn]}
+                onPress={confirmDelete}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.actionBtnText, styles.dangerText]}>删除卡片</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity style={styles.actionBtn} onPress={openNickname} activeOpacity={0.7}>
+                <Text style={styles.actionBtnText}>设置昵称</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.dangerBtn]}
+                onPress={confirmLeave}
+                disabled={leaveShare.isPending}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.actionBtnText, styles.dangerText]}>退出共享</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
+
+        {isOwner && (
+          <View style={styles.shareSection}>
+            <View style={styles.shareSectionHeader}>
+              <Text style={styles.shareSectionTitle}>共享成员</Text>
+              <TouchableOpacity
+                style={styles.addShareBtn}
+                onPress={() => setFriendPickerVisible(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.addShareText}>添加共享</Text>
+              </TouchableOpacity>
+            </View>
+
+            {sharesLoading ? (
+              <ActivityIndicator color={colors.primary} style={styles.sharesLoader} />
+            ) : shares.length === 0 ? (
+              <Text style={styles.emptyShares}>暂未共享给任何好友</Text>
+            ) : (
+              shares.map((share) => (
+                <ShareMemberItem key={share.id} share={share} cardId={card.id} />
+              ))
+            )}
+          </View>
+        )}
       </ScrollView>
 
+      {/* Owner: edit card name */}
       <Modal visible={editVisible} transparent animationType="slide" onRequestClose={() => setEditVisible(false)}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -140,11 +246,11 @@ export default function CardDetailScreen() {
             <Text style={styles.modalTitle}>编辑名称</Text>
 
             <Controller
-              control={control}
+              control={nameControl}
               name="name"
               render={({ field: { value, onChange, onBlur } }) => (
                 <TextInput
-                  style={[styles.input, errors.name && styles.inputError]}
+                  style={[styles.input, nameErrors.name && styles.inputError]}
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
@@ -155,7 +261,7 @@ export default function CardDetailScreen() {
                 />
               )}
             />
-            {errors.name && <Text style={styles.fieldError}>{errors.name.message}</Text>}
+            {nameErrors.name && <Text style={styles.fieldError}>{nameErrors.name.message}</Text>}
 
             <View style={styles.modalActions}>
               <TouchableOpacity
@@ -179,6 +285,68 @@ export default function CardDetailScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Viewer: set nickname */}
+      <Modal visible={nicknameVisible} transparent animationType="slide" onRequestClose={() => setNicknameVisible(false)}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>设置昵称</Text>
+
+            <Controller
+              control={nickControl}
+              name="viewerNickname"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <TextInput
+                  style={[styles.input, nickErrors.viewerNickname && styles.inputError]}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder="私有昵称（留空则使用原名）"
+                  autoFocus
+                  returnKeyType="done"
+                  onSubmitEditing={onSubmitNickname}
+                />
+              )}
+            />
+            {nickErrors.viewerNickname && (
+              <Text style={styles.fieldError}>{nickErrors.viewerNickname.message}</Text>
+            )}
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.cancelBtn]}
+                onPress={() => setNicknameVisible(false)}
+              >
+                <Text style={styles.cancelBtnText}>取消</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalBtn, styles.saveBtn]}
+                onPress={onSubmitNickname}
+                disabled={updateNickname.isPending}
+              >
+                {updateNickname.isPending ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.saveBtnText}>保存</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Owner: pick friend to share with */}
+      {isOwner && (
+        <FriendPickerModal
+          visible={friendPickerVisible}
+          cardId={card.id}
+          existingViewerIds={existingViewerIds}
+          onClose={() => setFriendPickerVisible(false)}
+        />
+      )}
     </>
   );
 }
@@ -239,6 +407,40 @@ const styles = StyleSheet.create({
   },
   dangerText: {
     color: colors.danger,
+  },
+  shareSection: {
+    marginTop: spacing.xl,
+  },
+  shareSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  shareSectionTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    color: colors.textMuted,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  addShareBtn: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  addShareText: {
+    fontSize: fontSize.sm,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  sharesLoader: {
+    marginTop: spacing.md,
+  },
+  emptyShares: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    textAlign: 'center',
+    paddingVertical: spacing.md,
   },
   modalOverlay: {
     flex: 1,
