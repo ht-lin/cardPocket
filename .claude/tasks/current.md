@@ -20,12 +20,12 @@
 | FE-USER | ✅ | 设置页 + 修改用户名/密码 + 注销 |
 | FE-CARD | ✅ | 9 tests pass |
 | FE-OFFLINE | ✅ | 7 tests pass |
-| FE-FRIEND | ⏳ 待开始 | 依赖 FE-INFRA + BE-FRIEND ✅ |
+| FE-FRIEND | ✅ | 10 tests pass |
 | FE-SHARE | ⏳ 待开始 | 依赖 FE-CARD + FE-FRIEND |
 
 ---
 
-## 当前焦点：FE-FRIEND / FE-SHARE
+## 当前焦点：FE-SHARE
 
 > 前端已于 2026-06-07 完整重置（旧代码/依赖/缓存全部清除），从新架构重建。
 
@@ -117,6 +117,27 @@
 
 ---
 
+## ✅ FE-FRIEND 全部完成（2026-06-08）
+
+- [x] **FE-FRIEND-01**：`UserSearchModal`（TextInput 防抖 300ms + `useSearchUsers` + FlatList 结果展示）
+- [x] **FE-FRIEND-02**：发送好友请求（`useSendFriendRequest` + 组件内 `pendingSentIds` Optimistic Update：点击立即置灰，失败回滚）
+- [x] **FE-FRIEND-03**：`FriendRequestItem`（接受/拒绝按钮，`useAcceptFriendRequest` / `useRemoveFriend`）
+- [x] **FE-FRIEND-04**：`FriendListItem`（解除好友按钮 + Alert 弹窗说明"将同时撤销所有共享"）
+
+**新增文件**：
+- `src/hooks/useFriendships.ts`、`src/hooks/useFriendRequests.ts`、`src/hooks/useSendFriendRequest.ts`、`src/hooks/useAcceptFriendRequest.ts`、`src/hooks/useRemoveFriend.ts`、`src/hooks/useSearchUsers.ts`
+- `src/components/friends/FriendListItem.tsx`、`src/components/friends/FriendRequestItem.tsx`、`src/components/friends/UserSearchModal.tsx`
+- `__tests__/useFriendships.test.tsx`、`__tests__/useFriendRequests.test.tsx`、`__tests__/useSendFriendRequest.test.tsx`、`__tests__/useAcceptFriendRequest.test.tsx`、`__tests__/useRemoveFriend.test.tsx`
+
+**修改文件**：`src/schemas/friend.ts`（`FriendshipCreateInput` 字段 `addresseeEmail` → `addresseeId`，修复 schema bug）、`src/lib/query/keys.ts`（+`users.search`）、`__tests__/mocks/handlers.ts`（+friend 相关常量和 handler）、`app/(app)/(tabs)/friends.tsx`（占位符 → 完整实现）
+
+**关键技术点**：
+- `FriendshipCreateInput` 原字段 `addresseeEmail` 与 API 规格不符，已修正为 `addresseeId`
+- Optimistic Update 使用组件内 `Set<string>` state，比操作 Query Cache 更简洁（搜索结果按 query 参数化，不适合直接 patch cache）
+- RNTL v14 `renderHook()` 需 `await`，同 `render()` 规则
+
+---
+
 ## Phase 1 完成标准
 
 - [x] 所有后端集成测试通过（144 tests, 1 skipped）
@@ -130,5 +151,5 @@
 - [x] 前端 FE-USER 完成（个人信息 / 修改 / 注销）
 - [x] 前端 FE-CARD 完成（列表 / 添加 / 详情 / 扫码）
 - [x] 前端 FE-OFFLINE 完成（离线缓存 + 增量同步）
-- [ ] 前端 FE-FRIEND 完成（好友管理）
+- [x] 前端 FE-FRIEND 完成（好友管理）
 - [ ] 前端 FE-SHARE 完成（共享管理）

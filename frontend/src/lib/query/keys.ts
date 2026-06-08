@@ -11,4 +11,7 @@ export const queryKeys = {
   shares: {
     card: (cardId: string) => ['shares', cardId] as const,
   },
+  users: {
+    search: (q: string) => ['users', 'search', q] as const,
+  },
 } as const;

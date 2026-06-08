@@ -156,10 +156,10 @@
 
 #### [FE-FRIEND] 好友模块（后端 BE-FRIEND 完成后）
 
-- [ ] FE-FRIEND-01：用户搜索页（输入 userName 或 email，防抖 300ms，`GET /api/users/search`）
-- [ ] FE-FRIEND-02：发送好友请求（搜索结果内操作 + Optimistic Update）
-- [ ] FE-FRIEND-03：好友请求列表页（接受 / 拒绝 PENDING 请求）
-- [ ] FE-FRIEND-04：好友列表页（含解除好友按钮 + 弹窗提示"将同时撤销所有共享"）
+- [x] FE-FRIEND-01：用户搜索页（输入 userName 或 email，防抖 300ms，`GET /api/users/search`）
+- [x] FE-FRIEND-02：发送好友请求（搜索结果内操作 + Optimistic Update）
+- [x] FE-FRIEND-03：好友请求列表页（接受 / 拒绝 PENDING 请求）
+- [x] FE-FRIEND-04：好友列表页（含解除好友按钮 + 弹窗提示"将同时撤销所有共享"）
 
 #### [FE-SHARE] 共享模块（后端 BE-SHARE 完成后）
 

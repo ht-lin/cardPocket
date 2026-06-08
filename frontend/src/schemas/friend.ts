@@ -16,6 +16,6 @@ export const FriendshipOutputSchema = z.object({
 export type FriendshipOutput = z.infer<typeof FriendshipOutputSchema>;
 
 export const FriendshipCreateInputSchema = z.object({
-  addresseeEmail: z.string().email(),
+  addresseeId: z.string(),
 });
 export type FriendshipCreateInput = z.infer<typeof FriendshipCreateInputSchema>;
