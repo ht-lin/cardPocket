@@ -9,6 +9,7 @@
 - **roadmap.md** — 开发路线图：Phase 1-4 计划、后端模块开发顺序
 - **architecture.md** — 系统架构：技术栈、前后端目录结构、数据模型 ER 图、认证流程、部署架构、测试架构
 - **decisions.md** — 架构决策记录（ADR-001~ADR-011）：关键设计决策与权衡
+- **flutter-spec.md** — Flutter 前端完整规格：技术栈、页面结构、导航、离线策略、认证流、设计系统、CI/CD
 
 ### 上下文（.claude/context/）
 
