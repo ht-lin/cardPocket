@@ -216,34 +216,3 @@
 | `config/packages/rate_limiter.yaml` | TTL 说明注释 |
 | `config/services.yaml` | when@prod 注册 HstsHeaderSubscriber |
 
----
-
-## ✅ 前端基础设施 [FE-INFRA]
-
-- FE-INFRA-01：Expo SDK 56 项目初始化，expo-doctor 21/21 ✅
-- FE-INFRA-02：TypeScript strict + `@/*` 路径别名
-- FE-INFRA-03：Expo Router 路由骨架（auth 组、tabs 组、认证守卫）
-- FE-INFRA-04：`apiFetch`（自动附 Bearer + 401 自动 refresh + 重试）
-- FE-INFRA-05：AuthContext（内存 AccessToken + SecureStore RefreshToken + bootstrap）
-- FE-INFRA-06：QueryClient（staleTime: 30s、retry: 1）
-- FE-INFRA-07：`src/storage/secureStore.ts`（类型安全封装）
-- FE-INFRA-08：`app.config.ts` 环境变量 + `src/types/api.ts` 占位
-
----
-
-## ✅ 认证界面 [FE-AUTH]
-
-- FE-AUTH-01：注册页（Zod schema + react-hook-form + 422 字段级回填）
-- FE-AUTH-02：邮箱验证提示页 + `ResendVerificationProcessor`（后端）
-- FE-AUTH-03：登录页（401/429/网络错误提示）
-- FE-AUTH-04/05：JWT Token 管理 + 自动刷新（与 FE-INFRA-04/05 集成）
-- FE-AUTH-06：`JWTCreatedSubscriber`（注入 `email_verified` claim）+ 未验证用户守卫页
-
----
-
-## ✅ 用户设置界面 [FE-USER]
-
-- FE-USER-01：个人信息页（GET /api/users/me）
-- FE-USER-02：修改 userName（422 重名回填）
-- FE-USER-03：修改密码（当前密码校验）
-- FE-USER-04：账户注销（二次确认 + clearTokens）

@@ -181,7 +181,7 @@ Token 刷新
 API 请求
   Authorization: Bearer <AccessToken>
   → Symfony JWT Authenticator 验证
-  → 如果过期 → 前端自动调用 /refresh → 重试原请求
+  → 如果过期 → 客户端自动调用 /refresh → 重试原请求
 ```
 
 ---

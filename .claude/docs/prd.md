@@ -108,7 +108,7 @@ GET /api/users/search 永远只返回 `id + userName`，即使搜索词是 email
 |------|------|
 | 性能 | 主要 API（GET /api/cards）P95 < 200ms（VPS 正常负载下） |
 | 离线 | 原生 App 无网络时必须能展示所有本地缓存的卡片条码 |
-| 安全 | 所有敏感数据走 HTTPS；原生本地缓存存 expo-secure-store；JWT Access Token 不持久化 |
+| 安全 | 所有敏感数据走 HTTPS；原生本地缓存使用硬件加密存储；JWT Access Token 不持久化 |
 | GDPR | 欧盟用户数据存储在欧盟节点；删除账户 24 小时内完成数据清除 |
 | 可用性 | 单 VPS 部署；无 SLA 承诺（个人项目），但应有基础监控和数据库备份 |
 
