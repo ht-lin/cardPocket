@@ -7,7 +7,7 @@
 ## 技术栈总览
 
 ```
-前端（Expo React Native）
+客户端（移动 App）
   ↕ HTTPS + JWT
 后端（Symfony 7 + API Platform 4）
   ↕
@@ -15,101 +15,11 @@ PostgreSQL（主数据库）
 Redis（速率限制专用，maxmemory-policy noeviction）
 
 Phase 2：Symfony Messenger Worker → Expo Push API → FCM/APNs
-Phase 3：Expo Web（PWA）+ Service Worker
 ```
 
 ---
 
-## 组件架构
-
-### 前端（Expo React Native）
-
-```
-frontend/
-├── app/                         # Expo Router（文件系统路由）
-│   ├── _layout.tsx              # Root layout：Providers 挂载（Query + 字体）
-│   ├── (auth)/                  # 未登录可访问
-│   │   ├── _layout.tsx
-│   │   ├── login.tsx
-│   │   ├── register.tsx
-│   │   └── verify-email.tsx
-│   └── (app)/                   # Auth Guard 保护的路由
-│       ├── _layout.tsx          # 检查 Zustand isAuthenticated → redirect
-│       ├── (tabs)/
-│       │   ├── _layout.tsx
-│       │   ├── index.tsx        # 我的卡片列表
-│       │   ├── shared.tsx       # 共享给我的卡片
-│       │   └── friends.tsx      # 好友管理
-│       ├── cards/
-│       │   ├── new.tsx          # 添加卡片（手动输入 + 相机扫码）
-│       │   ├── [id].tsx         # 卡片详情（条码展示）
-│       │   └── [id]/shares.tsx  # 共享成员管理
-│       └── profile.tsx          # 用户设置
-└── src/
-    ├── components/
-    │   ├── ui/                  # 通用基础组件（Button、Input、Modal、Banner）
-    │   ├── cards/               # BarcodeDisplay、CardListItem、CardForm
-    │   ├── friends/             # FriendListItem、FriendRequestCard
-    │   └── auth/                # EmailVerificationBanner
-    ├── hooks/
-    │   ├── useCards.ts          # TanStack Query hooks（卡片 CRUD）
-    │   ├── useFriends.ts        # TanStack Query hooks（好友）
-    │   ├── useShares.ts         # TanStack Query hooks（共享）
-    │   └── useSync.ts           # AppState 触发增量同步
-    ├── lib/
-    │   ├── api/
-    │   │   ├── client.ts        # Axios 实例 + 拦截器
-    │   │   └── endpoints/       # auth.ts / cards.ts / users.ts / friends.ts / shares.ts
-    │   ├── storage/
-    │   │   ├── secureStore.ts   # expo-secure-store 封装（Refresh Token 专用）
-    │   │   └── db.ts            # expo-sqlite 封装（卡片离线缓存）
-    │   └── query/
-    │       └── keys.ts          # TanStack Query key 常量
-    ├── store/
-    │   └── authStore.ts         # Zustand store（user + accessToken 内存）
-    ├── schemas/                 # Zod schemas（form 验证 + API 响应解析）
-    │   ├── auth.ts
-    │   ├── card.ts
-    │   ├── friend.ts
-    │   └── cardShare.ts
-    └── theme.ts                 # 设计 Token（颜色/间距/圆角）
-```
-
-**状态管理**：
-- **TanStack Query v5**：所有服务端状态（卡片、好友、共享）
-- **Zustand**：客户端状态（user profile、accessToken 内存存储）
-- 不引入 Redux；UI 局部状态用组件 `useState`
-
-**HTTP 客户端**：Axios 单实例
-- 请求拦截器：从 Zustand 读取 `accessToken` 注入 `Authorization: Bearer`
-- 响应拦截器：捕获 401 → 刷新 Token → 重试原请求；并发 401 共用同一次刷新（pending promise 队列）
-- TanStack Query 的 `queryFn` / `mutationFn` 全部调用 Axios endpoints，不直接用 axios
-
-**表单处理**：React Hook Form + Zod，所有表单统一使用。Zod schema 同时作为运行时验证与 TypeScript 类型来源（`z.infer<>`），不重复定义类型。
-
-**离线存储分层**：
-
-| 数据 | 存储 | 原因 |
-|-----|------|------|
-| Refresh Token | expo-secure-store | 敏感，硬件级加密 |
-| Access Token | Zustand 内存（不持久化） | 规范要求，15min 自动过期 |
-| 卡片数据缓存 | expo-sqlite | 支持 200+ 条记录，结构化查询；条码内容非高敏感 |
-| lastSyncTimestamp | expo-secure-store（单条） | 小数据，跟随 Refresh Token 生命周期 |
-
-**条码渲染**：
-- `QR_CODE` → `react-native-qrcode-svg`
-- 其余线性码（CODE_128 / EAN_13 / CODE_39 / PDF_417 / AZTEC / EAN_8 / UPC_A / DATA_MATRIX）→ `jsbarcode`（生成 SVG 字符串）+ `react-native-svg` 的 `SvgXml` 渲染
-- 两者共用 `react-native-svg`；`BarcodeDisplay` 组件内按 `barcodeType` 分支渲染
-
-**离线同步策略**：
-1. `useSync` hook 监听 `AppState` → `'active'`（防抖 1s）
-2. 触发 `GET /api/cards?updatedAfter=<lastSync>`
-3. `updated` → 写入 SQLite（insertOrReplace）；`deleted` → 从 SQLite 批量删除
-4. 更新 `lastSyncTimestamp`
-
----
-
-### 后端（Symfony 7 + API Platform 4）
+## 后端（Symfony 7 + API Platform 4）
 
 ```
 src/
@@ -307,9 +217,6 @@ Docker: postgres:16-alpine (localhost:5432)
   database: cardpocket_dev
   database: cardpocket_test  # 测试专用，每次测试前 reset
 Docker: redis:7-alpine (localhost:6379)  # 速率限制专用，maxmemory-policy noeviction
-
-Expo Dev Server (localhost:19000)
-  ↕ 指向 https://localhost:8000
 ```
 
 ---
@@ -322,7 +229,6 @@ Expo Dev Server (localhost:19000)
 | 认证 | JWT（15min）+ Refresh Token Rotation |
 | 授权 | Symfony Voter（每次操作独立判断） |
 | 速率限制 | symfony/rate-limiter（专用 Redis，noeviction，安全优先降级；见 ADR-017） |
-| 本地存储 | expo-secure-store（AES-256，TEE/SE）|
 | 数据库 | UUID 主键（防 ID 枚举），软删除（deletedAt）+ 账户删除时字段匿名化（GDPR Art. 17） |
 
 ---

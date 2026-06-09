@@ -4,7 +4,7 @@
 
 ---
 
-## ADR-001：条码存储为原始字符串，前端渲染
+## ADR-001：条码存储为原始字符串，客户端渲染
 
 **状态**：已采纳  
 **日期**：2026-06-01
@@ -13,10 +13,10 @@
 
 **原因**：
 - 数据量极小（纯文本），不产生图片文件存储压力
-- 前端库（react-native-barcode-svg）可动态渲染所有格式
+- 客户端可动态渲染所有格式
 - 修改灵活（改名称不需要重新生成图片）
 
-**权衡**：前端需要引入条码渲染库；浏览器端渲染 SVG 有极小的性能开销（可忽略）。
+**权衡**：客户端需要引入条码渲染库；渲染 SVG 有极小的性能开销（可忽略）。
 
 ---
 
@@ -120,17 +120,16 @@
 
 ---
 
-## ADR-009：开发采用后端 TDD + 前端同步模式
+## ADR-009：后端 TDD
 
 **状态**：已采纳  
 **日期**：2026-06-01
 
-**决策**：后端每个功能先写测试（PHPUnit + ApiTestCase），通过后前端才开始实现对应 UI。
+**决策**：后端每个功能先写测试（PHPUnit + ApiTestCase），通过后再实现。
 
 **原因**：
 - TDD 确保 API 契约在实现前就被明确（测试即文档）
-- 防止前端和后端并行开发导致的接口不一致问题
-- 单人开发时顺序开发比并行更高效（避免上下文切换）
+- 单人开发时顺序开发（测试 → 实现）比并行更高效（避免上下文切换）
 
 **权衡**：初期进度可能感觉较慢（写测试有额外成本），但后期 debug 和重构成本大幅降低。
 
@@ -149,22 +148,6 @@
 - Docker Compose 一行命令即可启动，学习成本低
 
 **权衡**：需要在开发机上安装 Docker（小成本）。
-
----
-
-## ADR-011：图片录入方式延迟到 Phase 3
-
-**状态**：已采纳  
-**日期**：2026-06-01
-
-**决策**：从相册导入图片解码 QR、iOS Share Sheet / Android Intent 接收图片均为 Phase 3 功能；MVP 只有相机扫码 + 手动输入。
-
-**原因**：
-- 相机扫码覆盖 95% 的日常添加场景
-- Share Extension / Intent 需要额外的 native 配置（Expo bare workflow 或 EAS Build 插件），增加 MVP 复杂度
-- MVP 应专注核心流程稳定性
-
-**权衡**：用户拿到截图 QR Code 时只能手动输入，体验稍差。Phase 3 解决。
 
 ---
 
@@ -299,35 +282,16 @@
 
 ---
 
-## ADR-018：前端表单处理使用 React Hook Form + Zod
-
-**状态**：已采纳（2026-06-07 前端架构重新规划后确认保留）
-**日期**：2026-06-04
-
-**决策**：从 Phase 1 认证界面起，所有前端表单使用 `react-hook-form` 管理状态，通过 `@hookform/resolvers/zod` 桥接 `zod` schema 进行验证。
-
-**原因**：
-- React Hook Form 基于非受控组件，减少不必要的 re-render，性能优于受控方案
-- Zod schema 作为 single source of truth：同时提供运行时验证逻辑和 `z.infer<>` 推导出的 TypeScript 类型，避免类型定义与验证规则分离导致的漂移
-- 认证页面（注册/登录）是输入最密集的界面，也是最先开发的，在此统一引入可为后续卡片编辑、用户设置表单建立规范
-
-**权衡**：
-- 增加两个依赖（`react-hook-form`、`zod`）和一个桥接包（`@hookform/resolvers`）
-- 团队需要了解 `useForm` + `zodResolver` 的使用模式；对于极简单的单字段输入（如搜索框）可直接用 `useState`，无需 RHF
-
----
-
 ## ADR-019：错误监控使用 Sentry，Phase 2 引入
 
 **状态**：已采纳
 **日期**：2026-06-04
 
-**决策**：Phase 2 引入 Sentry 作为错误监控与性能追踪方案。前端使用 `@sentry/react-native`，后端使用 `sentry/sentry-symfony` bundle。
+**决策**：Phase 2 引入 Sentry 作为错误监控与性能追踪方案。后端使用 `sentry/sentry-symfony` bundle。
 
 **原因**：
 - Phase 1 目标是 MVP 可运行，运维工具属于体验完善阶段的基础设施
-- Sentry 同时覆盖前后端，统一告警入口，避免前后端错误分散在不同系统
-- React Native SDK 支持 Expo，集成成本低；Symfony bundle 支持自动捕获未处理异常和慢请求
+- Sentry Symfony bundle 支持自动捕获未处理异常和慢请求
 
 **权衡**：
 - 需要创建 Sentry 项目并管理 DSN 配置（环境变量）
@@ -371,147 +335,3 @@
 **权衡**：
 - 匿名化后的 User/Card 行仍占用数据库空间（极小，每行约 100-200 字节）
 - 前端 JWT 中携带的旧 email 在账户删除后立即失效（email 已变更，任何 JWT 验证都将因找不到用户而 401），无需额外的 token 黑名单机制
-
----
-
-## ADR-022：前端状态管理：TanStack Query v5 + Zustand
-
-**状态**：已采纳
-**日期**：2026-06-07
-
-**决策**：服务端状态（卡片、好友、共享数据）由 TanStack Query v5 管理；客户端状态（user profile、accessToken）由 Zustand 管理。不引入 Redux 或 Context-based auth state。
-
-**原因**：
-- TanStack Query 提供缓存、后台重新获取、Optimistic Update 等开箱即用能力，适合 REST API 数据
-- Zustand 比 React Context 更适合多处读取的全局状态（如 Axios 拦截器直接调用 `useAuthStore.getState()` 读取 accessToken，不需要在组件树外传递 Context）
-- 两者职责清晰，无重叠：Query 管"服务器数据的副本"，Zustand 管"当前会话的身份"
-
-**Token 存储规则**：
-- `accessToken`：Zustand 内存，不持久化（符合安全规范）
-- `refreshToken`：expo-secure-store（硬件加密）
-- `user` profile：Zustand 内存（App 重启后通过 `/refresh` 接口重新获取）
-
-**权衡**：Zustand 增加一个依赖，但比手写 Context + useReducer 更少样板代码。
-
----
-
-## ADR-023：前端 HTTP 客户端使用 Axios
-
-**状态**：已采纳
-**日期**：2026-06-07
-
-**决策**：使用 Axios（单实例）作为 HTTP 客户端，不使用原生 `fetch` 包装。
-
-**原因**：
-- Axios 拦截器链（interceptors）是处理"请求注入 token + 响应处理 401 + 并发刷新去重"最直观的方式，避免手写状态机
-- 响应拦截器天然支持异步等待（`async/await`），刷新逻辑清晰
-- Axios 自动序列化请求体为 JSON，自动解析响应 JSON，减少样板代码
-
-**并发 401 去重方案**：
-```ts
-let pendingRefresh: Promise<string> | null = null;
-
-// 响应拦截器内
-if (!pendingRefresh) {
-  pendingRefresh = refreshAccessToken().finally(() => { pendingRefresh = null; });
-}
-const newToken = await pendingRefresh;
-// 用 newToken 重试原请求
-```
-
-**权衡**：Axios 比原生 fetch 多一个依赖（~14KB gzip），对 React Native 包体积影响可忽略。
-
----
-
-## ADR-024：前端不引入 UI 组件库，使用 StyleSheet + 设计 Token
-
-**状态**：已采纳
-**日期**：2026-06-07
-
-**决策**：前端 UI 全部使用 React Native 原生 `StyleSheet` + `src/theme.ts` 设计 Token 文件，不引入 NativeWind、Tamagui、GlueStack 等 UI 库。
-
-**原因**：
-- CardPocket UI 极简（列表、条码展示、基础表单），不需要复杂组件库
-- 任何第三方 UI 库都增加 Expo SDK 升级时的兼容摩擦
-- `theme.ts` 统一颜色/间距/圆角常量，足以保证设计一致性
-
-**权衡**：Button、Input、Modal 等基础组件需自行封装（成本低，一次性工作）。若将来暗色模式需求强烈，可引入 Shopify Restyle。
-
----
-
-## ADR-025：前端离线卡片缓存使用 expo-sqlite
-
-**状态**：已采纳
-**日期**：2026-06-07
-
-**决策**：卡片数据离线缓存存储在 `expo-sqlite`（`cards` 表），不使用 expo-secure-store 分条存储。Refresh Token 继续使用 expo-secure-store。
-
-**原因**：
-- expo-secure-store 单条 2KB 上限（iOS Keychain 约束），200 张卡的结构化查询无法高效实现
-- expo-sqlite 是 Expo 56 内置模块，无需额外安装；支持事务、索引、SQL 查询
-- 卡片条码内容的敏感级别：是会员卡条码（给收银台扫描用），非密码/金融数据，存明文 SQLite 可接受
-
-**权衡**：SQLite 文件在 App 沙盒内（iOS/Android 均受系统级文件保护），安全性远高于 AsyncStorage，略低于 Keychain。对本项目场景可接受。
-
----
-
-## ADR-026：条码渲染使用两个专用库（QR + 线性码分离）
-
-**状态**：已采纳
-**日期**：2026-06-07
-
-**决策**：
-- `QR_CODE` → `react-native-qrcode-svg`
-- 其余线性条码（CODE_128 / EAN_13 / CODE_39 / PDF_417 / AZTEC / EAN_8 / UPC_A / DATA_MATRIX）→ `jsbarcode` 生成 SVG 字符串 + `react-native-svg` 的 `SvgXml` 渲染
-- 两者均基于 `react-native-svg`，无额外 SVG 依赖
-
-**渲染方式**：`jsbarcode` 通过虚拟 SVG 节点生成 SVG 标记字符串，`BarcodeDisplay` 用 `SvgXml` 显示：
-```tsx
-type === 'QR_CODE' ? <QRCode value={content} /> : <SvgXml xml={getBarcodeSvg(content, type)} />
-```
-
-**原因**：
-- 原 `react-native-barcode-svg` 维护不活跃，API 覆盖不完整
-- 原选 `@kichiyaki/react-native-barcode-generator` 但该包最新版本为 0.6.7，npm 无 1.x 版本，可靠性存疑
-- `jsbarcode` 是业界标准条码库（3.12.x），支持所有所需格式，活跃维护，纯 JS 实现
-- `react-native-qrcode-svg` 是 QR 渲染的事实标准，支持纠错级别、Logo 嵌入（Phase 2 外观自定义用）
-- `BarcodeDisplay` 组件内按 `barcodeType` 分支：`type === 'QR_CODE' ? <QRCode /> : <SvgXml />`
-
-**权衡**：jsbarcode 是 Web 库，需配合虚拟 SVG 节点或手动 XML 生成在 RN 中使用；实现略复杂，但格式覆盖完整、依赖可靠性高于 @kichiyaki。
-
----
-
-## ADR-027：取消生物识别解锁功能（US-21）
-
-**状态**：已采纳
-**日期**：2026-06-07
-
-**决策**：US-21（离开 App 一段时间后需要生物识别重新解锁）从项目范围中移除，不在任何 Phase 实现。
-
-**原因**：
-- CardPocket 存储的是会员卡条码，不是密码/支付信息，数据敏感级别不要求生物识别保护
-- 增加 `expo-local-authentication` 依赖 + AppState 锁屏状态机的实现复杂度与安全收益不成比例
-- MVP 应聚焦核心功能（卡片管理 + 共享），锁屏是体验附加功能
-
-**权衡**：部分用户可能希望保护卡包（如家庭共用设备），但该需求属于 Phase 2+ 的体验完善，且可单独引入不影响核心架构。
-
----
-
-## ADR-028：前端测试策略：Phase 1 写关键测试（Jest + RNTL + MSW）
-
-**状态**：已采纳
-**日期**：2026-06-07
-
-**决策**：Phase 1 编写关键路径测试，不追求 100% 覆盖率。工具链：Jest + React Native Testing Library（RNTL）+ MSW（Mock Service Worker）。不引入 E2E 测试（Maestro/Detox 推迟到 Phase 2）。
-
-**测试重点**：
-1. Zod schemas（form 验证规则正确性）
-2. Axios 拦截器（token 注入 + 401 刷新 + 并发去重）
-3. `useSync` hook（增量同步逻辑：updated 写入 / deleted 删除）
-4. `BarcodeDisplay` 组件（9 种类型均正确分支）
-5. 认证流程屏幕（登录成功/失败，RNTL + MSW）
-
-**原因**：
-- 上述 5 类是"改动频繁、出错代价高"的关键路径，测试 ROI 最高
-- MSW 在 React Native 中通过 `msw/native` 拦截 fetch/axios，无需启动真实后端
-- RNTL 鼓励测试用户行为而非实现细节，避免脆性快照测试

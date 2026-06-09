@@ -17,5 +17,5 @@
 
 ### 任务（.claude/tasks/）
 
-- **current.md** — 当前任务：Phase 1 MVP 详细任务清单（含 TDD 测试用例名称），按模块分组（BE-INFRA/BE-AUTH/BE-USER/BE-CARD/BE-SYNC/BE-FRIEND/BE-SHARE）
-- **todo.md** — 全量任务列表：所有 Phase（1-4）的任务，含前端模块（FE-AUTH/FE-CARD/FE-OFFLINE/FE-FRIEND/FE-SHARE）
+- **current.md** — 当前任务：Phase 1 MVP 后端任务清单，按模块分组（BE-INFRA/BE-AUTH/BE-USER/BE-CARD/BE-SYNC/BE-FRIEND/BE-SHARE）
+- **todo.md** — 全量任务列表：所有 Phase（1-4）的后端任务
