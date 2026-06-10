@@ -19,8 +19,8 @@ dependencies:
   # Navigation
   go_router: ^17.3.0
 
-  # Local database (Drift 2.33 — NativeDatabase.createInBackground for background isolate)
-  drift: ^2.33.0
+  # Local database (Drift 2.34 — NativeDatabase.createInBackground for background isolate)
+  drift: ^2.34.0
   drift_flutter: ^0.3.0
   # drift_flutter 0.3.0 requires sqlite3_flutter_libs 0.6.x (ships native SQLite on Android)
   sqlite3_flutter_libs: ">=0.6.0 <0.7.0"
@@ -39,7 +39,7 @@ dependencies:
   sentry_flutter: ^8.14.2
 
   # Screen brightness control (barcode display page)
-  screen_brightness: ^1.0.1
+  screen_brightness: ^2.1.9
 
   # UI utilities
   shimmer: ^3.0.0
@@ -51,6 +51,7 @@ dependencies:
   # File path utilities (for Drift database path)
   path_provider: ^2.1.5
   path: ^1.9.0
+  connectivity_plus: ^7.1.1
 
 dev_dependencies:
   flutter_test:
@@ -63,10 +64,10 @@ dev_dependencies:
   riverpod_generator: ^4.0.4
   freezed: ^3.2.5
   json_serializable: ^6.14.0
-  drift_dev: ^2.33.0
+  drift_dev: ^2.34.0
 
   # Mocking
-  mocktail: ^0.3.0
+  mocktail: ^1.0.5
 
   # Linting
   flutter_lints: ^6.0.0

@@ -20,7 +20,7 @@ class _BarcodeScreenState extends ConsumerState<BarcodeScreen> {
   @override
   void initState() {
     super.initState();
-    ScreenBrightness().setScreenBrightness(1.0);
+    ScreenBrightness().setApplicationScreenBrightness(1.0);
     ref.read(cardsRepositoryProvider).getCardById(widget.id).then((card) {
       if (mounted) setState(() => _card = card);
     });
@@ -28,7 +28,7 @@ class _BarcodeScreenState extends ConsumerState<BarcodeScreen> {
 
   @override
   void dispose() {
-    ScreenBrightness().resetScreenBrightness();
+    ScreenBrightness().resetApplicationScreenBrightness();
     super.dispose();
   }
 
