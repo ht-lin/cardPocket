@@ -4,14 +4,42 @@ import 'core/config/app_config.dart';
 import 'core/l10n/l10n_extension.dart';
 import 'core/router/router_provider.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/offline_banner.dart';
 import 'features/auth/presentation/widgets/unverified_banner.dart';
+import 'features/cards/application/owned_cards_notifier.dart';
+import 'features/cards/application/viewed_cards_notifier.dart';
 
-class App extends ConsumerWidget {
+class App extends ConsumerStatefulWidget {
   const App({required this.config, super.key});
   final AppConfig config;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(ownedCardsProvider);
+      ref.invalidate(viewedCardsProvider);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final goRouter = ref.watch(routerProvider);
     return MaterialApp.router(
       title: 'CardPocket',
@@ -21,11 +49,13 @@ class App extends ConsumerWidget {
       routerConfig: goRouter,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      builder: (context, child) => Column(
-        children: [
-          const UnverifiedBanner(),
-          Expanded(child: child ?? const SizedBox.shrink()),
-        ],
+      builder: (context, child) => OfflineBanner(
+        child: Column(
+          children: [
+            const UnverifiedBanner(),
+            Expanded(child: child ?? const SizedBox.shrink()),
+          ],
+        ),
       ),
     );
   }

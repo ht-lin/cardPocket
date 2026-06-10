@@ -9,7 +9,7 @@ class OfflineBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isOffline = ref.watch(isOfflineProvider);
+    final isOffline = ref.watch(isOfflineProvider).value ?? false;
     return Column(
       children: [
         if (isOffline)

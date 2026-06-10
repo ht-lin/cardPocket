@@ -18,8 +18,14 @@ class CardsScreen extends ConsumerWidget {
     final viewed = ref.watch(viewedCardsProvider);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
+      body: RefreshIndicator(
+        onRefresh: () => Future.wait([
+          ref.read(ownedCardsProvider.notifier).refresh(),
+          ref.read(viewedCardsProvider.notifier).refresh(),
+        ]),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
           const SliverAppBar(
             title: Text('Cards'),
             floating: true,
@@ -60,7 +66,8 @@ class CardsScreen extends ConsumerWidget {
                   ref.read(viewedCardsProvider.notifier).loadMore(),
             ),
           ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.pushNamed(RouteNames.cardsScan),

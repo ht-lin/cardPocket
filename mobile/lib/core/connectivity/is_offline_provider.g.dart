@@ -12,8 +12,9 @@ part of 'is_offline_provider.dart';
 @ProviderFor(isOffline)
 final isOfflineProvider = IsOfflineProvider._();
 
-final class IsOfflineProvider extends $FunctionalProvider<bool, bool, bool>
-    with $Provider<bool> {
+final class IsOfflineProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
+    with $FutureModifier<bool>, $StreamProvider<bool> {
   IsOfflineProvider._()
     : super(
         from: null,
@@ -30,21 +31,13 @@ final class IsOfflineProvider extends $FunctionalProvider<bool, bool, bool>
 
   @$internal
   @override
-  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $StreamProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
 
   @override
-  bool create(Ref ref) {
+  Stream<bool> create(Ref ref) {
     return isOffline(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
-    );
   }
 }
 
-String _$isOfflineHash() => r'6f519df7d8a320e0d78febe40e62e5037342bce0';
+String _$isOfflineHash() => r'29de55a5c9cde911f0807da729b4f832f9aa79b5';

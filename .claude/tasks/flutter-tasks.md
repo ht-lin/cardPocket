@@ -45,10 +45,10 @@
 
 ### [FE-SYNC] 离线与同步
 
-- [ ] FE-SYNC-01：增量同步逻辑（读取 Drift `SyncMetaTable.lastSyncAt` → `GET /api/cards?updatedAfter={ts}` → `insertOrReplace` upsert `updated` 数组 → 删除 `deleted` 数组 → 更新 `lastSyncAt`；首次无 `lastSyncAt` 时全量加载分页至多 200 张）
-- [ ] FE-SYNC-02：`AppLifecycle` 监听（`AppLifecycleState.resumed` 时触发 FE-SYNC-01）
-- [ ] FE-SYNC-03：下拉刷新（卡片列表 `RefreshIndicator` 触发 FE-SYNC-01）
-- [ ] FE-SYNC-04：离线检测 + `OfflineBanner`（网络不可用时顶部静默横幅显示，恢复后自动消失；不弹 Dialog）
+- [x] FE-SYNC-01：增量同步逻辑（读取 Drift `SyncMetaTable.lastSyncAt` → `GET /api/cards?updatedAfter={ts}` → `insertOrReplace` upsert `updated` 数组 → 删除 `deleted` 数组 → 更新 `lastSyncAt`；首次无 `lastSyncAt` 时全量加载分页至多 200 张）
+- [x] FE-SYNC-02：`AppLifecycle` 监听（`AppLifecycleState.resumed` 时触发 FE-SYNC-01）
+- [x] FE-SYNC-03：下拉刷新（卡片列表 `RefreshIndicator` 触发 FE-SYNC-01）
+- [x] FE-SYNC-04：离线检测 + `OfflineBanner`（网络不可用时顶部静默横幅显示，恢复后自动消失；不弹 Dialog）
 
 ### [FE-SHARE] 共享 UI
 
