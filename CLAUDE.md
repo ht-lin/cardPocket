@@ -20,3 +20,4 @@
 
 - **current.md** — 当前任务：Phase 1 MVP 后端任务清单，按模块分组（BE-INFRA/BE-AUTH/BE-USER/BE-CARD/BE-SYNC/BE-FRIEND/BE-SHARE）
 - **todo.md** — 全量任务列表：所有 Phase（1-4）的后端任务
+- **flutter-tasks.md** — Flutter 前端任务清单：Phase 1 MVP 各模块任务（FE-INFRA/FE-AUTH/FE-CARDS/FE-SYNC/FE-SHARE/FE-FRIENDS/FE-PROFILE/FE-CI）
