@@ -1,10 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../features/auth/application/auth_notifier.dart';
 import 'auth_state.dart';
 
 part 'auth_state_provider.g.dart';
 
-// Manages the global authentication state. Starts as loading while
-// AuthNotifier (FE-AUTH-02) attempts a silent token refresh on app start.
-// Overridden by AuthNotifier once that module is implemented.
+// Derives the current AuthState from AuthNotifier.
+// Returns AuthState.loading() while the notifier is initialising (silent refresh).
 @Riverpod(keepAlive: true)
-AuthState authState(Ref ref) => const AuthState.unauthenticated();
+AuthState authState(Ref ref) =>
+    ref.watch(authProvider).value ?? const AuthState.loading();

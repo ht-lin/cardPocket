@@ -4,6 +4,7 @@ import 'core/config/app_config.dart';
 import 'core/l10n/l10n_extension.dart';
 import 'core/router/router_provider.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/presentation/widgets/unverified_banner.dart';
 
 class App extends ConsumerWidget {
   const App({required this.config, super.key});
@@ -20,6 +21,12 @@ class App extends ConsumerWidget {
       routerConfig: goRouter,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      builder: (context, child) => Column(
+        children: [
+          const UnverifiedBanner(),
+          Expanded(child: child ?? const SizedBox.shrink()),
+        ],
+      ),
     );
   }
 }

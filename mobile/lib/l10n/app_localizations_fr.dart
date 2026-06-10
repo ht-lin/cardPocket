@@ -19,4 +19,90 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get profile => 'Profil';
+
+  @override
+  String get loginTitle => 'Connexion';
+
+  @override
+  String get loginEmailLabel => 'E-mail';
+
+  @override
+  String get loginPasswordLabel => 'Mot de passe';
+
+  @override
+  String get loginSubmitButton => 'Se connecter';
+
+  @override
+  String get loginRegisterLink => 'Pas encore de compte ? S\'inscrire';
+
+  @override
+  String get registerTitle => 'Créer un compte';
+
+  @override
+  String get registerUsernameLabel => 'Nom d\'utilisateur';
+
+  @override
+  String get registerGdprLabel =>
+      'J\'accepte les Conditions d\'utilisation et la Politique de confidentialité';
+
+  @override
+  String get registerSubmitButton => 'Créer un compte';
+
+  @override
+  String get registerLoginLink => 'Déjà un compte ? Se connecter';
+
+  @override
+  String get verifyPendingTitle => 'Vérifiez votre e-mail';
+
+  @override
+  String get verifyPendingBody =>
+      'Nous avons envoyé un lien de vérification à votre adresse e-mail. Veuillez cliquer sur le lien pour activer votre compte.';
+
+  @override
+  String get resendVerificationButton => 'Renvoyer l\'e-mail de vérification';
+
+  @override
+  String get resendVerificationSuccess => 'E-mail de vérification envoyé';
+
+  @override
+  String get unverifiedBannerMessage =>
+      'E-mail non vérifié — certaines fonctionnalités sont restreintes.';
+
+  @override
+  String get unverifiedBannerAction => 'Renvoyer l\'e-mail';
+
+  @override
+  String get errorInvalidCredentials => 'E-mail ou mot de passe incorrect';
+
+  @override
+  String get errorNetworkTimeout =>
+      'Erreur réseau — veuillez vérifier votre connexion';
+
+  @override
+  String get errorServerError =>
+      'Erreur serveur — veuillez réessayer plus tard';
+
+  @override
+  String get errorForbiddenUnverified =>
+      'Veuillez vérifier votre e-mail pour utiliser cette fonctionnalité';
+
+  @override
+  String get emailValidationEmpty => 'Veuillez saisir votre e-mail';
+
+  @override
+  String get emailValidationInvalid =>
+      'Veuillez saisir une adresse e-mail valide';
+
+  @override
+  String get passwordValidationEmpty => 'Veuillez saisir votre mot de passe';
+
+  @override
+  String get passwordValidationTooShort =>
+      'Le mot de passe doit contenir au moins 8 caractères';
+
+  @override
+  String get usernameValidationEmpty => 'Veuillez saisir un nom d\'utilisateur';
+
+  @override
+  String get gdprValidationRequired => 'Vous devez accepter pour continuer';
 }

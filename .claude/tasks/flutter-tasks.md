@@ -21,14 +21,14 @@
 
 ### [FE-AUTH] 认证
 
-- [ ] FE-AUTH-00：Auth 领域模型（freezed：`User`、`LoginRequest`、`RegisterRequest`、`AuthTokens`）
-- [ ] FE-AUTH-01：`AuthRepository`（`POST /api/auth/login`、`/register`、`/refresh`、`/logout`、`/resend-verification` API 调用）
-- [ ] FE-AUTH-02：`AuthNotifier`（Riverpod AsyncNotifier，管理 `AuthState`：unauthenticated / authenticated / unverified；初始化时从 SecureStorage 读取 Refresh Token 静默刷新）
-- [ ] FE-AUTH-03：登录页 `/login`（表单校验、422 字段内联错误、提交后更新 AuthState）
-- [ ] FE-AUTH-04：注册页 `/register`（表单校验，注册成功后跳转 `/verify-pending`，不自动登录）
-- [ ] FE-AUTH-05：邮箱验证等待页 `/verify-pending`（说明文案 + "重新发送验证邮件"按钮）
-- [ ] FE-AUTH-06：邮箱未验证横幅（AuthState 为 unverified 时顶部警告 Banner，点击触发重发；受限操作返回 403 时 SnackBar 说明原因）
-- [ ] FE-AUTH-07：编写认证模块测试（`AuthRepository` 单元测试、登录 / 注册页 Widget 测试）
+- [x] FE-AUTH-00：Auth 领域模型（freezed：`User`、`LoginRequest`、`RegisterRequest`、`AuthTokens`）
+- [x] FE-AUTH-01：`AuthRepository`（`POST /api/auth/login`、`/register`、`/refresh`、`/logout`、`/resend-verification` API 调用）
+- [x] FE-AUTH-02：`AuthNotifier`（Riverpod AsyncNotifier，管理 `AuthState`：unauthenticated / authenticated / unverified；初始化时从 SecureStorage 读取 Refresh Token 静默刷新）
+- [x] FE-AUTH-03：登录页 `/login`（表单校验、422 字段内联错误、提交后更新 AuthState）
+- [x] FE-AUTH-04：注册页 `/register`（表单校验，注册成功后跳转 `/verify-pending`，不自动登录）
+- [x] FE-AUTH-05：邮箱验证等待页 `/verify-pending`（说明文案 + "重新发送验证邮件"按钮）
+- [x] FE-AUTH-06：邮箱未验证横幅（AuthState 为 unverified 时顶部警告 Banner，点击触发重发；受限操作返回 403 时 SnackBar 说明原因）
+- [x] FE-AUTH-07：编写认证模块测试（`AuthRepository` 单元测试、登录 / 注册页 Widget 测试）
 
 ### [FE-CARDS] 卡片
 

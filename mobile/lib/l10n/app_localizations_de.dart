@@ -19,4 +19,87 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get profile => 'Profil';
+
+  @override
+  String get loginTitle => 'Anmelden';
+
+  @override
+  String get loginEmailLabel => 'E-Mail';
+
+  @override
+  String get loginPasswordLabel => 'Passwort';
+
+  @override
+  String get loginSubmitButton => 'Anmelden';
+
+  @override
+  String get loginRegisterLink => 'Noch kein Konto? Registrieren';
+
+  @override
+  String get registerTitle => 'Konto erstellen';
+
+  @override
+  String get registerUsernameLabel => 'Benutzername';
+
+  @override
+  String get registerGdprLabel =>
+      'Ich stimme den Nutzungsbedingungen und der Datenschutzrichtlinie zu';
+
+  @override
+  String get registerSubmitButton => 'Konto erstellen';
+
+  @override
+  String get registerLoginLink => 'Bereits ein Konto? Anmelden';
+
+  @override
+  String get verifyPendingTitle => 'E-Mail prüfen';
+
+  @override
+  String get verifyPendingBody =>
+      'Wir haben einen Bestätigungslink an Ihre E-Mail-Adresse gesendet. Bitte klicken Sie auf den Link, um Ihr Konto zu aktivieren.';
+
+  @override
+  String get resendVerificationButton => 'Bestätigungs-E-Mail erneut senden';
+
+  @override
+  String get resendVerificationSuccess => 'Bestätigungs-E-Mail gesendet';
+
+  @override
+  String get unverifiedBannerMessage =>
+      'E-Mail nicht bestätigt — einige Funktionen sind eingeschränkt.';
+
+  @override
+  String get unverifiedBannerAction => 'E-Mail erneut senden';
+
+  @override
+  String get errorInvalidCredentials => 'Falsche E-Mail oder falsches Passwort';
+
+  @override
+  String get errorNetworkTimeout => 'Netzwerkfehler — bitte Verbindung prüfen';
+
+  @override
+  String get errorServerError => 'Serverfehler — bitte später erneut versuchen';
+
+  @override
+  String get errorForbiddenUnverified =>
+      'Bitte bestätigen Sie Ihre E-Mail, um diese Funktion zu nutzen';
+
+  @override
+  String get emailValidationEmpty => 'Bitte E-Mail eingeben';
+
+  @override
+  String get emailValidationInvalid => 'Bitte gültige E-Mail-Adresse eingeben';
+
+  @override
+  String get passwordValidationEmpty => 'Bitte Passwort eingeben';
+
+  @override
+  String get passwordValidationTooShort =>
+      'Passwort muss mindestens 8 Zeichen lang sein';
+
+  @override
+  String get usernameValidationEmpty => 'Bitte Benutzernamen eingeben';
+
+  @override
+  String get gdprValidationRequired => 'Sie müssen zustimmen, um fortzufahren';
 }

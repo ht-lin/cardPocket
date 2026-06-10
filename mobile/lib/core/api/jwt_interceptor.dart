@@ -48,7 +48,7 @@ class JwtInterceptor extends QueuedInterceptorsWrapper {
         data: {'refresh_token': refreshToken},
       );
 
-      final newAccessToken = response.data?['token'] as String?;
+      final newAccessToken = response.data?['access_token'] as String?;
       final newRefreshToken = response.data?['refresh_token'] as String?;
 
       if (newAccessToken == null) {

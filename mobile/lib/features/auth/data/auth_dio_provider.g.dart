@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'auth_state_provider.dart';
+part of 'auth_dio_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,43 +9,42 @@ part of 'auth_state_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(authState)
-final authStateProvider = AuthStateProvider._();
+@ProviderFor(authDio)
+final authDioProvider = AuthDioProvider._();
 
-final class AuthStateProvider
-    extends $FunctionalProvider<AuthState, AuthState, AuthState>
-    with $Provider<AuthState> {
-  AuthStateProvider._()
+final class AuthDioProvider extends $FunctionalProvider<Dio, Dio, Dio>
+    with $Provider<Dio> {
+  AuthDioProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'authStateProvider',
+        name: r'authDioProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$authStateHash();
+  String debugGetCreateSourceHash() => _$authDioHash();
 
   @$internal
   @override
-  $ProviderElement<AuthState> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<Dio> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  AuthState create(Ref ref) {
-    return authState(ref);
+  Dio create(Ref ref) {
+    return authDio(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AuthState value) {
+  Override overrideWithValue(Dio value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<AuthState>(value),
+      providerOverride: $SyncValueProvider<Dio>(value),
     );
   }
 }
 
-String _$authStateHash() => r'4fee15f9525681e2a36a303329615ea8881dcd38';
+String _$authDioHash() => r'f2cd6983e00960d5f6aa6e905af937f39f307f85';

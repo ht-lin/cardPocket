@@ -127,6 +127,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile'**
   String get profile;
+
+  /// Login screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get loginTitle;
+
+  /// Email field label on login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get loginEmailLabel;
+
+  /// Password field label on login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get loginPasswordLabel;
+
+  /// Submit button on login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get loginSubmitButton;
+
+  /// Link to register screen
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? Register'**
+  String get loginRegisterLink;
+
+  /// Register screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get registerTitle;
+
+  /// Username field label on register screen
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get registerUsernameLabel;
+
+  /// GDPR consent checkbox label
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the Terms of Service and Privacy Policy'**
+  String get registerGdprLabel;
+
+  /// Submit button on register screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get registerSubmitButton;
+
+  /// Link to login screen from register
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign In'**
+  String get registerLoginLink;
+
+  /// Verify pending screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Check Your Email'**
+  String get verifyPendingTitle;
+
+  /// Explanation text on verify pending screen
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification link to your email address. Please click the link to activate your account.'**
+  String get verifyPendingBody;
+
+  /// Button to resend verification email
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Verification Email'**
+  String get resendVerificationButton;
+
+  /// SnackBar message after successful resend
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email sent'**
+  String get resendVerificationSuccess;
+
+  /// Warning banner text for unverified users
+  ///
+  /// In en, this message translates to:
+  /// **'Email not verified — some features are restricted.'**
+  String get unverifiedBannerMessage;
+
+  /// Action button in the unverified banner
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Email'**
+  String get unverifiedBannerAction;
+
+  /// Error message for wrong login credentials
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password'**
+  String get errorInvalidCredentials;
+
+  /// Error message for network timeout
+  ///
+  /// In en, this message translates to:
+  /// **'Network error — please check your connection'**
+  String get errorNetworkTimeout;
+
+  /// Error message for server errors
+  ///
+  /// In en, this message translates to:
+  /// **'Server error — please try again later'**
+  String get errorServerError;
+
+  /// Error message when unverified user hits a restricted action
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify your email to use this feature'**
+  String get errorForbiddenUnverified;
+
+  /// Validation error when email is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email'**
+  String get emailValidationEmpty;
+
+  /// Validation error for invalid email format
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get emailValidationInvalid;
+
+  /// Validation error when password is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get passwordValidationEmpty;
+
+  /// Validation error when password is too short
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get passwordValidationTooShort;
+
+  /// Validation error when username is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a username'**
+  String get usernameValidationEmpty;
+
+  /// Validation error when GDPR checkbox is unchecked
+  ///
+  /// In en, this message translates to:
+  /// **'You must agree to continue'**
+  String get gdprValidationRequired;
 }
 
 class _AppLocalizationsDelegate

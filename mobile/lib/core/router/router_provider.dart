@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../auth/auth_state.dart';
 import '../auth/auth_state_provider.dart';
+import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
+import '../../features/auth/presentation/verify_pending_screen.dart';
 import '../../features/placeholder_screen.dart';
 import 'route_names.dart';
 
@@ -48,19 +51,17 @@ List<RouteBase> _buildRoutes() => [
       GoRoute(
         path: '/login',
         name: RouteNames.login,
-        builder: (context, state) => const PlaceholderScreen(label: 'Login'),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: '/register',
         name: RouteNames.register,
-        builder: (context, state) =>
-            const PlaceholderScreen(label: 'Register'),
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/verify-pending',
         name: RouteNames.verifyPending,
-        builder: (context, state) =>
-            const PlaceholderScreen(label: 'Verify Pending'),
+        builder: (context, state) => const VerifyPendingScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => _ScaffoldWithNavBar(shell: shell),
