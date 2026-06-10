@@ -1,0 +1,70 @@
+name: card_pocket
+description: "CardPocket — store and share loyalty/membership card barcodes."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management (Riverpod 3.x)
+  flutter_riverpod: ^3.3.2
+  riverpod_annotation: ^4.0.3
+
+  # Navigation
+  go_router: ^17.3.0
+
+  # Local database (Drift 2.33 — NativeDatabase.createInBackground for background isolate)
+  drift: ^2.33.0
+  drift_flutter: ^0.3.0
+  # drift_flutter 0.3.0 requires sqlite3_flutter_libs 0.6.x (ships native SQLite on Android)
+  sqlite3_flutter_libs: ">=0.6.0 <0.7.0"
+
+  # HTTP client
+  dio: ^5.9.2
+
+  # Secure token storage
+  flutter_secure_storage: ^10.3.1
+
+  # Barcode scanning & rendering
+  mobile_scanner: ^7.2.0
+  barcode_widget: ^2.0.4
+
+  # Crash reporting (sentry 9.x not yet resolvable with current deps — stays at 8.x)
+  sentry_flutter: ^8.14.2
+
+  # UI utilities
+  shimmer: ^3.0.0
+
+  # Code-gen runtime annotations
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
+
+  # File path utilities (for Drift database path)
+  path_provider: ^2.1.5
+  path: ^1.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+  # Code generation
+  build_runner: ^2.15.0
+  riverpod_generator: ^4.0.4
+  freezed: ^3.2.5
+  json_serializable: ^6.14.0
+  drift_dev: ^2.33.0
+
+  # Linting
+  flutter_lints: ^6.0.0
+
+flutter:
+  generate: true
+  uses-material-design: true

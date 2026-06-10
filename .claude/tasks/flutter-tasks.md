@@ -8,16 +8,16 @@
 
 ### [FE-INFRA] 基础设施与项目初始化
 
-- [ ] FE-INFRA-01：`flutter create mobile/`，配置 dev/prod Flavor（Bundle ID `com.cardpocket.app[.dev]`、API base URL、Sentry DSN）
-- [ ] FE-INFRA-02：配置 `pubspec.yaml`（riverpod + riverpod_generator、go_router、drift + drift_flutter + sqlite3_flutter_libs、dio、mobile_scanner、barcode_widget、flutter_secure_storage、sentry_flutter、shimmer、freezed + json_serializable + drift_dev + build_runner）
-- [ ] FE-INFRA-03：Dio 客户端 + JWT 拦截器（请求自动附加 `Authorization: Bearer`，401 时自动调用 `POST /api/auth/refresh`，refresh 失败则清除 Token 并跳转 /login）
-- [ ] FE-INFRA-04：AuthTokenStorage（Access Token 存内存变量、Refresh Token 存 flutter_secure_storage 硬件加密）
-- [ ] FE-INFRA-05：Drift 数据库初始化（`AppDatabase` 单例、`CardsTable` + `SyncMetaTable` 定义、`drift_flutter` NativeDatabase，`build_runner` 生成代码）
-- [ ] FE-INFRA-06：go_router 路由配置（所有路由定义、路由守卫：未登录重定向 /login，已登录且访问 /login 则重定向 /cards）
-- [ ] FE-INFRA-07：Material 3 主题（seed color `#4F6BED`，light/dark 跟随系统，ThemeData 全局注册到 MaterialApp）
-- [ ] FE-INFRA-08：共用组件（`OfflineBanner` 顶部静默横幅、`ShimmerList` 加载占位、底部 3-Tab 导航骨架）
-- [ ] FE-INFRA-09：Sentry Flutter 集成（dev/prod DSN 通过 Flavor 区分，全局 `runZonedGuarded` + `FlutterError.onError` 捕获）
-- [ ] FE-INFRA-10：i18n 配置（`flutter_localizations` + `gen-l10n`，ARB 文件 en/de/fr/es/zh 至 `mobile/lib/l10n/`，跟随系统语言）
+- [x] FE-INFRA-01：`flutter create mobile/`，配置 dev/prod Flavor（Bundle ID `com.cardpocket.app[.dev]`、API base URL、Sentry DSN）
+- [x] FE-INFRA-02：配置 `pubspec.yaml`（riverpod + riverpod_generator、go_router、drift + drift_flutter + sqlite3_flutter_libs、dio、mobile_scanner、barcode_widget、flutter_secure_storage、sentry_flutter、shimmer、freezed + json_serializable + drift_dev + build_runner）
+- [x] FE-INFRA-03：Dio 客户端 + JWT 拦截器（请求自动附加 `Authorization: Bearer`，401 时自动调用 `POST /api/auth/refresh`，refresh 失败则清除 Token 并跳转 /login）
+- [x] FE-INFRA-04：AuthTokenStorage（Access Token 存内存变量、Refresh Token 存 flutter_secure_storage 硬件加密）
+- [x] FE-INFRA-05：Drift 数据库初始化（`AppDatabase` 单例、`CardsTable` + `SyncMetaTable` 定义、`drift_flutter` NativeDatabase，`build_runner` 生成代码）
+- [x] FE-INFRA-06：go_router 路由配置（所有路由定义、路由守卫：未登录重定向 /login，已登录且访问 /login 则重定向 /cards）
+- [x] FE-INFRA-07：Material 3 主题（seed color `#4F6BED`，light/dark 跟随系统，ThemeData 全局注册到 MaterialApp）
+- [x] FE-INFRA-08：共用组件（`OfflineBanner` 顶部静默横幅、`ShimmerList` 加载占位、底部 3-Tab 导航骨架）
+- [x] FE-INFRA-09：Sentry Flutter 集成（dev/prod DSN 通过 Flavor 区分，全局 `runZonedGuarded` + `FlutterError.onError` 捕获）
+- [x] FE-INFRA-10：i18n 配置（`flutter_localizations` + `gen-l10n`，ARB 文件 en/de/fr/es/zh 至 `mobile/lib/l10n/`，跟随系统语言）
 
 ### [FE-AUTH] 认证
 

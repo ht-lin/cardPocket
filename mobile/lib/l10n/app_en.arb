@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "offlineMode": "Offline",
+  "@offlineMode": {
+    "description": "Label shown in the offline banner at the top of the screen"
+  },
+  "cards": "Cards",
+  "@cards": {
+    "description": "Bottom nav tab label for the card wallet"
+  },
+  "friends": "Friends",
+  "@friends": {
+    "description": "Bottom nav tab label for the friends list"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Bottom nav tab label for user profile"
+  }
+}
