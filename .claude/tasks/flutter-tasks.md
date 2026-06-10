@@ -9,10 +9,10 @@
 ### [FE-INFRA] 基础设施与项目初始化
 
 - [ ] FE-INFRA-01：`flutter create mobile/`，配置 dev/prod Flavor（Bundle ID `com.cardpocket.app[.dev]`、API base URL、Sentry DSN）
-- [ ] FE-INFRA-02：配置 `pubspec.yaml`（riverpod + riverpod_generator、go_router、isar + isar_flutter_libs、dio、mobile_scanner、barcode_widget、flutter_secure_storage、sentry_flutter、shimmer、freezed + json_serializable + build_runner）
+- [ ] FE-INFRA-02：配置 `pubspec.yaml`（riverpod + riverpod_generator、go_router、drift + drift_flutter + sqlite3_flutter_libs、dio、mobile_scanner、barcode_widget、flutter_secure_storage、sentry_flutter、shimmer、freezed + json_serializable + drift_dev + build_runner）
 - [ ] FE-INFRA-03：Dio 客户端 + JWT 拦截器（请求自动附加 `Authorization: Bearer`，401 时自动调用 `POST /api/auth/refresh`，refresh 失败则清除 Token 并跳转 /login）
 - [ ] FE-INFRA-04：AuthTokenStorage（Access Token 存内存变量、Refresh Token 存 flutter_secure_storage 硬件加密）
-- [ ] FE-INFRA-05：Isar 数据库初始化（数据库实例单例、schema 注册、`lastSyncAt` 元数据存储）
+- [ ] FE-INFRA-05：Drift 数据库初始化（`AppDatabase` 单例、`CardsTable` + `SyncMetaTable` 定义、`drift_flutter` NativeDatabase，`build_runner` 生成代码）
 - [ ] FE-INFRA-06：go_router 路由配置（所有路由定义、路由守卫：未登录重定向 /login，已登录且访问 /login 则重定向 /cards）
 - [ ] FE-INFRA-07：Material 3 主题（seed color `#4F6BED`，light/dark 跟随系统，ThemeData 全局注册到 MaterialApp）
 - [ ] FE-INFRA-08：共用组件（`OfflineBanner` 顶部静默横幅、`ShimmerList` 加载占位、底部 3-Tab 导航骨架）
@@ -33,8 +33,8 @@
 ### [FE-CARDS] 卡片
 
 - [ ] FE-CARDS-00：Card 领域模型（freezed：`Card` 含 `id`、`name`、`barcodeType`、`barcodeContent`、`isOwner`、`viewerNickname String?`、`ownerUsername String?`、`updatedAt`）
-- [ ] FE-CARDS-01：Isar `CardSchema`（`@Collection`，存储 Card 完整字段 + `isOwner` + `viewerNickname`）
-- [ ] FE-CARDS-02：`CardRepository`（`GET /api/cards` 分页、`POST` 创建、`PATCH /:id` 编辑名称、`DELETE /:id`，含 Isar 读写）
+- [ ] FE-CARDS-01：Drift `CardsTable`（`TextColumn` id/name/barcodeType/barcodeContent/viewerNickname/ownerUsername、`BoolColumn` isOwner、`DateTimeColumn` updatedAt；`insertOrReplace` 支持 upsert）
+- [ ] FE-CARDS-02：`CardRepository`（`GET /api/cards` 分页、`POST` 创建、`PATCH /:id` 编辑名称、`DELETE /:id`，含 Drift 读写）
 - [ ] FE-CARDS-03：卡片列表页 `/cards`（两区块：owned / viewed，各自独立无限滚动每页 20 条，FAB 触发扫描流程，空状态插图）
 - [ ] FE-CARDS-04：全屏条码展示页 `/cards/:id/barcode`（进入时亮度调最高、退出恢复，`barcode_widget` 渲染对应 `barcodeType`，深色背景；Viewer 标题显示"昵称(共享者用户名)"或"卡片名(共享者用户名)"）
 - [ ] FE-CARDS-05：条码扫描页 `/cards/scan`（`mobile_scanner` 相机，扫描成功跳确认页，底部"手动输入"按钮跳 `/cards/create`）
@@ -45,7 +45,7 @@
 
 ### [FE-SYNC] 离线与同步
 
-- [ ] FE-SYNC-01：增量同步逻辑（读取 Isar `lastSyncAt` → `GET /api/cards?updatedAfter={ts}` → upsert `updated` 数组 → 删除 `deleted` 数组 → 更新 `lastSyncAt`；首次无 `lastSyncAt` 时全量加载分页至多 200 张）
+- [ ] FE-SYNC-01：增量同步逻辑（读取 Drift `SyncMetaTable.lastSyncAt` → `GET /api/cards?updatedAfter={ts}` → `insertOrReplace` upsert `updated` 数组 → 删除 `deleted` 数组 → 更新 `lastSyncAt`；首次无 `lastSyncAt` 时全量加载分页至多 200 张）
 - [ ] FE-SYNC-02：`AppLifecycle` 监听（`AppLifecycleState.resumed` 时触发 FE-SYNC-01）
 - [ ] FE-SYNC-03：下拉刷新（卡片列表 `RefreshIndicator` 触发 FE-SYNC-01）
 - [ ] FE-SYNC-04：离线检测 + `OfflineBanner`（网络不可用时顶部静默横幅显示，恢复后自动消失；不弹 Dialog）
@@ -74,7 +74,7 @@
 - [ ] FE-PROFILE-03：修改用户名页 `/profile/edit-name`（TextFormField + 422 内联错误）
 - [ ] FE-PROFILE-04：修改密码页 `/profile/change-password`（当前密码 + 新密码 + 确认密码，422 内联错误）
 - [ ] FE-PROFILE-05：退出登录（`AuthNotifier.logout` 调用 `/api/auth/logout` + 清除 SecureStorage + 重定向 /login；无独立页面）
-- [ ] FE-PROFILE-06：删除账户（AlertDialog 二次确认，确认后调用 `UserRepository.deleteAccount` + 清除 Isar 数据 + 重定向 /login）
+- [ ] FE-PROFILE-06：删除账户（AlertDialog 二次确认，确认后调用 `UserRepository.deleteAccount` + 清除 Drift 数据库 + 重定向 /login）
 - [ ] FE-PROFILE-07：编写个人信息模块测试（`UserRepository` 单元测试、个人信息页 Widget 测试）
 
 ### [FE-CI] CI/CD
@@ -87,7 +87,7 @@
 
 ```
 [1] FE-INFRA（全部）
-    ├── 项目骨架、Dio、Isar、路由、主题、i18n
+    ├── 项目骨架、Dio、Drift、路由、主题、i18n
     └── 完成后所有模块可并行开始
 
 [2] FE-AUTH（依赖 FE-INFRA）
@@ -95,7 +95,7 @@
 
 [3] FE-CARDS + FE-SYNC（依赖 FE-AUTH）
     ├── 卡片是核心功能，优先完成
-    └── FE-SYNC 依赖 FE-CARDS-01（Isar Schema）
+    └── FE-SYNC 依赖 FE-CARDS-01（Drift CardsTable）
 
 [4] FE-SHARE（依赖 FE-CARDS）
     └── 共享 UI 依赖卡片列表菜单入口

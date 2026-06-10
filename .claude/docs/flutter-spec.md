@@ -11,9 +11,9 @@
 | Flutter SDK | 3.44.x Stable channel |
 | 状态管理 | Riverpod + riverpod_generator |
 | 导航 | go_router |
-| 本地存储 | Isar |
+| 本地存储 | Drift（SQLite，drift_flutter） |
 | HTTP 客户端 | Dio |
-| 代码生成 | riverpod_generator + freezed + json_serializable |
+| 代码生成 | riverpod_generator + freezed + json_serializable + drift_dev |
 | 条码扫描 | mobile_scanner |
 | 条码渲染 | barcode_widget |
 | 安全存储 | flutter_secure_storage（Refresh Token） |
@@ -70,7 +70,7 @@ mobile/lib/
 ├── core/
 │   ├── api/            # Dio client、JWT 拦截器、Token 刷新逻辑
 │   ├── auth/           # AuthState、Token 内存存储、SecureStorage
-│   ├── isar/           # Isar 数据库初始化、schema 注册
+│   ├── database/       # Drift 数据库初始化、AppDatabase、迁移配置
 │   ├── router/         # go_router 路由配置、路由守卫
 │   ├── theme/          # Material 3 主题（light/dark）、色彩常量
 │   └── widgets/        # 共用组件（OfflineBanner、ShimmerList 等）
@@ -80,7 +80,7 @@ mobile/lib/
 │   │   ├── domain/     # 模型（freezed）、接口定义
 │   │   └── presentation/ # 登录/注册/验证等待页
 │   ├── cards/
-│   │   ├── data/       # CardRepository、Isar CardSchema、增量同步
+│   │   ├── data/       # CardRepository、Drift CardsTable、增量同步
 │   │   ├── domain/     # Card 模型、CardShare 模型
 │   │   └── presentation/ # 卡片列表、全屏条码、添加卡片、条码扫描
 │   ├── friends/
@@ -180,7 +180,7 @@ Dio 拦截器逻辑：
 - **缓存内容**：仅缓存卡片列表（含 `barcodeContent`），支持离线展示条码
 - **好友列表、请求列表不缓存**（离线时好友 Tab 显示空状态）
 - **离线提示**：顶部细横幅 `"离线模式"` 静默显示，不弹 Dialog
-- **Isar 本地 Schema**：存储 Card 完整字段 + `isOwner` + `viewerNickname`（仅 Viewer 有值）
+- **Drift 本地表 `cards`**：存储 Card 完整字段 + `isOwner` + `viewerNickname`（仅 Viewer 有值）
 
 ---
 
@@ -192,9 +192,9 @@ Dio 拦截器逻辑：
 
 逻辑：
 ```
-1. 读取本地 lastSyncAt 时间戳（Isar 中存储）
+1. 读取本地 lastSyncAt 时间戳（Drift SyncMeta 表中存储）
 2. 调用 GET /api/cards?updatedAfter={lastSyncAt}
-3. 将 updated 数组 upsert 到 Isar
+3. 将 updated 数组 upsert 到 Drift cards 表
 4. 将 deleted 数组对应的本地记录删除
 5. 更新 lastSyncAt = 本次同步时间
 ```
