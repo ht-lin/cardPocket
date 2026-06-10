@@ -4,6 +4,7 @@ abstract final class RouteNames {
   static const verifyPending = 'verify-pending';
   static const cards = 'cards';
   static const cardsScan = 'cards-scan';
+  static const cardsScanConfirm = 'cards-scan-confirm';
   static const cardsCreate = 'cards-create';
   static const cardBarcode = 'card-barcode';
   static const friends = 'friends';

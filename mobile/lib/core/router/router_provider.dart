@@ -6,6 +6,11 @@ import '../auth/auth_state_provider.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/verify_pending_screen.dart';
+import '../../features/cards/presentation/barcode_screen.dart';
+import '../../features/cards/presentation/cards_screen.dart';
+import '../../features/cards/presentation/create_card_screen.dart';
+import '../../features/cards/presentation/scan_confirm_screen.dart';
+import '../../features/cards/presentation/scan_screen.dart';
 import '../../features/placeholder_screen.dart';
 import 'route_names.dart';
 
@@ -71,26 +76,38 @@ List<RouteBase> _buildRoutes() => [
               GoRoute(
                 path: '/cards',
                 name: RouteNames.cards,
-                builder: (context, state) =>
-                    const PlaceholderScreen(label: 'Cards'),
+                builder: (context, state) => const CardsScreen(),
                 routes: [
                   GoRoute(
                     path: 'scan',
                     name: RouteNames.cardsScan,
-                    builder: (context, state) =>
-                        const PlaceholderScreen(label: 'Scan'),
+                    builder: (context, state) => const ScanScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'confirm',
+                        name: RouteNames.cardsScanConfirm,
+                        builder: (context, state) {
+                          final extra =
+                              state.extra as Map<String, String>? ?? {};
+                          return ScanConfirmScreen(
+                            barcodeContent: extra['barcodeContent'] ?? '',
+                            barcodeType: extra['barcodeType'] ?? 'QR_CODE',
+                          );
+                        },
+                      ),
+                    ],
                   ),
                   GoRoute(
                     path: 'create',
                     name: RouteNames.cardsCreate,
-                    builder: (context, state) =>
-                        const PlaceholderScreen(label: 'Create Card'),
+                    builder: (context, state) => const CreateCardScreen(),
                   ),
                   GoRoute(
                     path: ':id/barcode',
                     name: RouteNames.cardBarcode,
-                    builder: (context, state) =>
-                        const PlaceholderScreen(label: 'Barcode'),
+                    builder: (context, state) => BarcodeScreen(
+                      id: state.pathParameters['id']!,
+                    ),
                   ),
                 ],
               ),

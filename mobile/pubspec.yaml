@@ -38,6 +38,9 @@ dependencies:
   # Crash reporting (sentry 9.x not yet resolvable with current deps — stays at 8.x)
   sentry_flutter: ^8.14.2
 
+  # Screen brightness control (barcode display page)
+  screen_brightness: ^1.0.1
+
   # UI utilities
   shimmer: ^3.0.0
 

@@ -32,16 +32,16 @@
 
 ### [FE-CARDS] 卡片
 
-- [ ] FE-CARDS-00：Card 领域模型（freezed：`Card` 含 `id`、`name`、`barcodeType`、`barcodeContent`、`isOwner`、`viewerNickname String?`、`ownerUsername String?`、`updatedAt`）
-- [ ] FE-CARDS-01：Drift `CardsTable`（`TextColumn` id/name/barcodeType/barcodeContent/viewerNickname/ownerUsername、`BoolColumn` isOwner、`DateTimeColumn` updatedAt；`insertOrReplace` 支持 upsert）
-- [ ] FE-CARDS-02：`CardRepository`（`GET /api/cards` 分页、`POST` 创建、`PATCH /:id` 编辑名称、`DELETE /:id`，含 Drift 读写）
-- [ ] FE-CARDS-03：卡片列表页 `/cards`（两区块：owned / viewed，各自独立无限滚动每页 20 条，FAB 触发扫描流程，空状态插图）
-- [ ] FE-CARDS-04：全屏条码展示页 `/cards/:id/barcode`（进入时亮度调最高、退出恢复，`barcode_widget` 渲染对应 `barcodeType`，深色背景；Viewer 标题显示"昵称(共享者用户名)"或"卡片名(共享者用户名)"）
-- [ ] FE-CARDS-05：条码扫描页 `/cards/scan`（`mobile_scanner` 相机，扫描成功跳确认页，底部"手动输入"按钮跳 `/cards/create`）
-- [ ] FE-CARDS-06：扫描确认页（显示识别到的条码内容 + 类型 + 输入卡片名称，提交调用 `CardRepository.create`）
-- [ ] FE-CARDS-07：手动输入页 `/cards/create`（条码内容 TextField + 类型 DropdownMenu + 名称 TextField）
-- [ ] FE-CARDS-08：Owner 三点菜单（编辑名称 AlertDialog + 管理共享 ModalBottomSheet 入口 + 删除二次确认）
-- [ ] FE-CARDS-09：编写卡片模块测试（`CardRepository` 单元测试、卡片列表 Widget 测试）
+- [x] FE-CARDS-00：Card 领域模型（freezed：`Card` 含 `id`、`name`、`barcodeType`、`barcodeContent`、`isOwner`、`viewerNickname String?`、`ownerUsername String?`、`updatedAt`）
+- [x] FE-CARDS-01：Drift `CardsTable`（`TextColumn` id/name/barcodeType/barcodeContent/viewerNickname/ownerUsername、`BoolColumn` isOwner、`DateTimeColumn` updatedAt；`insertOrReplace` 支持 upsert）
+- [x] FE-CARDS-02：`CardRepository`（`GET /api/cards` 分页、`POST` 创建、`PATCH /:id` 编辑名称、`DELETE /:id`，含 Drift 读写）
+- [x] FE-CARDS-03：卡片列表页 `/cards`（两区块：owned / viewed，各自独立无限滚动每页 20 条，FAB 触发扫描流程，空状态插图）
+- [x] FE-CARDS-04：全屏条码展示页 `/cards/:id/barcode`（进入时亮度调最高、退出恢复，`barcode_widget` 渲染对应 `barcodeType`，深色背景；Viewer 标题显示"昵称(共享者用户名)"或"卡片名(共享者用户名)"）
+- [x] FE-CARDS-05：条码扫描页 `/cards/scan`（`mobile_scanner` 相机，扫描成功跳确认页，底部"手动输入"按钮跳 `/cards/create`）
+- [x] FE-CARDS-06：扫描确认页（显示识别到的条码内容 + 类型 + 输入卡片名称，提交调用 `CardRepository.create`）
+- [x] FE-CARDS-07：手动输入页 `/cards/create`（条码内容 TextField + 类型 DropdownMenu + 名称 TextField）
+- [x] FE-CARDS-08：Owner 三点菜单（编辑名称 AlertDialog + 管理共享 ModalBottomSheet 入口 + 删除二次确认）
+- [x] FE-CARDS-09：编写卡片模块测试（`CardRepository` 单元测试、卡片列表 Widget 测试）
 
 ### [FE-SYNC] 离线与同步
 

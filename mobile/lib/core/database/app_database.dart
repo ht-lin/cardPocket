@@ -17,9 +17,54 @@ class AppDatabase extends _$AppDatabase {
         onCreate: (m) => m.createAll(),
       );
 
-  // driftDatabase() resolves the platform path automatically and opens the
-  // database in a background isolate on native platforms.
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'cardpocket');
+  }
+
+  Future<void> upsertCards(List<CardsTableCompanion> rows) async {
+    await batch((b) => b.insertAllOnConflictUpdate(cardsTable, rows));
+  }
+
+  Future<void> deleteCardsByIds(List<String> ids) async {
+    if (ids.isEmpty) return;
+    await (delete(cardsTable)..where((t) => t.id.isIn(ids))).go();
+  }
+
+  Future<List<CardsTableData>> getOwnedCards({
+    required int offset,
+    int limit = 20,
+  }) {
+    return (select(cardsTable)
+          ..where((t) => t.isOwner.equals(true))
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
+          ..limit(limit, offset: offset))
+        .get();
+  }
+
+  Future<List<CardsTableData>> getViewedCards({
+    required int offset,
+    int limit = 20,
+  }) {
+    return (select(cardsTable)
+          ..where((t) => t.isOwner.equals(false))
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
+          ..limit(limit, offset: offset))
+        .get();
+  }
+
+  Future<DateTime?> getLastSyncAt() async {
+    final row = await (select(syncMetaTable)
+          ..where((t) => t.key.equals('default')))
+        .getSingleOrNull();
+    return row?.lastSyncAt;
+  }
+
+  Future<void> setLastSyncAt(DateTime dt) {
+    return into(syncMetaTable).insertOnConflictUpdate(
+      SyncMetaTableCompanion.insert(
+        key: 'default',
+        lastSyncAt: Value(dt),
+      ),
+    );
   }
 }
