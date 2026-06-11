@@ -10,6 +10,7 @@ abstract class CardModel with _$CardModel {
     required String barcodeType,
     required String barcodeContent,
     required bool isOwner,
+    String? shareId,
     String? viewerNickname,
     String? ownerUsername,
     required DateTime updatedAt,

@@ -6,6 +6,7 @@ class CardsTable extends Table {
   TextColumn get barcodeType => text()();
   TextColumn get barcodeContent => text()();
   BoolColumn get isOwner => boolean()();
+  TextColumn get shareId => text().nullable()();
   TextColumn get viewerNickname => text().nullable()();
   TextColumn get ownerUsername => text().nullable()();
   DateTimeColumn get updatedAt => dateTime()();

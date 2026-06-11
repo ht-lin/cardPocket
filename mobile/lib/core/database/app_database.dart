@@ -10,11 +10,16 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(cardsTable, cardsTable.shareId);
+          }
+        },
       );
 
   static QueryExecutor _openConnection() {
@@ -24,6 +29,10 @@ class AppDatabase extends _$AppDatabase {
   Future<void> upsertCards(List<CardsTableCompanion> rows) async {
     await batch((b) => b.insertAllOnConflictUpdate(cardsTable, rows));
   }
+
+  Future<void> updateViewerNickname(String cardId, String? nickname) =>
+      (update(cardsTable)..where((t) => t.id.equals(cardId)))
+          .write(CardsTableCompanion(viewerNickname: Value(nickname)));
 
   Future<void> deleteCardsByIds(List<String> ids) async {
     if (ids.isEmpty) return;

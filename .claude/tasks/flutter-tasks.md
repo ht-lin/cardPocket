@@ -52,10 +52,10 @@
 
 ### [FE-SHARE] 共享 UI
 
-- [ ] FE-SHARE-01：`ShareRepository`（`POST /api/cards/:id/shares` 添加 Viewer、`DELETE /api/cards/:id/shares/:userId` 移除 Viewer、`DELETE /api/cards/:id/shares/me` Viewer 退出、`PATCH /api/cards/:id/shares/me` 设置昵称）
-- [ ] FE-SHARE-02：共享管理 ModalBottomSheet（Owner 视图）：当前 Viewer 列表 + 各自"移除"按钮 + 顶部"从好友中添加"搜索入口
-- [ ] FE-SHARE-03：Viewer 三点菜单（退出共享操作，调用 `ShareRepository.leave`）
-- [ ] FE-SHARE-04：设置昵称 Modal（Viewer）：TextFormField + 保存 / 清除按钮，调用 `ShareRepository.setNickname`
+- [x] FE-SHARE-01：`ShareRepository`（`POST /api/cards/:id/shares` 添加 Viewer、`DELETE /api/cards/:id/shares/:userId` 移除 Viewer、`DELETE /api/cards/:id/shares/me` Viewer 退出、`PATCH /api/cards/:id/shares/me` 设置昵称）
+- [x] FE-SHARE-02：共享管理 ModalBottomSheet（Owner 视图）：当前 Viewer 列表 + 各自"移除"按钮 + 顶部"从好友中添加"搜索入口
+- [x] FE-SHARE-03：Viewer 三点菜单（退出共享操作，调用 `ShareRepository.leave`）
+- [x] FE-SHARE-04：设置昵称 Modal（Viewer）：TextFormField + 保存 / 清除按钮，调用 `ShareRepository.setNickname`
 
 ### [FE-FRIENDS] 好友
 

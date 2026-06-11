@@ -63,6 +63,17 @@ class $CardsTableTable extends CardsTable
       'CHECK ("is_owner" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _shareIdMeta = const VerificationMeta(
+    'shareId',
+  );
+  @override
+  late final GeneratedColumn<String> shareId = GeneratedColumn<String>(
+    'share_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _viewerNicknameMeta = const VerificationMeta(
     'viewerNickname',
   );
@@ -103,6 +114,7 @@ class $CardsTableTable extends CardsTable
     barcodeType,
     barcodeContent,
     isOwner,
+    shareId,
     viewerNickname,
     ownerUsername,
     updatedAt,
@@ -162,6 +174,12 @@ class $CardsTableTable extends CardsTable
     } else if (isInserting) {
       context.missing(_isOwnerMeta);
     }
+    if (data.containsKey('share_id')) {
+      context.handle(
+        _shareIdMeta,
+        shareId.isAcceptableOrUnknown(data['share_id']!, _shareIdMeta),
+      );
+    }
     if (data.containsKey('viewer_nickname')) {
       context.handle(
         _viewerNicknameMeta,
@@ -217,6 +235,10 @@ class $CardsTableTable extends CardsTable
         DriftSqlType.bool,
         data['${effectivePrefix}is_owner'],
       )!,
+      shareId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}share_id'],
+      ),
       viewerNickname: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}viewer_nickname'],
@@ -244,6 +266,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
   final String barcodeType;
   final String barcodeContent;
   final bool isOwner;
+  final String? shareId;
   final String? viewerNickname;
   final String? ownerUsername;
   final DateTime updatedAt;
@@ -253,6 +276,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     required this.barcodeType,
     required this.barcodeContent,
     required this.isOwner,
+    this.shareId,
     this.viewerNickname,
     this.ownerUsername,
     required this.updatedAt,
@@ -265,6 +289,9 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     map['barcode_type'] = Variable<String>(barcodeType);
     map['barcode_content'] = Variable<String>(barcodeContent);
     map['is_owner'] = Variable<bool>(isOwner);
+    if (!nullToAbsent || shareId != null) {
+      map['share_id'] = Variable<String>(shareId);
+    }
     if (!nullToAbsent || viewerNickname != null) {
       map['viewer_nickname'] = Variable<String>(viewerNickname);
     }
@@ -282,6 +309,9 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       barcodeType: Value(barcodeType),
       barcodeContent: Value(barcodeContent),
       isOwner: Value(isOwner),
+      shareId: shareId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shareId),
       viewerNickname: viewerNickname == null && nullToAbsent
           ? const Value.absent()
           : Value(viewerNickname),
@@ -303,6 +333,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       barcodeType: serializer.fromJson<String>(json['barcodeType']),
       barcodeContent: serializer.fromJson<String>(json['barcodeContent']),
       isOwner: serializer.fromJson<bool>(json['isOwner']),
+      shareId: serializer.fromJson<String?>(json['shareId']),
       viewerNickname: serializer.fromJson<String?>(json['viewerNickname']),
       ownerUsername: serializer.fromJson<String?>(json['ownerUsername']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -317,6 +348,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       'barcodeType': serializer.toJson<String>(barcodeType),
       'barcodeContent': serializer.toJson<String>(barcodeContent),
       'isOwner': serializer.toJson<bool>(isOwner),
+      'shareId': serializer.toJson<String?>(shareId),
       'viewerNickname': serializer.toJson<String?>(viewerNickname),
       'ownerUsername': serializer.toJson<String?>(ownerUsername),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -329,6 +361,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     String? barcodeType,
     String? barcodeContent,
     bool? isOwner,
+    Value<String?> shareId = const Value.absent(),
     Value<String?> viewerNickname = const Value.absent(),
     Value<String?> ownerUsername = const Value.absent(),
     DateTime? updatedAt,
@@ -338,6 +371,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     barcodeType: barcodeType ?? this.barcodeType,
     barcodeContent: barcodeContent ?? this.barcodeContent,
     isOwner: isOwner ?? this.isOwner,
+    shareId: shareId.present ? shareId.value : this.shareId,
     viewerNickname: viewerNickname.present
         ? viewerNickname.value
         : this.viewerNickname,
@@ -357,6 +391,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
           ? data.barcodeContent.value
           : this.barcodeContent,
       isOwner: data.isOwner.present ? data.isOwner.value : this.isOwner,
+      shareId: data.shareId.present ? data.shareId.value : this.shareId,
       viewerNickname: data.viewerNickname.present
           ? data.viewerNickname.value
           : this.viewerNickname,
@@ -375,6 +410,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
           ..write('barcodeType: $barcodeType, ')
           ..write('barcodeContent: $barcodeContent, ')
           ..write('isOwner: $isOwner, ')
+          ..write('shareId: $shareId, ')
           ..write('viewerNickname: $viewerNickname, ')
           ..write('ownerUsername: $ownerUsername, ')
           ..write('updatedAt: $updatedAt')
@@ -389,6 +425,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     barcodeType,
     barcodeContent,
     isOwner,
+    shareId,
     viewerNickname,
     ownerUsername,
     updatedAt,
@@ -402,6 +439,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
           other.barcodeType == this.barcodeType &&
           other.barcodeContent == this.barcodeContent &&
           other.isOwner == this.isOwner &&
+          other.shareId == this.shareId &&
           other.viewerNickname == this.viewerNickname &&
           other.ownerUsername == this.ownerUsername &&
           other.updatedAt == this.updatedAt);
@@ -413,6 +451,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
   final Value<String> barcodeType;
   final Value<String> barcodeContent;
   final Value<bool> isOwner;
+  final Value<String?> shareId;
   final Value<String?> viewerNickname;
   final Value<String?> ownerUsername;
   final Value<DateTime> updatedAt;
@@ -423,6 +462,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     this.barcodeType = const Value.absent(),
     this.barcodeContent = const Value.absent(),
     this.isOwner = const Value.absent(),
+    this.shareId = const Value.absent(),
     this.viewerNickname = const Value.absent(),
     this.ownerUsername = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -434,6 +474,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     required String barcodeType,
     required String barcodeContent,
     required bool isOwner,
+    this.shareId = const Value.absent(),
     this.viewerNickname = const Value.absent(),
     this.ownerUsername = const Value.absent(),
     required DateTime updatedAt,
@@ -450,6 +491,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     Expression<String>? barcodeType,
     Expression<String>? barcodeContent,
     Expression<bool>? isOwner,
+    Expression<String>? shareId,
     Expression<String>? viewerNickname,
     Expression<String>? ownerUsername,
     Expression<DateTime>? updatedAt,
@@ -461,6 +503,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
       if (barcodeType != null) 'barcode_type': barcodeType,
       if (barcodeContent != null) 'barcode_content': barcodeContent,
       if (isOwner != null) 'is_owner': isOwner,
+      if (shareId != null) 'share_id': shareId,
       if (viewerNickname != null) 'viewer_nickname': viewerNickname,
       if (ownerUsername != null) 'owner_username': ownerUsername,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -474,6 +517,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     Value<String>? barcodeType,
     Value<String>? barcodeContent,
     Value<bool>? isOwner,
+    Value<String?>? shareId,
     Value<String?>? viewerNickname,
     Value<String?>? ownerUsername,
     Value<DateTime>? updatedAt,
@@ -485,6 +529,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
       barcodeType: barcodeType ?? this.barcodeType,
       barcodeContent: barcodeContent ?? this.barcodeContent,
       isOwner: isOwner ?? this.isOwner,
+      shareId: shareId ?? this.shareId,
       viewerNickname: viewerNickname ?? this.viewerNickname,
       ownerUsername: ownerUsername ?? this.ownerUsername,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -510,6 +555,9 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     if (isOwner.present) {
       map['is_owner'] = Variable<bool>(isOwner.value);
     }
+    if (shareId.present) {
+      map['share_id'] = Variable<String>(shareId.value);
+    }
     if (viewerNickname.present) {
       map['viewer_nickname'] = Variable<String>(viewerNickname.value);
     }
@@ -533,6 +581,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
           ..write('barcodeType: $barcodeType, ')
           ..write('barcodeContent: $barcodeContent, ')
           ..write('isOwner: $isOwner, ')
+          ..write('shareId: $shareId, ')
           ..write('viewerNickname: $viewerNickname, ')
           ..write('ownerUsername: $ownerUsername, ')
           ..write('updatedAt: $updatedAt, ')
@@ -789,6 +838,7 @@ typedef $$CardsTableTableCreateCompanionBuilder =
       required String barcodeType,
       required String barcodeContent,
       required bool isOwner,
+      Value<String?> shareId,
       Value<String?> viewerNickname,
       Value<String?> ownerUsername,
       required DateTime updatedAt,
@@ -801,6 +851,7 @@ typedef $$CardsTableTableUpdateCompanionBuilder =
       Value<String> barcodeType,
       Value<String> barcodeContent,
       Value<bool> isOwner,
+      Value<String?> shareId,
       Value<String?> viewerNickname,
       Value<String?> ownerUsername,
       Value<DateTime> updatedAt,
@@ -838,6 +889,11 @@ class $$CardsTableTableFilterComposer
 
   ColumnFilters<bool> get isOwner => $composableBuilder(
     column: $table.isOwner,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shareId => $composableBuilder(
+    column: $table.shareId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -891,6 +947,11 @@ class $$CardsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get shareId => $composableBuilder(
+    column: $table.shareId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get viewerNickname => $composableBuilder(
     column: $table.viewerNickname,
     builder: (column) => ColumnOrderings(column),
@@ -934,6 +995,9 @@ class $$CardsTableTableAnnotationComposer
 
   GeneratedColumn<bool> get isOwner =>
       $composableBuilder(column: $table.isOwner, builder: (column) => column);
+
+  GeneratedColumn<String> get shareId =>
+      $composableBuilder(column: $table.shareId, builder: (column) => column);
 
   GeneratedColumn<String> get viewerNickname => $composableBuilder(
     column: $table.viewerNickname,
@@ -985,6 +1049,7 @@ class $$CardsTableTableTableManager
                 Value<String> barcodeType = const Value.absent(),
                 Value<String> barcodeContent = const Value.absent(),
                 Value<bool> isOwner = const Value.absent(),
+                Value<String?> shareId = const Value.absent(),
                 Value<String?> viewerNickname = const Value.absent(),
                 Value<String?> ownerUsername = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -995,6 +1060,7 @@ class $$CardsTableTableTableManager
                 barcodeType: barcodeType,
                 barcodeContent: barcodeContent,
                 isOwner: isOwner,
+                shareId: shareId,
                 viewerNickname: viewerNickname,
                 ownerUsername: ownerUsername,
                 updatedAt: updatedAt,
@@ -1007,6 +1073,7 @@ class $$CardsTableTableTableManager
                 required String barcodeType,
                 required String barcodeContent,
                 required bool isOwner,
+                Value<String?> shareId = const Value.absent(),
                 Value<String?> viewerNickname = const Value.absent(),
                 Value<String?> ownerUsername = const Value.absent(),
                 required DateTime updatedAt,
@@ -1017,6 +1084,7 @@ class $$CardsTableTableTableManager
                 barcodeType: barcodeType,
                 barcodeContent: barcodeContent,
                 isOwner: isOwner,
+                shareId: shareId,
                 viewerNickname: viewerNickname,
                 ownerUsername: ownerUsername,
                 updatedAt: updatedAt,

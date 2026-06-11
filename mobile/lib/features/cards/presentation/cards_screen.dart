@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/router/route_names.dart';
+import '../../share/data/share_repository.dart';
 import '../application/owned_cards_notifier.dart';
 import '../application/viewed_cards_notifier.dart';
 import '../data/cards_repository.dart';
 import '../domain/card_model.dart';
+import 'manage_sharing_sheet.dart';
+import 'set_nickname_sheet.dart';
 
 class CardsScreen extends ConsumerWidget {
   const CardsScreen({super.key});
@@ -180,7 +183,7 @@ class _CardTile extends ConsumerWidget {
       subtitle: isOwner ? null : Text(card.ownerUsername ?? ''),
       trailing: isOwner
           ? _OwnerMenu(card: card)
-          : null,
+          : _ViewerMenu(card: card),
       onTap: () => context.pushNamed(
         RouteNames.cardBarcode,
         pathParameters: {'id': card.id},
@@ -282,10 +285,8 @@ class _OwnerMenu extends ConsumerWidget {
   void _showManageSharingSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      builder: (_) => const Padding(
-        padding: EdgeInsets.all(24),
-        child: Text('Manage sharing — coming soon'),
-      ),
+      isScrollControlled: true,
+      builder: (_) => ManageSharingSheet(card: card),
     );
   }
 
@@ -342,3 +343,98 @@ class _OwnerMenu extends ConsumerWidget {
 }
 
 enum _MenuAction { editName, manageSharing, delete }
+
+class _ViewerMenu extends ConsumerWidget {
+  const _ViewerMenu({required this.card});
+  final CardModel card;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton<_ViewerMenuAction>(
+      onSelected: (action) => _handleAction(context, ref, action),
+      itemBuilder: (_) => const [
+        PopupMenuItem(
+          value: _ViewerMenuAction.setNickname,
+          child: Text('Set nickname'),
+        ),
+        PopupMenuItem(
+          value: _ViewerMenuAction.leave,
+          child: Text('Leave sharing'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleAction(
+    BuildContext context,
+    WidgetRef ref,
+    _ViewerMenuAction action,
+  ) async {
+    switch (action) {
+      case _ViewerMenuAction.setNickname:
+        if (!context.mounted) return;
+        showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => SetNicknameSheet(card: card),
+        );
+      case _ViewerMenuAction.leave:
+        await _showLeaveDialog(context, ref);
+    }
+  }
+
+  Future<void> _showLeaveDialog(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Leave sharing'),
+        content: Text(
+          'Stop viewing "${card.viewerNickname ?? card.name}"? You will lose access.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Leave', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final shareId = card.shareId;
+    if (shareId == null) return;
+
+    try {
+      await ref.read(shareRepositoryProvider).leave(shareId, card.id);
+      ref.invalidate(viewedCardsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Left sharing'),
+            backgroundColor: Colors.green,
+            duration: Duration(milliseconds: 1500),
+          ),
+        );
+      }
+    } on ApiException catch (e) {
+      if (context.mounted) {
+        final message = switch (e) {
+          NetworkException() => 'Network error, check your connection',
+          ForbiddenException() => 'Permission denied',
+          ServerException() => 'Server error, try later',
+          UnprocessableException(:final errors) =>
+            errors.values.expand((v) => v).join(', '),
+          _ => 'An error occurred',
+        };
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+      }
+    }
+  }
+}
+
+enum _ViewerMenuAction { setNickname, leave }

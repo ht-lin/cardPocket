@@ -144,6 +144,7 @@ class CardsRepository {
         barcodeType: json['barcodeType'] as String,
         barcodeContent: json['barcodeContent'] as String,
         isOwner: json['isOwner'] as bool,
+        shareId: json['shareId'] as String?,
         viewerNickname: json['viewerNickname'] as String?,
         ownerUsername:
             (json['owner'] as Map<String, dynamic>?)?['userName'] as String?,
@@ -157,6 +158,7 @@ class CardsRepository {
         barcodeType: Value(json['barcodeType'] as String),
         barcodeContent: Value(json['barcodeContent'] as String),
         isOwner: Value(json['isOwner'] as bool),
+        shareId: Value(json['shareId'] as String?),
         viewerNickname: Value(json['viewerNickname'] as String?),
         ownerUsername: Value(
           (json['owner'] as Map<String, dynamic>?)?['userName'] as String?,
@@ -170,6 +172,7 @@ class CardsRepository {
         barcodeType: row.barcodeType,
         barcodeContent: row.barcodeContent,
         isOwner: row.isOwner,
+        shareId: row.shareId,
         viewerNickname: row.viewerNickname,
         ownerUsername: row.ownerUsername,
         updatedAt: row.updatedAt,
