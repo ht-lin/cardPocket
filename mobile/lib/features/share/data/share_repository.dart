@@ -15,8 +15,6 @@ ShareRepository shareRepository(Ref ref) => ShareRepository(
       ref.watch(appDatabaseProvider),
     );
 
-typedef FriendEntry = ({String id, String userName});
-
 class ShareRepository {
   const ShareRepository(this._dio, this._db);
 
@@ -72,22 +70,6 @@ class ShareRepository {
         data: {'viewerNickname': nickname},
       );
       await _db.updateViewerNickname(cardId, nickname);
-    } on DioException catch (e) {
-      throw _mapError(e);
-    }
-  }
-
-  Future<List<FriendEntry>> getFriends() async {
-    try {
-      final response = await _dio.get<List<dynamic>>('/api/friendships');
-      final list = (response.data ?? []).cast<Map<String, dynamic>>();
-      return list.map((item) {
-        final friend = item['friend'] as Map<String, dynamic>;
-        return (
-          id: friend['id'] as String,
-          userName: friend['userName'] as String,
-        );
-      }).toList();
     } on DioException catch (e) {
       throw _mapError(e);
     }

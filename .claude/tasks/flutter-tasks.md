@@ -59,12 +59,12 @@
 
 ### [FE-FRIENDS] 好友
 
-- [ ] FE-FRIENDS-00：Friendship 领域模型（freezed：`UserSummary`、`FriendRequest`、`FriendshipStatus` enum）
-- [ ] FE-FRIENDS-01：`FriendshipRepository`（`GET /api/friends`、`GET /api/friends/requests`、`POST /api/friends/requests` 发请求、`PATCH /api/friends/requests/:id` 接受/拒绝、`DELETE /api/friends/:id` 删除好友）
-- [ ] FE-FRIENDS-02：好友列表页 `/friends`（好友列表，有待处理请求时顶部显示"X 条待处理请求"横幅，点击跳 `/friends/requests`；空状态插图）
-- [ ] FE-FRIENDS-03：待处理请求页 `/friends/requests`（请求列表，接受 / 拒绝按钮，无请求时文字提示）
-- [ ] FE-FRIENDS-04：搜索好友页 `/friends/search`（TextFormField 搜索 `GET /api/users?q=`，无结果提示，发送好友请求按钮）
-- [ ] FE-FRIENDS-05：编写好友模块测试（`FriendshipRepository` 单元测试、好友列表 Widget 测试）
+- [x] FE-FRIENDS-00：Friendship 领域模型（freezed：`UserSummary`、`FriendRequest`、`FriendshipStatus` enum）
+- [x] FE-FRIENDS-01：`FriendshipRepository`（`GET /api/friends`、`GET /api/friends/requests`、`POST /api/friends/requests` 发请求、`PATCH /api/friends/requests/:id` 接受/拒绝、`DELETE /api/friends/:id` 删除好友）
+- [x] FE-FRIENDS-02：好友列表页 `/friends`（好友列表，有待处理请求时顶部显示"X 条待处理请求"横幅，点击跳 `/friends/requests`；空状态插图）
+- [x] FE-FRIENDS-03：待处理请求页 `/friends/requests`（请求列表，接受 / 拒绝按钮，无请求时文字提示）
+- [x] FE-FRIENDS-04：搜索好友页 `/friends/search`（TextFormField 搜索 `GET /api/users?q=`，无结果提示，发送好友请求按钮）
+- [x] FE-FRIENDS-05：编写好友模块测试（`FriendshipRepository` 单元测试、好友列表 Widget 测试）
 
 ### [FE-PROFILE] 个人信息
 

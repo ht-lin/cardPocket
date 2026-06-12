@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exception.dart';
+import '../../friends/data/friendship_repository.dart';
+import '../../friends/domain/friend_model.dart';
 import '../../share/data/share_repository.dart';
 import '../../share/domain/card_share_model.dart';
 import '../domain/card_model.dart';
@@ -17,7 +19,7 @@ class ManageSharingSheet extends ConsumerStatefulWidget {
 
 class _ManageSharingSheetState extends ConsumerState<ManageSharingSheet> {
   List<CardShareModel>? _shares;
-  List<({String id, String userName})>? _friends;
+  List<Friendship>? _friends;
   bool _loadingShares = true;
   bool _loadingFriends = true;
   String? _sharesError;
@@ -57,7 +59,8 @@ class _ManageSharingSheetState extends ConsumerState<ManageSharingSheet> {
       _friendsError = null;
     });
     try {
-      final friends = await ref.read(shareRepositoryProvider).getFriends();
+      final friends =
+          await ref.read(friendshipRepositoryProvider).getFriends();
       if (mounted) setState(() => _friends = friends);
     } on ApiException catch (e) {
       if (mounted) setState(() => _friendsError = _errorMessage(e));
@@ -91,13 +94,13 @@ class _ManageSharingSheetState extends ConsumerState<ManageSharingSheet> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
-  List<({String id, String userName})> get _filteredFriends {
+  List<Friendship> get _filteredFriends {
     final friends = _friends ?? [];
     final viewerIds = (_shares ?? []).map((s) => s.viewerUserId).toSet();
     return friends
         .where((f) =>
-            !viewerIds.contains(f.id) &&
-            f.userName.toLowerCase().contains(_query.toLowerCase()))
+            !viewerIds.contains(f.friend.id) &&
+            f.friend.userName.toLowerCase().contains(_query.toLowerCase()))
         .toList();
   }
 
@@ -169,9 +172,9 @@ class _ManageSharingSheetState extends ConsumerState<ManageSharingSheet> {
                     (f) => ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const CircleAvatar(child: Icon(Icons.person)),
-                      title: Text(f.userName),
+                      title: Text(f.friend.userName),
                       trailing: TextButton(
-                        onPressed: () => _addViewer(f.id),
+                        onPressed: () => _addViewer(f.friend.id),
                         child: const Text('Add'),
                       ),
                     ),

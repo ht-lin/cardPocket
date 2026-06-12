@@ -11,6 +11,9 @@ import '../../features/cards/presentation/cards_screen.dart';
 import '../../features/cards/presentation/create_card_screen.dart';
 import '../../features/cards/presentation/scan_confirm_screen.dart';
 import '../../features/cards/presentation/scan_screen.dart';
+import '../../features/friends/presentation/friend_requests_screen.dart';
+import '../../features/friends/presentation/friend_search_screen.dart';
+import '../../features/friends/presentation/friends_screen.dart';
 import '../../features/placeholder_screen.dart';
 import 'route_names.dart';
 
@@ -118,20 +121,19 @@ List<RouteBase> _buildRoutes() => [
               GoRoute(
                 path: '/friends',
                 name: RouteNames.friends,
-                builder: (context, state) =>
-                    const PlaceholderScreen(label: 'Friends'),
+                builder: (context, state) => const FriendsScreen(),
                 routes: [
                   GoRoute(
                     path: 'requests',
                     name: RouteNames.friendsRequests,
                     builder: (context, state) =>
-                        const PlaceholderScreen(label: 'Requests'),
+                        const FriendRequestsScreen(),
                   ),
                   GoRoute(
                     path: 'search',
                     name: RouteNames.friendsSearch,
                     builder: (context, state) =>
-                        const PlaceholderScreen(label: 'Search Friends'),
+                        const FriendSearchScreen(),
                   ),
                 ],
               ),
