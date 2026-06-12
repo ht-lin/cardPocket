@@ -29,5 +29,21 @@
   "passwordValidationEmpty": "Veuillez saisir votre mot de passe",
   "passwordValidationTooShort": "Le mot de passe doit contenir au moins 8 caractères",
   "usernameValidationEmpty": "Veuillez saisir un nom d'utilisateur",
-  "gdprValidationRequired": "Vous devez accepter pour continuer"
+  "gdprValidationRequired": "Vous devez accepter pour continuer",
+  "profileEditNameTitle": "Modifier le nom d'utilisateur",
+  "profileChangePasswordTitle": "Modifier le mot de passe",
+  "profileLogoutButton": "Se déconnecter",
+  "profileDeleteAccountButton": "Supprimer le compte",
+  "profileDeleteAccountConfirmTitle": "Supprimer le compte",
+  "profileDeleteAccountConfirmBody": "Cela supprimera définitivement votre compte et toutes les données associées. Cette action est irréversible.",
+  "profileDeleteAccountConfirmAction": "Supprimer le compte",
+  "profileDeleteAccountCancelAction": "Annuler",
+  "profileNewUsernameLabel": "Nouveau nom d'utilisateur",
+  "profileCurrentPasswordLabel": "Mot de passe actuel",
+  "profileNewPasswordLabel": "Nouveau mot de passe",
+  "profileConfirmPasswordLabel": "Confirmer le nouveau mot de passe",
+  "profilePasswordMismatch": "Les mots de passe ne correspondent pas",
+  "profileSaveButton": "Enregistrer",
+  "profileUsernameUpdated": "Nom d'utilisateur mis à jour",
+  "profilePasswordUpdated": "Mot de passe mis à jour"
 }

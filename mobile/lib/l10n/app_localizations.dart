@@ -283,6 +283,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You must agree to continue'**
   String get gdprValidationRequired;
+
+  /// Title for the edit username screen
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Username'**
+  String get profileEditNameTitle;
+
+  /// Title for the change password screen
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get profileChangePasswordTitle;
+
+  /// Sign out button label on profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get profileLogoutButton;
+
+  /// Delete account button label on profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get profileDeleteAccountButton;
+
+  /// Title of the delete account confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get profileDeleteAccountConfirmTitle;
+
+  /// Body text of the delete account confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete your account and all associated data. This action cannot be undone.'**
+  String get profileDeleteAccountConfirmBody;
+
+  /// Confirm button in delete account dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get profileDeleteAccountConfirmAction;
+
+  /// Cancel button in delete account dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get profileDeleteAccountCancelAction;
+
+  /// Label for new username field on edit name screen
+  ///
+  /// In en, this message translates to:
+  /// **'New username'**
+  String get profileNewUsernameLabel;
+
+  /// Label for current password field on change password screen
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get profileCurrentPasswordLabel;
+
+  /// Label for new password field on change password screen
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get profileNewPasswordLabel;
+
+  /// Label for confirm password field on change password screen
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get profileConfirmPasswordLabel;
+
+  /// Validation error when new password and confirm password differ
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get profilePasswordMismatch;
+
+  /// Save button label on edit screens
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get profileSaveButton;
+
+  /// SnackBar message after successful username update
+  ///
+  /// In en, this message translates to:
+  /// **'Username updated'**
+  String get profileUsernameUpdated;
+
+  /// SnackBar message after successful password update
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated'**
+  String get profilePasswordUpdated;
 }
 
 class _AppLocalizationsDelegate

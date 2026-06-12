@@ -14,7 +14,9 @@ import '../../features/cards/presentation/scan_screen.dart';
 import '../../features/friends/presentation/friend_requests_screen.dart';
 import '../../features/friends/presentation/friend_search_screen.dart';
 import '../../features/friends/presentation/friends_screen.dart';
-import '../../features/placeholder_screen.dart';
+import '../../features/profile/presentation/change_password_screen.dart';
+import '../../features/profile/presentation/edit_name_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
 import 'route_names.dart';
 
 part 'router_provider.g.dart';
@@ -144,20 +146,18 @@ List<RouteBase> _buildRoutes() => [
               GoRoute(
                 path: '/profile',
                 name: RouteNames.profile,
-                builder: (context, state) =>
-                    const PlaceholderScreen(label: 'Profile'),
+                builder: (context, state) => const ProfileScreen(),
                 routes: [
                   GoRoute(
                     path: 'edit-name',
                     name: RouteNames.profileEditName,
-                    builder: (context, state) =>
-                        const PlaceholderScreen(label: 'Edit Name'),
+                    builder: (context, state) => const EditNameScreen(),
                   ),
                   GoRoute(
                     path: 'change-password',
                     name: RouteNames.profileChangePassword,
                     builder: (context, state) =>
-                        const PlaceholderScreen(label: 'Change Password'),
+                        const ChangePasswordScreen(),
                   ),
                 ],
               ),

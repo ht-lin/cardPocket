@@ -1,0 +1,236 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+import 'package:card_pocket/core/api/api_exception.dart';
+import 'package:card_pocket/features/profile/data/user_repository.dart';
+
+class MockDio extends Mock implements Dio {}
+
+const _userJson = {
+  'id': 'user-1',
+  'email': 'alice@example.com',
+  'userName': 'alice',
+  'emailVerified': true,
+  'createdAt': '2026-06-01T10:00:00.000Z',
+};
+
+void main() {
+  late MockDio mockDio;
+  late UserRepository repo;
+
+  setUp(() {
+    mockDio = MockDio();
+    repo = UserRepository(mockDio);
+  });
+
+  group('UserRepository.getProfile', () {
+    test('returns User on 200', () async {
+      when(() => mockDio.get<Map<String, dynamic>>('/api/users/me')).thenAnswer(
+        (_) async => Response(
+          data: _userJson,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/users/me'),
+        ),
+      );
+
+      final user = await repo.getProfile();
+
+      expect(user.id, 'user-1');
+      expect(user.email, 'alice@example.com');
+      expect(user.userName, 'alice');
+      expect(user.emailVerified, isTrue);
+    });
+
+    test('throws NetworkException on connection timeout', () async {
+      when(() => mockDio.get<Map<String, dynamic>>('/api/users/me')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/users/me'),
+          type: DioExceptionType.connectionTimeout,
+        ),
+      );
+
+      expect(() => repo.getProfile(), throwsA(isA<NetworkException>()));
+    });
+
+    test('throws UnauthorizedException on 401', () async {
+      when(() => mockDio.get<Map<String, dynamic>>('/api/users/me')).thenThrow(
+        DioException(
+          response: Response(
+            statusCode: 401,
+            requestOptions: RequestOptions(path: '/api/users/me'),
+          ),
+          requestOptions: RequestOptions(path: '/api/users/me'),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      expect(() => repo.getProfile(), throwsA(isA<UnauthorizedException>()));
+    });
+  });
+
+  group('UserRepository.updateUsername', () {
+    test('returns updated User on 200', () async {
+      final updatedJson = {..._userJson, 'userName': 'alice_new'};
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: updatedJson,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/users/me'),
+        ),
+      );
+
+      final user = await repo.updateUsername('alice_new');
+
+      expect(user.userName, 'alice_new');
+    });
+
+    test('throws UnprocessableException with field error on 422', () async {
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: any(named: 'data'),
+        ),
+      ).thenThrow(
+        DioException(
+          response: Response(
+            statusCode: 422,
+            data: {
+              'violations': [
+                {'propertyPath': 'userName', 'message': 'Username already taken'},
+              ],
+            },
+            requestOptions: RequestOptions(path: '/api/users/me'),
+          ),
+          requestOptions: RequestOptions(path: '/api/users/me'),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      expect(
+        () => repo.updateUsername('taken'),
+        throwsA(
+          isA<UnprocessableException>().having(
+            (e) => e.errors['userName'],
+            'userName error',
+            contains('Username already taken'),
+          ),
+        ),
+      );
+    });
+  });
+
+  group('UserRepository.updatePassword', () {
+    test('returns updated User on 200', () async {
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: _userJson,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/users/me'),
+        ),
+      );
+
+      final user = await repo.updatePassword(
+        currentPassword: 'old123456',
+        newPassword: 'new123456',
+      );
+
+      expect(user.id, 'user-1');
+    });
+
+    test('throws UnprocessableException on wrong current password', () async {
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: any(named: 'data'),
+        ),
+      ).thenThrow(
+        DioException(
+          response: Response(
+            statusCode: 422,
+            data: {
+              'violations': [
+                {
+                  'propertyPath': 'currentPassword',
+                  'message': 'Current password is incorrect',
+                },
+              ],
+            },
+            requestOptions: RequestOptions(path: '/api/users/me'),
+          ),
+          requestOptions: RequestOptions(path: '/api/users/me'),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      expect(
+        () => repo.updatePassword(
+          currentPassword: 'wrong',
+          newPassword: 'new123456',
+        ),
+        throwsA(
+          isA<UnprocessableException>().having(
+            (e) => e.errors['currentPassword'],
+            'currentPassword error',
+            contains('Current password is incorrect'),
+          ),
+        ),
+      );
+    });
+  });
+
+  group('UserRepository.deleteAccount', () {
+    test('completes without error on 204', () async {
+      when(() => mockDio.delete<void>('/api/users/me')).thenAnswer(
+        (_) async => Response(
+          statusCode: 204,
+          requestOptions: RequestOptions(path: '/api/users/me'),
+        ),
+      );
+
+      await expectLater(repo.deleteAccount(), completes);
+    });
+
+    test('throws ServerException on 500', () async {
+      when(() => mockDio.delete<void>('/api/users/me')).thenThrow(
+        DioException(
+          response: Response(
+            statusCode: 500,
+            requestOptions: RequestOptions(path: '/api/users/me'),
+          ),
+          requestOptions: RequestOptions(path: '/api/users/me'),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      expect(
+        () => repo.deleteAccount(),
+        throwsA(isA<ServerException>()),
+      );
+    });
+
+    test('throws NetworkException on receive timeout', () async {
+      when(() => mockDio.delete<void>('/api/users/me')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/users/me'),
+          type: DioExceptionType.receiveTimeout,
+        ),
+      );
+
+      expect(
+        () => repo.deleteAccount(),
+        throwsA(isA<NetworkException>()),
+      );
+    });
+  });
+}

@@ -68,14 +68,14 @@
 
 ### [FE-PROFILE] 个人信息
 
-- [ ] FE-PROFILE-00：User 领域模型（freezed：`UserProfile` 含 `id`、`email`、`username`、`isVerified`）
-- [ ] FE-PROFILE-01：`UserRepository`（`GET /api/profile`、`PATCH /api/profile/username` 改用户名、`PATCH /api/profile/password` 改密码、`DELETE /api/users/me` 注销）
-- [ ] FE-PROFILE-02：个人信息页 `/profile`（用户名 + 邮箱展示，退出登录 ListTile，删除账户 ListTile）
-- [ ] FE-PROFILE-03：修改用户名页 `/profile/edit-name`（TextFormField + 422 内联错误）
-- [ ] FE-PROFILE-04：修改密码页 `/profile/change-password`（当前密码 + 新密码 + 确认密码，422 内联错误）
-- [ ] FE-PROFILE-05：退出登录（`AuthNotifier.logout` 调用 `/api/auth/logout` + 清除 SecureStorage + 重定向 /login；无独立页面）
-- [ ] FE-PROFILE-06：删除账户（AlertDialog 二次确认，确认后调用 `UserRepository.deleteAccount` + 清除 Drift 数据库 + 重定向 /login）
-- [ ] FE-PROFILE-07：编写个人信息模块测试（`UserRepository` 单元测试、个人信息页 Widget 测试）
+- [x] FE-PROFILE-00：User 领域模型（freezed：`UserProfile` 含 `id`、`email`、`username`、`isVerified`）
+- [x] FE-PROFILE-01：`UserRepository`（`GET /api/profile`、`PATCH /api/profile/username` 改用户名、`PATCH /api/profile/password` 改密码、`DELETE /api/users/me` 注销）
+- [x] FE-PROFILE-02：个人信息页 `/profile`（用户名 + 邮箱展示，退出登录 ListTile，删除账户 ListTile）
+- [x] FE-PROFILE-03：修改用户名页 `/profile/edit-name`（TextFormField + 422 内联错误）
+- [x] FE-PROFILE-04：修改密码页 `/profile/change-password`（当前密码 + 新密码 + 确认密码，422 内联错误）
+- [x] FE-PROFILE-05：退出登录（`AuthNotifier.logout` 调用 `/api/auth/logout` + 清除 SecureStorage + 重定向 /login；无独立页面）
+- [x] FE-PROFILE-06：删除账户（AlertDialog 二次确认，确认后调用 `UserRepository.deleteAccount` + 清除 Drift 数据库 + 重定向 /login）
+- [x] FE-PROFILE-07：编写个人信息模块测试（`UserRepository` 单元测试、个人信息页 Widget 测试）
 
 ### [FE-CI] CI/CD
 

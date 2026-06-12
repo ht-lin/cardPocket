@@ -29,5 +29,21 @@
   "passwordValidationEmpty": "Por favor introduce tu contraseña",
   "passwordValidationTooShort": "La contraseña debe tener al menos 8 caracteres",
   "usernameValidationEmpty": "Por favor introduce un nombre de usuario",
-  "gdprValidationRequired": "Debes aceptar para continuar"
+  "gdprValidationRequired": "Debes aceptar para continuar",
+  "profileEditNameTitle": "Editar nombre de usuario",
+  "profileChangePasswordTitle": "Cambiar contraseña",
+  "profileLogoutButton": "Cerrar sesión",
+  "profileDeleteAccountButton": "Eliminar cuenta",
+  "profileDeleteAccountConfirmTitle": "Eliminar cuenta",
+  "profileDeleteAccountConfirmBody": "Esto eliminará permanentemente tu cuenta y todos los datos asociados. Esta acción no se puede deshacer.",
+  "profileDeleteAccountConfirmAction": "Eliminar cuenta",
+  "profileDeleteAccountCancelAction": "Cancelar",
+  "profileNewUsernameLabel": "Nuevo nombre de usuario",
+  "profileCurrentPasswordLabel": "Contraseña actual",
+  "profileNewPasswordLabel": "Nueva contraseña",
+  "profileConfirmPasswordLabel": "Confirmar nueva contraseña",
+  "profilePasswordMismatch": "Las contraseñas no coinciden",
+  "profileSaveButton": "Guardar",
+  "profileUsernameUpdated": "Nombre de usuario actualizado",
+  "profilePasswordUpdated": "Contraseña actualizada"
 }

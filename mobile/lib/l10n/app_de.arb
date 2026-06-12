@@ -29,5 +29,21 @@
   "passwordValidationEmpty": "Bitte Passwort eingeben",
   "passwordValidationTooShort": "Passwort muss mindestens 8 Zeichen lang sein",
   "usernameValidationEmpty": "Bitte Benutzernamen eingeben",
-  "gdprValidationRequired": "Sie müssen zustimmen, um fortzufahren"
+  "gdprValidationRequired": "Sie müssen zustimmen, um fortzufahren",
+  "profileEditNameTitle": "Benutzername ändern",
+  "profileChangePasswordTitle": "Passwort ändern",
+  "profileLogoutButton": "Abmelden",
+  "profileDeleteAccountButton": "Konto löschen",
+  "profileDeleteAccountConfirmTitle": "Konto löschen",
+  "profileDeleteAccountConfirmBody": "Dadurch werden Ihr Konto und alle zugehörigen Daten dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+  "profileDeleteAccountConfirmAction": "Konto löschen",
+  "profileDeleteAccountCancelAction": "Abbrechen",
+  "profileNewUsernameLabel": "Neuer Benutzername",
+  "profileCurrentPasswordLabel": "Aktuelles Passwort",
+  "profileNewPasswordLabel": "Neues Passwort",
+  "profileConfirmPasswordLabel": "Neues Passwort bestätigen",
+  "profilePasswordMismatch": "Passwörter stimmen nicht überein",
+  "profileSaveButton": "Speichern",
+  "profileUsernameUpdated": "Benutzername aktualisiert",
+  "profilePasswordUpdated": "Passwort aktualisiert"
 }

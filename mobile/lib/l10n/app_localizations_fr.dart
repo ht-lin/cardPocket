@@ -105,4 +105,54 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get gdprValidationRequired => 'Vous devez accepter pour continuer';
+
+  @override
+  String get profileEditNameTitle => 'Modifier le nom d\'utilisateur';
+
+  @override
+  String get profileChangePasswordTitle => 'Modifier le mot de passe';
+
+  @override
+  String get profileLogoutButton => 'Se déconnecter';
+
+  @override
+  String get profileDeleteAccountButton => 'Supprimer le compte';
+
+  @override
+  String get profileDeleteAccountConfirmTitle => 'Supprimer le compte';
+
+  @override
+  String get profileDeleteAccountConfirmBody =>
+      'Cela supprimera définitivement votre compte et toutes les données associées. Cette action est irréversible.';
+
+  @override
+  String get profileDeleteAccountConfirmAction => 'Supprimer le compte';
+
+  @override
+  String get profileDeleteAccountCancelAction => 'Annuler';
+
+  @override
+  String get profileNewUsernameLabel => 'Nouveau nom d\'utilisateur';
+
+  @override
+  String get profileCurrentPasswordLabel => 'Mot de passe actuel';
+
+  @override
+  String get profileNewPasswordLabel => 'Nouveau mot de passe';
+
+  @override
+  String get profileConfirmPasswordLabel => 'Confirmer le nouveau mot de passe';
+
+  @override
+  String get profilePasswordMismatch =>
+      'Les mots de passe ne correspondent pas';
+
+  @override
+  String get profileSaveButton => 'Enregistrer';
+
+  @override
+  String get profileUsernameUpdated => 'Nom d\'utilisateur mis à jour';
+
+  @override
+  String get profilePasswordUpdated => 'Mot de passe mis à jour';
 }

@@ -97,4 +97,52 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gdprValidationRequired => '需要同意才能继续';
+
+  @override
+  String get profileEditNameTitle => '修改用户名';
+
+  @override
+  String get profileChangePasswordTitle => '修改密码';
+
+  @override
+  String get profileLogoutButton => '退出登录';
+
+  @override
+  String get profileDeleteAccountButton => '注销账号';
+
+  @override
+  String get profileDeleteAccountConfirmTitle => '注销账号';
+
+  @override
+  String get profileDeleteAccountConfirmBody => '此操作将永久删除您的账号及所有相关数据，且无法恢复。';
+
+  @override
+  String get profileDeleteAccountConfirmAction => '确认注销';
+
+  @override
+  String get profileDeleteAccountCancelAction => '取消';
+
+  @override
+  String get profileNewUsernameLabel => '新用户名';
+
+  @override
+  String get profileCurrentPasswordLabel => '当前密码';
+
+  @override
+  String get profileNewPasswordLabel => '新密码';
+
+  @override
+  String get profileConfirmPasswordLabel => '确认新密码';
+
+  @override
+  String get profilePasswordMismatch => '两次密码不一致';
+
+  @override
+  String get profileSaveButton => '保存';
+
+  @override
+  String get profileUsernameUpdated => '用户名已更新';
+
+  @override
+  String get profilePasswordUpdated => '密码已更新';
 }

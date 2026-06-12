@@ -76,4 +76,9 @@ class AppDatabase extends _$AppDatabase {
       ),
     );
   }
+
+  Future<void> clearAllData() async {
+    await delete(cardsTable).go();
+    await delete(syncMetaTable).go();
+  }
 }

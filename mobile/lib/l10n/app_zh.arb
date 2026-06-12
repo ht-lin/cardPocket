@@ -29,5 +29,21 @@
   "passwordValidationEmpty": "请输入密码",
   "passwordValidationTooShort": "密码至少需要 8 个字符",
   "usernameValidationEmpty": "请输入用户名",
-  "gdprValidationRequired": "需要同意才能继续"
+  "gdprValidationRequired": "需要同意才能继续",
+  "profileEditNameTitle": "修改用户名",
+  "profileChangePasswordTitle": "修改密码",
+  "profileLogoutButton": "退出登录",
+  "profileDeleteAccountButton": "注销账号",
+  "profileDeleteAccountConfirmTitle": "注销账号",
+  "profileDeleteAccountConfirmBody": "此操作将永久删除您的账号及所有相关数据，且无法恢复。",
+  "profileDeleteAccountConfirmAction": "确认注销",
+  "profileDeleteAccountCancelAction": "取消",
+  "profileNewUsernameLabel": "新用户名",
+  "profileCurrentPasswordLabel": "当前密码",
+  "profileNewPasswordLabel": "新密码",
+  "profileConfirmPasswordLabel": "确认新密码",
+  "profilePasswordMismatch": "两次密码不一致",
+  "profileSaveButton": "保存",
+  "profileUsernameUpdated": "用户名已更新",
+  "profilePasswordUpdated": "密码已更新"
 }
