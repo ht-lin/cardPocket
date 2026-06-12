@@ -1,0 +1,64 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['mobile/**']
+  pull_request:
+    branches: [main]
+    paths: ['mobile/**']
+
+jobs:
+  ci:
+    name: Analyze / Test / Build APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: flutter analyze
+        working-directory: mobile
+        run: flutter analyze
+
+      - name: flutter test
+        working-directory: mobile
+        run: flutter test
+
+      - name: Build dev APK (debug)
+        working-directory: mobile
+        run: flutter build apk --flavor dev --debug
+
+      - name: Upload dev APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-debug-apk
+          path: mobile/build/app/outputs/flutter-apk/app-dev-debug.apk
+          retention-days: 7
+
+  build-ios:
+    name: Build dev IPA (no codesign)
+    runs-on: macos-latest
+    needs: ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Build dev IPA (debug, no codesign)
+        working-directory: mobile
+        run: flutter build ios --flavor dev --debug --no-codesign

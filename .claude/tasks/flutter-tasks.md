@@ -79,7 +79,7 @@
 
 ### [FE-CI] CI/CD
 
-- [ ] FE-CI-01：GitHub Actions workflow（触发：push to main + PR；步骤：`flutter analyze` → `flutter test` → build dev APK → build dev IPA on macOS runner）
+- [x] FE-CI-01：GitHub Actions workflow（触发：push to main + PR；步骤：`flutter analyze` → `flutter test` → build dev APK → build dev IPA on macOS runner）
 
 ---
 
