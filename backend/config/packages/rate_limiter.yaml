@@ -15,9 +15,25 @@ framework:
             interval: '1 minute'
             cache_pool: cache.rate_limiter
 
+        # Per-account brute-force guard (keyed by email) so distributed credential stuffing
+        # cannot bypass the per-IP limiter by rotating source IPs.
+        login_by_account:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'
+            cache_pool: cache.rate_limiter
+
         resend_verification_by_user:
             policy: sliding_window
             limit: 3
+            interval: '1 hour'
+            cache_pool: cache.rate_limiter
+
+        # Per-IP guard so an attacker cannot spam verification emails at many registered
+        # addresses (the per-user limiter is keyed by the attacker-supplied email).
+        resend_verification_by_ip:
+            policy: sliding_window
+            limit: 10
             interval: '1 hour'
             cache_pool: cache.rate_limiter
 
@@ -34,7 +50,11 @@ when@dev:
                 policy: no_limit
             login_by_ip:
                 policy: no_limit
+            login_by_account:
+                policy: no_limit
             resend_verification_by_user:
+                policy: no_limit
+            resend_verification_by_ip:
                 policy: no_limit
             send_friend_request_by_user:
                 policy: no_limit
@@ -46,7 +66,11 @@ when@test:
                 policy: no_limit
             login_by_ip:
                 policy: no_limit
+            login_by_account:
+                policy: no_limit
             resend_verification_by_user:
+                policy: no_limit
+            resend_verification_by_ip:
                 policy: no_limit
             send_friend_request_by_user:
                 policy: no_limit

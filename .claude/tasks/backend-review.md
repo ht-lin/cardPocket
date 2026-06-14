@@ -41,26 +41,34 @@
 
 ## 🟡 中优先级
 
-### [REV-M5] 唯一性检查竞态返回 500
-- [ ] UserRegisterProcessor / UserUpdateProcessor「先查后插」，并发时 DB 约束兜底但表现为 500 → 应 catch `UniqueConstraintViolationException` 转 422
-- [ ] UserRegisterInput 上的 `#[UniqueEntity]` 与 processor 手动查重重复 → 确认哪个生效后删另一个
+### [REV-M5] 唯一性检查竞态返回 500 ✅ 已修复
+- [x] UserRegisterProcessor / UserUpdateProcessor「先查后插」，并发时 DB 约束兜底但表现为 500 → 应 catch `UniqueConstraintViolationException` 转 422
+- [x] UserRegisterInput 上的 `#[UniqueEntity]` 与 processor 手动查重重复 → 确认哪个生效后删另一个
+- 实现：Register 删除 processor 内手动 `findOneBy` 查重（保留 Input 的 `#[UniqueEntity]` 作前置校验），两处 processor 的 `flush()` 包 try/catch `UniqueConstraintViolationException` → 422 兜并发竞态。
 
-### [REV-M6] `CardShareUpdateInput::viewerNickname` 无长度校验
-- [ ] DB 列 255，超长输入触发 DB 错误 500 → 加 `#[Assert\Length(max: 255)]`
+### [REV-M6] `CardShareUpdateInput::viewerNickname` 无长度校验 ✅ 已修复
+- [x] DB 列 255，超长输入触发 DB 错误 500 → 加 `#[Assert\Length(max: 255)]`
+- 实现：`CardShareUpdateInput` 加 `#[Assert\Length(max: 255)]`；测试补 256 字符 → 422。
 
-### [REV-M7] 登录用户枚举 + 防爆破缺口
-- [ ] LoginProcessor 用户不存在时跳过密码哈希，存在时序差异可枚举注册邮箱 → 对不存在用户跑 dummy hash
-- [ ] 只有 by-IP 限流，无 by-account 限流，防不住分布式撞库 → 加按 email 键的宽松限流器
+### [REV-M7] 登录用户枚举 + 防爆破缺口 ✅ 已修复
+- [x] LoginProcessor 用户不存在时跳过密码哈希，存在时序差异可枚举注册邮箱 → 对不存在用户跑 dummy hash
+- [x] 只有 by-IP 限流，无 by-account 限流，防不住分布式撞库 → 加按 email 键的宽松限流器
+- 实现：`LoginProcessor` user 为 null 时对 `DUMMY_HASH`(预生成 bcrypt) 跑一次 `isPasswordValid` 消除时序差异；新增 `login_by_account` 限流器(5/15min，键=email)。现有 `testWrongPasswordAndNonExistentEmailReturnIdenticalResponse` 已覆盖等价响应。
 
-### [REV-M8] `resend-verification` 限流维度不对
-- [ ] 限流键是攻击者提供的 email（每目标 3 次/h），无 by-IP 限制 → 可对任意已注册邮箱发垃圾验证邮件 → 补 by-IP 限流器
+### [REV-M8] `resend-verification` 限流维度不对 ✅ 已修复
+- [x] 限流键是攻击者提供的 email（每目标 3 次/h），无 by-IP 限制 → 可对任意已注册邮箱发垃圾验证邮件 → 补 by-IP 限流器
+- 实现：新增 `resend_verification_by_ip` 限流器(10/h)；`ResendVerificationProcessor` 注入 `RequestStack`，by-IP 限流先于 by-user，保持不泄露邮箱注册状态语义。
 
-### [REV-M9] 增量同步时钟问题
-- [ ] `updatedAt > since` 严格比较且秒级精度，同秒更新可能丢失；`since` 由客户端时钟生成，时钟偏移直接丢数据
+### [REV-M9] 增量同步时钟问题 ✅ 已修复
+- [x] `updatedAt > since` 严格比较且秒级精度，同秒更新可能丢失；`since` 由客户端时钟生成，时钟偏移直接丢数据
 - 方案：CardSyncOutput 返回服务器端 `syncedAt`，客户端下次以此作 `updatedAfter`
+- 实现：`CardSyncOutput` 加 `syncedAt`；`IncrementalSyncProvider` 在查询前捕获 `$serverNow` 并下发，消除客户端时钟依赖。范围限增量响应（全量列表初始高水位属前端首启策略）。
 
-### [REV-M10] `/users/search` 暴露 email → userName 映射
-- [ ] 任何已验证用户可用 email 精确查询确认「该邮箱是否注册及其用户名」→ 若为好友搜索的产品决定可接受，但应在 PRD 明确记录该隐私权衡
+### [REV-M10] `/users/search` 暴露 email → userName 映射 ✅ 已记录
+- [x] 任何已验证用户可用 email 精确查询确认「该邮箱是否注册及其用户名」→ 若为好友搜索的产品决定可接受，但应在 PRD 明确记录该隐私权衡
+- 处理：与用户确认「仅文档记录」（保持行为）。已在 `prd.md` FR-07 与 `api.md` search 章节补隐私权衡说明（仅精确匹配 / 响应不含 email / 限已验证用户；未来可改为仅按 userName 搜索）。
+
+> M5~M10 完成后全量测试：163 绿（含本轮新增 M6/M9 共 2 条）。
 
 ---
 

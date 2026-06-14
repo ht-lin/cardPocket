@@ -164,6 +164,31 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $this->assertContains((string) $card->getId(), $data['deleted']);
     }
 
+    public function testSyncResponseIncludesServerSyncedAt(): void
+    {
+        UserFactory::createOne(['email' => 'owner@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'owner@example.com', 'Password1!');
+
+        $response = $this->authenticatedRequest(
+            $client,
+            'GET',
+            '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
+            $token,
+            self::JSON_HEADER,
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $data = $response->toArray();
+
+        $this->assertArrayHasKey('syncedAt', $data);
+        $this->assertNotFalse(
+            \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $data['syncedAt']),
+            'syncedAt must be a valid ATOM timestamp',
+        );
+    }
+
     public function testMalformedUpdatedAfterReturns400(): void
     {
         UserFactory::createOne(['email' => 'owner@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);

@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Service\EmailVerificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 
@@ -22,8 +23,11 @@ final class ResendVerificationProcessor implements ProcessorInterface
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly EmailVerificationService $emailVerificationService,
+        private readonly RequestStack $requestStack,
         #[Autowire(service: 'limiter.resend_verification_by_user')]
         private readonly RateLimiterFactory $resendLimiter,
+        #[Autowire(service: 'limiter.resend_verification_by_ip')]
+        private readonly RateLimiterFactory $resendByIpLimiter,
     ) {
     }
 
@@ -34,6 +38,12 @@ final class ResendVerificationProcessor implements ProcessorInterface
         array $context = [],
     ): null {
         assert($data instanceof ResendVerificationInput);
+
+        // Per-IP guard first (independent of the attacker-supplied email), then per-target.
+        $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? '127.0.0.1';
+        if (!$this->resendByIpLimiter->create($ip)->consume()->isAccepted()) {
+            throw new TooManyRequestsHttpException();
+        }
 
         if (!$this->resendLimiter->create($data->email)->consume()->isAccepted()) {
             throw new TooManyRequestsHttpException();

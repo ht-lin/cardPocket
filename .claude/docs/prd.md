@@ -96,6 +96,8 @@ GET /api/cards?updatedAfter={timestamp} 必须同时返回：
 
 GET /api/users/search 永远只返回 `id + userName`，即使搜索词是 email，响应中也不包含 email 字段。无匹配时返回空数组（不返回 404）。
 
+**隐私权衡（有意决策，已知并接受）**：按 email 精确搜索时，命中即可推断「该邮箱已注册及其用户名」。这是为支持好友搜索（需用 email 找人）的产品取舍。缓解措施：仅**已验证邮箱**的用户可调用（`UserSearchProvider` 校验 `emailVerifiedAt`）；仅做**精确匹配**、不做模糊/前缀枚举；响应**永不含 email**。若未来隐私要求升级，可改为仅按 userName 搜索。
+
 ### FR-08：卡片数量上限
 
 每用户 Card 数量（Owner）上限 200 张。超出时 POST /api/cards 返回 422，错误信息说明上限。

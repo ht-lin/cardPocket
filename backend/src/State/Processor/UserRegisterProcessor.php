@@ -10,15 +10,14 @@ use App\ApiResource\User\UserRegisterInput;
 use App\ApiResource\User\UserRegisterOutput;
 use App\Entity\User;
 use App\Service\EmailVerificationService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
-use ApiPlatform\Validator\Exception\ValidationException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
-use Symfony\Component\Validator\ConstraintViolation;
-use Symfony\Component\Validator\ConstraintViolationList;
 
 /**
  * @implements ProcessorInterface<UserRegisterInput, UserRegisterOutput>
@@ -48,20 +47,10 @@ final class UserRegisterProcessor implements ProcessorInterface
             throw new TooManyRequestsHttpException();
         }
 
-        $violations = new ConstraintViolationList();
-
-        if ($this->entityManager->getRepository(User::class)->findOneBy(['email' => $data->email]) !== null) {
-            $violations->add(new ConstraintViolation('This email is already registered.', null, [], $data, 'email', $data->email));
-        }
-
-        if ($this->entityManager->getRepository(User::class)->findOneBy(['userName' => $data->userName]) !== null) {
-            $violations->add(new ConstraintViolation('This username is already taken.', null, [], $data, 'userName', $data->userName));
-        }
-
-        if (count($violations) > 0) {
-            throw new ValidationException($violations);
-        }
-
+        // Uniqueness of email/userName is enforced declaratively by #[UniqueEntity] on
+        // UserRegisterInput (validated before this processor). The DB unique indexes are the
+        // race-condition backstop: two concurrent registrations can both pass validation, so
+        // catch the violation here instead of surfacing a 500.
         $user = new User();
         $user->setEmail($data->email);
         $user->setUserName($data->userName);
@@ -71,7 +60,12 @@ final class UserRegisterProcessor implements ProcessorInterface
         $user->setPassword($hashedPassword);
 
         $this->entityManager->persist($user);
-        $this->entityManager->flush();
+
+        try {
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            throw new UnprocessableEntityHttpException('Email or username is already taken.', $e);
+        }
 
         $this->emailVerificationService->sendVerification($user);
 

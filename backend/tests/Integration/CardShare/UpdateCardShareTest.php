@@ -39,6 +39,27 @@ final class UpdateCardShareTest extends AbstractApiTestCase
         $this->assertSame('我的超市卡', $data['viewerNickname']);
     }
 
+    public function testNicknameTooLongReturns422(): void
+    {
+        $owner  = UserFactory::createOne(['email' => 'owner@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+        $viewer = UserFactory::createOne(['email' => 'viewer@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+        $card   = CardFactory::createOne(['owner' => $owner]);
+        $share  = CardShareFactory::createOne(['card' => $card, 'viewer' => $viewer]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'viewer@example.com', 'Password1!');
+
+        $this->authenticatedRequest(
+            $client,
+            'PATCH',
+            '/api/card-shares/' . $share->getId(),
+            $token,
+            ['json' => ['viewerNickname' => str_repeat('a', 256)]],
+        );
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
     // ─── Authorization ────────────────────────────────────────────────────────
 
     public function testUpdateCardShareRequiresAuth(): void

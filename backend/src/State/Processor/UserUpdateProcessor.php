@@ -9,6 +9,7 @@ use ApiPlatform\State\ProcessorInterface;
 use App\ApiResource\User\UserOutput;
 use App\ApiResource\User\UserUpdateInput;
 use App\Entity\User;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -59,7 +60,12 @@ final class UserUpdateProcessor implements ProcessorInterface
             $user->setUserName($data->userName);
         }
 
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            // DB unique index backstops the find-then-update check above against races.
+            throw new UnprocessableEntityHttpException('This username is already taken.', $e);
+        }
 
         return new UserOutput(
             id: (string) $user->getId(),

@@ -23,6 +23,10 @@ final class IncrementalSyncProvider
 
     public function provide(User $user, \DateTimeImmutable $since): CardSyncOutput
     {
+        // Capture the server clock before querying so anything committed during/after this
+        // request (updatedAt >= serverNow) is caught by the next sync (> serverNow).
+        $serverNow = new \DateTimeImmutable();
+
         $updated = [];
 
         foreach ($this->cardRepository->findUpdatedByOwnerSince($user, $since) as $card) {
@@ -57,6 +61,10 @@ final class IncrementalSyncProvider
             $since,
         );
 
-        return new CardSyncOutput(updated: $updated, deleted: $deleted);
+        return new CardSyncOutput(
+            updated: $updated,
+            deleted: $deleted,
+            syncedAt: $serverNow->format(\DateTimeInterface::ATOM),
+        );
     }
 }
