@@ -199,14 +199,19 @@ Nginx
   ├── /api/docs → PHP-FPM (OpenAPI UI)
   └── /静态文件 → 本地磁盘
         │
-        ├── PostgreSQL (5432, 仅本地访问)
-        ├── Redis:rate-limiter (6380, 仅本地访问, maxmemory-policy noeviction)
+        ├── PostgreSQL (5432, 仅本地访问) — 业务数据 + messenger_messages 异步队列
+        ├── Redis (仅本地访问, maxmemory-policy noeviction) — 速率限制 + ORM result cache(REDIS_URL_RESULT_CACHE)
         └── 本地磁盘（Phase 3 图片）
 
-后台进程（Phase 2）
-  ├── php bin/console messenger:consume async   # 推送队列 Worker
-  └── php bin/console scheduler:run             # 归档定时任务
+后台进程（常驻 worker）
+  ├── php bin/console messenger:consume async              # 异步邮件（验证邮件等，避免阻塞注册）
+  └── php bin/console messenger:consume scheduler_default  # 定时任务调度（App\Schedule）
 ```
+
+**数据保留与清理**：`App\Schedule` 每日触发 `CleanupExpiredDataHandler`，清理：过期
+`email_verification_token`、失效 `refresh_tokens`（等价 `gesdinet:jwt:clear`）、超 **90 天**的
+`app_card_deletion` tombstone。**客户端若离线超过保留期（90 天）应触发全量同步**，否则会漏掉
+已被清理的删除记录。两个 worker 建议用 systemd/supervisor 常驻并自动重启。
 
 ### 开发环境
 

@@ -24,10 +24,12 @@ services:
     App\Service\EmailVerificationService:
         arguments:
             $appUrl: '%env(APP_URL)%'
+            $senderEmail: '%env(MAILER_SENDER)%'
 
     App\State\Processor\LoginProcessor:
         arguments:
             $jwtTtl: '%lexik_jwt_authentication.token_ttl%'
+            $refreshTtl: '%gesdinet_jwt_refresh_token.ttl%'
 
     App\EventSubscriber\AuthenticationSuccessSubscriber:
         arguments:

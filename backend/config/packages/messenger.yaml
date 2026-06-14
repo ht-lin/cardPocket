@@ -1,0 +1,24 @@
+framework:
+    messenger:
+        transports:
+            # Async transport for non-blocking work (e.g. verification emails).
+            # prod: doctrine://default (table auto-created); dev/test: overridden to sync below.
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+
+        routing:
+            # Symfony Mailer dispatches this message; routing it async makes ->send() non-blocking.
+            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+
+# Run synchronously in dev/test so no worker is required and test behaviour is unchanged.
+when@dev:
+    framework:
+        messenger:
+            transports:
+                async: 'sync://'
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                async: 'sync://'

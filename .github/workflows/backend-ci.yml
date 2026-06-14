@@ -1,0 +1,72 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**']
+  pull_request:
+    branches: [main]
+    paths: ['backend/**']
+
+jobs:
+  ci:
+    name: PHPUnit / PHPStan
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cardpocket
+          POSTGRES_PASSWORD: cardpocket
+          POSTGRES_DB: cardpocket_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cardpocket"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: "postgresql://cardpocket:cardpocket@127.0.0.1:5432/cardpocket_test?serverVersion=16&charset=utf8"
+      REDIS_URL_RATE_LIMITER: redis://127.0.0.1:6379
+      REDIS_URL_RESULT_CACHE: redis://127.0.0.1:6379
+      MESSENGER_TRANSPORT_DSN: sync://
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv, pdo_pgsql, redis, intl
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Generate JWT keypair
+        run: php bin/console lexik:jwt:generate-keypair --overwrite --no-interaction
+
+      - name: Run migrations
+        run: php bin/console doctrine:migrations:migrate --no-interaction
+
+      - name: PHPUnit
+        run: php bin/phpunit
+
+      - name: Warm dev cache for PHPStan
+        run: php bin/console cache:warmup --env=dev
+
+      - name: PHPStan
+        env:
+          APP_ENV: dev
+        run: vendor/bin/phpstan analyse --no-progress

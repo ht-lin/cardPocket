@@ -57,7 +57,10 @@ when@prod:
     framework:
         cache:
             pools:
+                # Shared across instances so the ORM result cache is consistent in a
+                # multi-instance deployment (cache.app's default filesystem is per-instance).
                 doctrine.result_cache_pool:
-                    adapter: cache.app
+                    adapter: cache.adapter.redis
+                    provider: '%env(REDIS_URL_RESULT_CACHE)%'
                 doctrine.system_cache_pool:
                     adapter: cache.system

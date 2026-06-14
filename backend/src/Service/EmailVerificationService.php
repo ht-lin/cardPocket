@@ -16,6 +16,7 @@ final class EmailVerificationService
         private readonly EntityManagerInterface $entityManager,
         private readonly MailerInterface $mailer,
         private readonly string $appUrl,
+        private readonly string $senderEmail,
     ) {
     }
 
@@ -32,7 +33,7 @@ final class EmailVerificationService
         $verificationUrl = $this->appUrl.'/verify-email?token='.$token->getToken();
 
         $email = (new Email())
-            ->from('noreply@cardpocket.app')
+            ->from($this->senderEmail)
             ->to($user->getEmail())
             ->subject('Verify your CardPocket email')
             ->text("Click this link to verify your email: $verificationUrl");

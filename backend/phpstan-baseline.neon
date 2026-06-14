@@ -1,0 +1,211 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\ApiResource\\CardShare\\CardShareOutput\:\:__construct\(\) has parameter \$viewer with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/ApiResource/CardShare/CardShareOutput.php
+
+		-
+			message: '#^Method App\\ApiResource\\Friendship\\FriendRequestOutput\:\:__construct\(\) has parameter \$requester with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/ApiResource/Friendship/FriendRequestOutput.php
+
+		-
+			message: '#^Method App\\ApiResource\\Friendship\\FriendshipOutput\:\:__construct\(\) has parameter \$friend with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/ApiResource/Friendship/FriendshipOutput.php
+
+		-
+			message: '#^Class App\\Security\\Voter\\CardShareVoter extends generic class Symfony\\Component\\Security\\Core\\Authorization\\Voter\\Voter but does not specify its types\: TAttribute, TSubject$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Security/Voter/CardShareVoter.php
+
+		-
+			message: '#^Class App\\Security\\Voter\\CardVoter extends generic class Symfony\\Component\\Security\\Core\\Authorization\\Voter\\Voter but does not specify its types\: TAttribute, TSubject$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Security/Voter/CardVoter.php
+
+		-
+			message: '#^Class App\\Security\\Voter\\FriendshipVoter extends generic class Symfony\\Component\\Security\\Core\\Authorization\\Voter\\Voter but does not specify its types\: TAttribute, TSubject$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Security/Voter/FriendshipVoter.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/CardCreateProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\Card\\CardCreateInput and App\\ApiResource\\Card\\CardCreateInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/CardCreateProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/CardShareCreateProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\CardShare\\CardShareCreateInput and App\\ApiResource\\CardShare\\CardShareCreateInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/CardShareCreateProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/CardShareUpdateProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\CardShare\\CardShareUpdateInput and App\\ApiResource\\CardShare\\CardShareUpdateInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/CardShareUpdateProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/CardUpdateProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\Card\\CardUpdateInput and App\\ApiResource\\Card\\CardUpdateInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/CardUpdateProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/FriendSendProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\Friendship\\FriendSendInput and App\\ApiResource\\Friendship\\FriendSendInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/FriendSendProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/LoginProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\Auth\\LoginInput and App\\ApiResource\\Auth\\LoginInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/LoginProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/LogoutProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\Auth\\LogoutInput and App\\ApiResource\\Auth\\LogoutInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/LogoutProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/ResendVerificationProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\Auth\\ResendVerificationInput and App\\ApiResource\\Auth\\ResendVerificationInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/ResendVerificationProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/UserRegisterProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\User\\UserRegisterInput and App\\ApiResource\\User\\UserRegisterInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/UserRegisterProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/UserUpdateProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\User\\UserUpdateInput and App\\ApiResource\\User\\UserUpdateInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/UserUpdateProcessor.php
+
+		-
+			message: '#^Call to function assert\(\) with true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/State/Processor/VerifyEmailProcessor.php
+
+		-
+			message: '#^Instanceof between App\\ApiResource\\Auth\\VerifyEmailInput and App\\ApiResource\\Auth\\VerifyEmailInput will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/State/Processor/VerifyEmailProcessor.php
+
+		-
+			message: '#^Class App\\State\\Provider\\CardListProvider implements generic interface ApiPlatform\\State\\ProviderInterface but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/State/Provider/CardListProvider.php
+
+		-
+			message: '#^Method App\\State\\Provider\\FriendRequestListProvider\:\:provide\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/State/Provider/FriendRequestListProvider.php
+
+		-
+			message: '#^Method App\\State\\Provider\\FriendshipListProvider\:\:provide\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/State/Provider/FriendshipListProvider.php
+
+		-
+			message: '#^Method App\\State\\Provider\\UserSearchProvider\:\:provide\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/State/Provider/UserSearchProvider.php
+
+		-
+			message: '#^Method App\\Tests\\AbstractApiTestCase\:\:authenticatedRequest\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/AbstractApiTestCase.php
+
+		-
+			message: '#^Method App\\Tests\\AbstractApiTestCase\:\:decodeJwtPayload\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/AbstractApiTestCase.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Symfony\\\\Component\\\\Dotenv\\\\Dotenv'' and ''bootEnv'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: tests/bootstrap.php

@@ -37,6 +37,7 @@ final class LoginProcessor implements ProcessorInterface
         private readonly RefreshTokenGeneratorInterface $refreshTokenGenerator,
         private readonly RefreshTokenManagerInterface $refreshTokenManager,
         private readonly int $jwtTtl,
+        private readonly int $refreshTtl,
         private readonly RequestStack $requestStack,
         #[Autowire(service: 'limiter.login_by_ip')]
         private readonly RateLimiterFactory $loginByIpLimiter,
@@ -75,7 +76,7 @@ final class LoginProcessor implements ProcessorInterface
 
         $accessToken = $this->jwtManager->create($user);
 
-        $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, 2592000);
+        $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, $this->refreshTtl);
         $this->refreshTokenManager->save($refreshToken);
 
         return new LoginOutput(

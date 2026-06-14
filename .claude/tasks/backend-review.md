@@ -74,15 +74,26 @@
 
 ## 🟢 低优先级 / 工程化
 
-- [ ] [REV-L11] 无 monolog，生产出错无迹可查 → 尽早补日志组件
-- [ ] [REV-L12] 邮件同步发送阻塞注册请求（EmailVerificationService），发件人 `noreply@cardpocket.app` 硬编码 → 引入 messenger 异步化 + 发件人走配置
-- [ ] [REV-L13] 无数据清理机制：过期 email_verification_token / refresh_tokens（有 `gesdinet:jwt:clear` 但无 cron）/ app_card_deletion tombstone 无限增长 → 定保留期（如 90 天）+ 定时清理，客户端超期则全量同步
-- [ ] [REV-L14] 后端无 CI（`.github/workflows/` 只有 flutter-ci.yml）→ 加 PHP CI（phpunit + 引入 PHPStan，目前无静态分析）
-- [ ] [REV-L15] `LoginProcessor` 硬编码 `2592000` 与 gesdinet 配置 `ttl` 重复 → 注入参数
-- [ ] [REV-L16] 软删过滤器与各 repository 手写 `deletedAt IS NULL` 冗余 → 统一约定依赖哪一层
-- [ ] [REV-L17] prod `doctrine.result_cache_pool` 走 `cache.app`（默认文件系统）→ 多实例部署需切 Redis
-- [ ] [REV-L18] `framework.yaml` 开了 `session: true`，纯 stateless API 用不到 → 可关闭
-- [ ] [REV-L19] Viewer 无法 GET 单张共享卡：CardVoter::CARD_VIEW 仅允许 owner（注明 Phase 2），但列表接口会返回共享卡 → 前端对共享卡发 `GET /cards/{id}` 会拿 403，注意别踩坑
+- [x] [REV-L11] 无 monolog，生产出错无迹可查 → 尽早补日志组件
+  - 实现：`composer require symfony/monolog-bundle`，Flex 生成 `monolog.yaml`（prod 把 error 以 JSON 写 `php://stderr`，容器友好）。
+- [x] [REV-L12] 邮件同步发送阻塞注册请求（EmailVerificationService），发件人 `noreply@cardpocket.app` 硬编码 → 引入 messenger 异步化 + 发件人走配置
+  - 实现：引入 `symfony/messenger`，`messenger.yaml` 把 `SendEmailMessage` 路由到 async（prod=doctrine 传输，dev/test=sync://）；`EmailVerificationService` 发件人改注入 `MAILER_SENDER` env。
+- [x] [REV-L13] 无数据清理机制 → 定保留期（90 天）+ 定时清理，客户端超期则全量同步
+  - 实现：引入 `symfony/scheduler`，`App\Schedule` 每日触发 `CleanupExpiredDataHandler`（清过期验证 token / 失效 refresh token / 90 天前 tombstone）；`CardDeletionRepository::deleteOlderThan` 新增；architecture.md 补 worker 与保留期说明。测试 `CleanupExpiredDataHandlerTest`。
+- [x] [REV-L14] 后端无 CI → 加 PHP CI（phpunit + 引入 PHPStan）
+  - 实现：`.github/workflows/backend-ci.yml`（postgres+redis 服务，php 8.4，JWT keypair、migrate、phpunit、phpstan）；PHPStan level 6 + `phpstan-baseline.neon` 收编 35 处现存告警，增量把关。
+- [x] [REV-L15] `LoginProcessor` 硬编码 `2592000` 与 gesdinet `ttl` 重复 → 注入参数
+  - 实现：`LoginProcessor` 注入 `$refreshTtl`（services.yaml 绑定 `%gesdinet_jwt_refresh_token.ttl%`）。
+- [x] [REV-L16] 软删过滤器与 repo 手写 `deletedAt IS NULL` 冗余 → 统一约定依赖哪一层
+  - 处理：**保留显式子句**并文档化约定（`SoftDeleteFilter` 注释）。理由：`CardRepositoryTest` 显式断言「即使禁用过滤器，`findActiveByOwner`/`countActiveByOwner` 仍排除软删」是有意的纵深防御，删除会破坏该安全契约。约定 = 全局过滤器为默认 + 具名 active 方法保留显式子句作 filter-independent 兜底。
+- [x] [REV-L17] prod `doctrine.result_cache_pool` 走 `cache.app` → 多实例切 Redis
+  - 实现：`doctrine.yaml` when@prod 的 result_cache_pool 改 `cache.adapter.redis` + `REDIS_URL_RESULT_CACHE`。
+- [x] [REV-L18] `framework.yaml` `session: true` → 关闭
+  - 实现：`session: false`，移除 when@test 多余的 session mock 覆盖；全量测试确认无 session 依赖。
+- [x] [REV-L19] Viewer 无法 GET 单张共享卡 → 仅文档记录（已与用户确认）
+  - 处理：保持 Phase 2 边界。修正 `api.md`（原误写「Owner 或 Viewer 均可」→ 仅 Owner，附前端勿对共享卡发 GET /cards/{id} 提醒）；`CardVoter` 补注释。
+
+> L11~L19 完成后：`lint:container` / `lint:yaml` / PHPStan(0 errors，含 baseline) 全过；全量测试 164 绿（新增 L13 清理测试 1 条）。
 
 ---
 

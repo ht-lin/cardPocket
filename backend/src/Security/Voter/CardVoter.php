@@ -30,7 +30,9 @@ final class CardVoter extends Voter
         assert($subject instanceof Card);
 
         return match ($attribute) {
-            // Phase 2: CARD_VIEW will also check CardShare table for shared viewers
+            // Phase 2: CARD_VIEW will also check CardShare table for shared viewers.
+            // Until then, viewers receive shared cards only via the list/sync endpoint, never
+            // GET /api/cards/{id} (which 403s for non-owners). See api.md GET /api/cards/{id}.
             self::CARD_VIEW,
             self::CARD_EDIT,
             self::CARD_DELETE => $subject->getOwner()->getId()->equals($user->getId()),

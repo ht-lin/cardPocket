@@ -443,7 +443,10 @@ barcodeType 枚举值：`QR_CODE` | `CODE_128` | `EAN_13` | `CODE_39` | `PDF_417
 ---
 
 ### GET /api/cards/{id}
-获取单张卡片详情（Owner 或 Viewer 均可）。
+获取单张卡片详情。**当前仅 Owner 可取**（Viewer 访问共享卡 → 403，属 Phase 2 范围）。
+
+> ⚠️ 前端注意：共享卡（`isOwner: false`）只通过 `GET /api/cards`（列表/增量同步）返回，
+> **不要**对共享卡单独发 `GET /api/cards/{id}`，否则会拿到 403。
 
 **响应 200**（同 GET /api/cards 中的单条格式）
 
