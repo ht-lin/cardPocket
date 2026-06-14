@@ -42,6 +42,12 @@ final class UserUpdateProcessor implements ProcessorInterface
                 throw new UnprocessableEntityHttpException('Current password is incorrect.');
             }
             $user->setPassword($this->passwordHasher->hashPassword($user, $data->newPassword));
+
+            // Revoke all refresh tokens so a changed password cannot be undone by a stolen,
+            // still-valid (30-day) refresh token. The username column stores the user's email.
+            $this->entityManager->createQuery(
+                'DELETE FROM App\Entity\RefreshToken rt WHERE rt.username = :username'
+            )->setParameter('username', $user->getUserIdentifier())->execute();
         }
 
         if ($data->userName !== null) {

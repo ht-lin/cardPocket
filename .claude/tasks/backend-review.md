@@ -18,20 +18,24 @@
 - 实现：新增 `src/Routing/ApiRequirement::UUID`（宽松 36 字符十六进制正则，接受 v7 + nil UUID）；在 CardOwnerOutput/CardShareOutput/FriendshipOutput 的全部 `{id}`/`{cardId}` 操作加 `requirements`；CardListProvider 对 `updatedAfter` try/catch → `BadRequestHttpException`（空串归入无参数分支）。补 8 条 `not-a-uuid`→404 + 1 条 `updatedAfter=garbage`→400 测试。全量 156 测试绿。
 - 关键确认：项目未配置 uid 版本，Symfony 7.x 默认生成 **UUID v7**，若误用 `Requirement::UUID`（版本位 `[1-5]`）会使所有真实 ID 路由 404 —— 这是必须用宽松正则的硬性原因。
 
-### [REV-H2] `app_card_share` 缺 `(card_id, viewer_id)` 唯一约束
-- [ ] `CardShareCreateProcessor` 仅应用层查重，并发请求可插入重复分享记录（Friendship 有 DB 级约束，CardShare 没有）
+### [REV-H2] `app_card_share` 缺 `(card_id, viewer_id)` 唯一约束 ✅ 已修复
+- [x] `CardShareCreateProcessor` 仅应用层查重，并发请求可插入重复分享记录（Friendship 有 DB 级约束，CardShare 没有）
 - 方案：CardShare 实体加 `#[ORM\UniqueConstraint(fields: ['card', 'viewer'])]` + 新建迁移 `CREATE UNIQUE INDEX uniq_card_share_card_viewer`；Processor 兜 `UniqueConstraintViolationException` → 422
+- 实现：`CardShare.php` 加 `uniq_card_share_card_viewer` 唯一约束；`migrations/Version20260614111309.php`（diff 生成）建唯一索引；`CardShareCreateProcessor` 保留应用层快路径并把 `flush()` 包 try/catch → 422。测试断言 `pg_indexes` 中索引存在。
 
-### [REV-H3] 删账号不给 viewer 写 tombstone（同步数据不一致）
-- [ ] `DeleteAccountProcessor` 用 `deleteByOwner()` 批量删分享，但未写 `CardDeletion` tombstone
-- [ ] 后果：卡主注销后，viewer 的设备增量同步永远收不到删除通知，本地残留幽灵卡
+### [REV-H3] 删账号不给 viewer 写 tombstone（同步数据不一致）✅ 已修复
+- [x] `DeleteAccountProcessor` 用 `deleteByOwner()` 批量删分享，但未写 `CardDeletion` tombstone
+- [x] 后果：卡主注销后，viewer 的设备增量同步永远收不到删除通知，本地残留幽灵卡
 - 方案：在 `deleteByOwner()` 之前遍历 owner 的分享，为每个 viewer 写 `CardDeletion`（复用 CardDeleteProcessor 逻辑）；需在 CardShareRepository 加 `findByOwner()`
+- 实现：`CardShareRepository::findByOwner()` 新增；`DeleteAccountProcessor` 在 `deleteByOwner()` 前为每个 viewer 写 `CardDeletion` tombstone。测试断言注销后 viewer 收到对应 tombstone 行。
 
-### [REV-H4] 改密码 / 删账号不撤销 refresh token + 不清验证 token
-- [ ] `UserUpdateProcessor` 改密码后，已签发 refresh token 仍有效 30 天，无法踢出被盗 token
-- [ ] `DeleteAccountProcessor` 不清 `refresh_tokens` 表，其 `username` 列存原始 email → 注销后个人数据仍保留最长 30 天（与字段匿名化矛盾）
-- [ ] `email_verification_token` 行也不清（user 软删，`ON DELETE CASCADE` 不触发）
+### [REV-H4] 改密码 / 删账号不撤销 refresh token + 不清验证 token ✅ 已修复
+- [x] `UserUpdateProcessor` 改密码后，已签发 refresh token 仍有效 30 天，无法踢出被盗 token
+- [x] `DeleteAccountProcessor` 不清 `refresh_tokens` 表，其 `username` 列存原始 email → 注销后个人数据仍保留最长 30 天（与字段匿名化矛盾）
+- [x] `email_verification_token` 行也不清（user 软删，`ON DELETE CASCADE` 不触发）
 - 方案：两处用 DQL `DELETE FROM App\Entity\RefreshToken rt WHERE rt.username = :username` 撤销（删账号须在改 email 前执行）；删账号附带 DQL 删 EmailVerificationToken
+- 实现：`UserUpdateProcessor` 改密码分支内按 `getUserIdentifier()`(=email) DQL 删 refresh token；`DeleteAccountProcessor` 开头（匿名化覆盖 email 前）DQL 删 refresh token + EmailVerificationToken。测试覆盖改密码后旧 refresh token 失效(401)、注销后 refresh/验证 token 清零。
+- 全量测试：161 绿（含本次新增 5 条）。
 
 ---
 

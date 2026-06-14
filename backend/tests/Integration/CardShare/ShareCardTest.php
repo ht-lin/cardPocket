@@ -240,4 +240,15 @@ final class ShareCardTest extends AbstractApiTestCase
 
         $this->assertResponseStatusCodeSame(404);
     }
+
+    public function testCardShareHasUniqueCardViewerConstraint(): void
+    {
+        $conn   = static::getContainer()->get('doctrine')->getConnection();
+        $exists = (int) $conn->fetchOne(
+            "SELECT COUNT(*) FROM pg_indexes
+             WHERE tablename = 'app_card_share' AND indexname = 'uniq_card_share_card_viewer'",
+        );
+
+        $this->assertSame(1, $exists, 'app_card_share must have a unique (card_id, viewer_id) index');
+    }
 }

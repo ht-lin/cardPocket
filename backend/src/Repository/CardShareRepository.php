@@ -77,6 +77,17 @@ class CardShareRepository extends ServiceEntityRepository
     }
 
     /** @return CardShare[] */
+    public function findByOwner(User $owner): array
+    {
+        return $this->createQueryBuilder('cs')
+            ->join('cs.card', 'c')
+            ->where('c.owner = :owner')
+            ->setParameter('owner', $owner)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return CardShare[] */
     public function findUpdatedSharesSince(User $viewer, \DateTimeImmutable $since): array
     {
         return $this->createQueryBuilder('cs')

@@ -14,6 +14,7 @@ use App\Entity\User;
 use App\Enum\FriendshipStatus;
 use App\Repository\CardShareRepository;
 use App\Repository\FriendshipRepository;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -76,7 +77,12 @@ final class CardShareCreateProcessor implements ProcessorInterface
         $share->setViewer($viewer);
 
         $this->entityManager->persist($share);
-        $this->entityManager->flush();
+
+        try {
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            throw new UnprocessableEntityHttpException('Card is already shared with this user.', $e);
+        }
 
         return new CardShareOutput(
             id: (string) $share->getId(),

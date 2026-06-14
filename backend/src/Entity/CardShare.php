@@ -12,6 +12,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: CardShareRepository::class)]
 #[ORM\Table(name: 'app_card_share')]
+#[ORM\UniqueConstraint(name: 'uniq_card_share_card_viewer', fields: ['card', 'viewer'])]
 #[ORM\HasLifecycleCallbacks]
 class CardShare
 {

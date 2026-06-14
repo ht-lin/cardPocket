@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\User;
 
+use App\Entity\RefreshToken;
 use App\Factory\UserFactory;
 use App\Tests\AbstractApiTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -74,6 +75,38 @@ final class UpdateMeTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest($client, 'GET', self::ENDPOINT, $newToken);
         $this->assertResponseStatusCodeSame(200);
         $this->assertSame('pwchange@example.com', $response->toArray()['email']);
+    }
+
+    public function testChangePasswordRevokesRefreshTokens(): void
+    {
+        UserFactory::createOne(['email' => 'pwrevoke@example.com']);
+
+        $client = static::createClient();
+        $loginResponse = $client->request('POST', '/api/auth/login', [
+            'json' => ['email' => 'pwrevoke@example.com', 'password' => 'Password1!'],
+        ]);
+        $oldRefreshToken = $loginResponse->toArray()['refresh_token'];
+
+        $token = $this->getToken($client, 'pwrevoke@example.com', 'Password1!');
+        $this->authenticatedRequest($client, 'PATCH', self::ENDPOINT, $token, [
+            'json' => [
+                'currentPassword' => 'Password1!',
+                'newPassword' => 'Tr0ub4dor&3secure',
+            ],
+        ]);
+        $this->assertResponseStatusCodeSame(200);
+
+        // The previously issued refresh token must no longer be usable.
+        $em = static::getContainer()->get('doctrine')->getManager();
+        $this->assertNull(
+            $em->getRepository(RefreshToken::class)->findOneBy(['refreshToken' => $oldRefreshToken]),
+            'Refresh tokens must be revoked after a password change',
+        );
+
+        $client->request('POST', '/api/auth/refresh', [
+            'json' => ['refresh_token' => $oldRefreshToken],
+        ]);
+        $this->assertResponseStatusCodeSame(401);
     }
 
     public function testChangePasswordFailsWithWrongCurrentPassword(): void

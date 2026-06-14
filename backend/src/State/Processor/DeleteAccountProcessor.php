@@ -6,6 +6,7 @@ namespace App\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\Entity\CardDeletion;
 use App\Entity\User;
 use App\Repository\CardDeletionRepository;
 use App\Repository\CardRepository;
@@ -36,11 +37,31 @@ final class DeleteAccountProcessor implements ProcessorInterface
 
         $userId = (string) $user->getId();
 
+        // Revoke all refresh tokens (username column stores the original email) and clear
+        // email verification tokens BEFORE the email is anonymized below. The entity is
+        // soft-deleted, so ON DELETE CASCADE never fires — delete these rows explicitly.
+        $this->entityManager->createQuery(
+            'DELETE FROM App\Entity\RefreshToken rt WHERE rt.username = :username'
+        )->setParameter('username', $user->getUserIdentifier())->execute();
+
+        $this->entityManager->createQuery(
+            'DELETE FROM App\Entity\EmailVerificationToken evt WHERE evt.user = :user'
+        )->setParameter('user', $user)->execute();
+
         // GDPR: remove audit log entries that reference this user before anonymizing
         $this->cardDeletionRepository->deleteByUserId($userId);
 
         foreach ($this->cardShareRepository->findByViewer($user) as $share) {
             $this->entityManager->remove($share);
+        }
+
+        // Write a tombstone per viewer so their incremental sync learns the shared card
+        // disappeared, before hard-deleting the owner's shares.
+        foreach ($this->cardShareRepository->findByOwner($user) as $share) {
+            $tombstone = new CardDeletion();
+            $tombstone->setUserId((string) $share->getViewer()->getId());
+            $tombstone->setCardId((string) $share->getCard()->getId());
+            $this->entityManager->persist($tombstone);
         }
 
         $this->cardShareRepository->deleteByOwner($user);

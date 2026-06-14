@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\User;
 
+use App\Entity\RefreshToken;
 use App\Factory\CardDeletionFactory;
 use App\Factory\CardFactory;
 use App\Factory\CardShareFactory;
+use App\Factory\EmailVerificationTokenFactory;
 use App\Factory\FriendshipFactory;
 use App\Factory\UserFactory;
 use App\Enum\FriendshipStatus;
@@ -198,5 +200,70 @@ final class DeleteAccountTest extends AbstractApiTestCase
             'headers' => ['Accept' => 'application/json'],
         ]);
         $this->assertResponseStatusCodeSame(401);
+    }
+
+    public function testDeleteAccountWritesTombstoneForSharedViewers(): void
+    {
+        $owner  = UserFactory::createOne(['email' => 'owner@example.com']);
+        $viewer = UserFactory::createOne(['email' => 'viewer@example.com']);
+        $card   = CardFactory::createOne(['owner' => $owner]);
+        CardShareFactory::createOne(['card' => $card, 'viewer' => $viewer]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'owner@example.com', 'Password1!');
+
+        $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        $this->assertResponseStatusCodeSame(204);
+
+        $conn  = static::getContainer()->get('doctrine')->getConnection();
+        $count = (int) $conn->fetchOne(
+            'SELECT COUNT(*) FROM app_card_deletion WHERE user_id = ? AND card_id = ?',
+            [(string) $viewer->getId(), (string) $card->getId()],
+        );
+        $this->assertSame(1, $count, 'A tombstone must be written for each viewer of the deleted owner\'s shares');
+    }
+
+    public function testDeleteAccountRevokesRefreshTokens(): void
+    {
+        UserFactory::createOne(['email' => 'revoke@example.com']);
+
+        $client = static::createClient();
+        $loginResponse = $client->request('POST', '/api/auth/login', [
+            'json' => ['email' => 'revoke@example.com', 'password' => 'Password1!'],
+        ]);
+        $refreshToken = $loginResponse->toArray()['refresh_token'];
+
+        $token = $this->getToken($client, 'revoke@example.com', 'Password1!');
+        $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        $this->assertResponseStatusCodeSame(204);
+
+        $em = static::getContainer()->get('doctrine')->getManager();
+        $remaining = $em->getRepository(RefreshToken::class)->findOneBy(['refreshToken' => $refreshToken]);
+        $this->assertNull($remaining, 'Refresh tokens must be revoked when the account is deleted');
+    }
+
+    public function testDeleteAccountClearsEmailVerificationTokens(): void
+    {
+        $user = UserFactory::createOne(['email' => 'evt@example.com']);
+        EmailVerificationTokenFactory::createOne(['user' => $user]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'evt@example.com', 'Password1!');
+
+        $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        $this->assertResponseStatusCodeSame(204);
+
+        $conn  = static::getContainer()->get('doctrine')->getConnection();
+        $count = (int) $conn->fetchOne(
+            'SELECT COUNT(*) FROM email_verification_token WHERE user_id = ?',
+            [(string) $user->getId()],
+        );
+        $this->assertSame(0, $count, 'Email verification tokens must be cleared when the account is deleted');
     }
 }
