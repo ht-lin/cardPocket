@@ -163,4 +163,22 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $this->assertArrayHasKey('deleted', $data);
         $this->assertContains((string) $card->getId(), $data['deleted']);
     }
+
+    public function testMalformedUpdatedAfterReturns400(): void
+    {
+        UserFactory::createOne(['email' => 'owner@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        $client = static::createClient();
+        $token = $this->getToken($client, 'owner@example.com', 'Password1!');
+
+        $this->authenticatedRequest(
+            $client,
+            'GET',
+            '/api/cards?updatedAfter=garbage',
+            $token,
+            self::JSON_HEADER,
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+    }
 }

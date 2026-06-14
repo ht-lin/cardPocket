@@ -156,6 +156,18 @@ final class DeleteFriendshipTest extends AbstractApiTestCase
         $this->assertResponseStatusCodeSame(404);
     }
 
+    public function testDeleteReturns404ForMalformedUuid(): void
+    {
+        UserFactory::createOne(['email' => 'user@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'user@example.com', 'Password1!');
+
+        $this->authenticatedRequest($client, 'DELETE', '/api/friendships/not-a-uuid', $token);
+
+        $this->assertResponseStatusCodeSame(404);
+    }
+
     public function testUnauthenticatedRequestReturns401(): void
     {
         $client = static::createClient();

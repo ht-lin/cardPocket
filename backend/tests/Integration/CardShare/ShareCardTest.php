@@ -222,4 +222,22 @@ final class ShareCardTest extends AbstractApiTestCase
 
         $this->assertResponseStatusCodeSame(403);
     }
+
+    public function testShareCardReturns404ForMalformedCardId(): void
+    {
+        UserFactory::createOne(['email' => 'owner@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'owner@example.com', 'Password1!');
+
+        $this->authenticatedRequest(
+            $client,
+            'POST',
+            '/api/cards/not-a-uuid/shares',
+            $token,
+            ['json' => ['viewerId' => '00000000-0000-0000-0000-000000000000'], ...self::JSON_HEADER],
+        );
+
+        $this->assertResponseStatusCodeSame(404);
+    }
 }

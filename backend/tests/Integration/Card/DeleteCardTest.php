@@ -70,4 +70,17 @@ final class DeleteCardTest extends AbstractApiTestCase
 
         $this->assertResponseStatusCodeSame(404);
     }
+
+    public function testDeleteCardReturns404ForMalformedUuid(): void
+    {
+        UserFactory::createOne(['email' => 'owner@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+        $client = static::createClient();
+        $token = $this->getToken($client, 'owner@example.com', 'Password1!');
+
+        $this->authenticatedRequest($client, 'DELETE', '/api/cards/not-a-uuid', $token, [
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+
+        $this->assertResponseStatusCodeSame(404);
+    }
 }

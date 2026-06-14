@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Entity\Card;
+use App\Routing\ApiRequirement;
 use App\State\Processor\CardShareCreateProcessor;
 use App\State\Processor\CardShareDeleteProcessor;
 use App\State\Processor\CardShareUpdateProcessor;
@@ -25,6 +26,7 @@ use App\State\Provider\CardShareViewProvider;
             uriVariables: [
                 'cardId' => new Link(fromClass: Card::class, identifiers: ['id']),
             ],
+            requirements: ['cardId' => ApiRequirement::UUID],
             provider: CardShareListProvider::class,
             paginationEnabled: false,
             name: 'api_card_share_list',
@@ -34,6 +36,7 @@ use App\State\Provider\CardShareViewProvider;
             uriVariables: [
                 'cardId' => new Link(fromClass: Card::class, identifiers: ['id']),
             ],
+            requirements: ['cardId' => ApiRequirement::UUID],
             input: CardShareCreateInput::class,
             status: 201,
             processor: CardShareCreateProcessor::class,
@@ -41,6 +44,7 @@ use App\State\Provider\CardShareViewProvider;
         ),
         new Patch(
             uriTemplate: '/card-shares/{id}',
+            requirements: ['id' => ApiRequirement::UUID],
             inputFormats: ['json' => ['application/json']],
             input: CardShareUpdateInput::class,
             provider: CardShareViewProvider::class,
@@ -49,6 +53,7 @@ use App\State\Provider\CardShareViewProvider;
         ),
         new Delete(
             uriTemplate: '/card-shares/{id}',
+            requirements: ['id' => ApiRequirement::UUID],
             output: false,
             status: 204,
             provider: CardShareViewProvider::class,

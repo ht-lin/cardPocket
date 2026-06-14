@@ -14,6 +14,7 @@ use App\Repository\CardRepository;
 use App\Repository\CardShareRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class CardListProvider implements ProviderInterface
 {
@@ -32,8 +33,14 @@ final class CardListProvider implements ProviderInterface
         $user = $this->security->getUser();
 
         $updatedAfterParam = $this->requestStack->getCurrentRequest()?->query->get('updatedAfter');
-        if ($updatedAfterParam !== null) {
-            return $this->incrementalSyncProvider->provide($user, new \DateTimeImmutable($updatedAfterParam));
+        if ($updatedAfterParam !== null && $updatedAfterParam !== '') {
+            try {
+                $since = new \DateTimeImmutable($updatedAfterParam);
+            } catch (\Exception $e) {
+                throw new BadRequestHttpException('Invalid "updatedAfter" parameter: expected a valid date/time.', $e);
+            }
+
+            return $this->incrementalSyncProvider->provide($user, $since);
         }
 
         $result = [];

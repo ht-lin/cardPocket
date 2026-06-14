@@ -92,6 +92,23 @@ final class AcceptFriendshipRequestTest extends AbstractApiTestCase
         $this->assertResponseStatusCodeSame(404);
     }
 
+    public function testAcceptReturns404ForMalformedUuid(): void
+    {
+        UserFactory::createOne(['email' => 'addressee@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+
+        $client = static::createClient();
+        $token  = $this->getToken($client, 'addressee@example.com', 'Password1!');
+
+        $this->authenticatedRequest(
+            $client,
+            'PATCH',
+            '/api/friendships/not-a-uuid/accept',
+            $token,
+        );
+
+        $this->assertResponseStatusCodeSame(404);
+    }
+
     public function testUnauthenticatedRequestReturns401(): void
     {
         $client = static::createClient();

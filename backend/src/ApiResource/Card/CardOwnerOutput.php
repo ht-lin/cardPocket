@@ -13,6 +13,7 @@ use ApiPlatform\Metadata\Post;
 use App\State\Processor\CardCreateProcessor;
 use App\State\Processor\CardDeleteProcessor;
 use App\State\Processor\CardUpdateProcessor;
+use App\Routing\ApiRequirement;
 use App\State\Provider\CardListProvider;
 use App\State\Provider\CardViewProvider;
 
@@ -32,11 +33,13 @@ use App\State\Provider\CardViewProvider;
         ),
         new Get(
             uriTemplate: '/cards/{id}',
+            requirements: ['id' => ApiRequirement::UUID],
             provider: CardViewProvider::class,
             name: 'api_cards_get',
         ),
         new Patch(
             uriTemplate: '/cards/{id}',
+            requirements: ['id' => ApiRequirement::UUID],
             inputFormats: ['json' => ['application/json']],
             input: CardUpdateInput::class,
             provider: CardViewProvider::class,
@@ -45,6 +48,7 @@ use App\State\Provider\CardViewProvider;
         ),
         new Delete(
             uriTemplate: '/cards/{id}',
+            requirements: ['id' => ApiRequirement::UUID],
             output: false,
             status: 204,
             provider: CardViewProvider::class,

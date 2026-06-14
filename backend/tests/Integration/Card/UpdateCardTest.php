@@ -83,4 +83,21 @@ final class UpdateCardTest extends AbstractApiTestCase
 
         $this->assertResponseStatusCodeSame(404);
     }
+
+    public function testUpdateCardReturns404ForMalformedUuid(): void
+    {
+        UserFactory::createOne(['email' => 'owner@example.com', 'emailVerifiedAt' => new \DateTimeImmutable()]);
+        $client = static::createClient();
+        $token = $this->getToken($client, 'owner@example.com', 'Password1!');
+
+        $this->authenticatedRequest(
+            $client,
+            'PATCH',
+            '/api/cards/not-a-uuid',
+            $token,
+            ['json' => ['name' => 'Name']],
+        );
+
+        $this->assertResponseStatusCodeSame(404);
+    }
 }

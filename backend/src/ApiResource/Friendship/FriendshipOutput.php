@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
+use App\Routing\ApiRequirement;
 use App\State\Processor\FriendAcceptProcessor;
 use App\State\Processor\FriendDeleteProcessor;
 use App\State\Provider\FriendshipListProvider;
@@ -23,6 +24,7 @@ use App\State\Provider\FriendshipViewProvider;
         ),
         new Patch(
             uriTemplate: '/friendships/{id}/accept',
+            requirements: ['id' => ApiRequirement::UUID],
             inputFormats: ['json' => ['application/json']],
             input: false,
             provider: FriendshipViewProvider::class,
@@ -31,6 +33,7 @@ use App\State\Provider\FriendshipViewProvider;
         ),
         new Delete(
             uriTemplate: '/friendships/{id}',
+            requirements: ['id' => ApiRequirement::UUID],
             output: false,
             status: 204,
             provider: FriendshipViewProvider::class,
