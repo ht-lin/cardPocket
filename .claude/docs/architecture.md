@@ -90,6 +90,7 @@ User
  password: string
  userName: string(50) UNIQUE
  emailVerifiedAt: datetime|null
+ expiryPolicy: enum(KEEP|AUTO_TRASH) DEFAULT KEEP   # [Phase 2] 账户级卡片过期策略
  createdAt: datetime
  updatedAt: datetime
  deletedAt: datetime|null
@@ -104,11 +105,10 @@ Card
  color: string(7)|null
  gradient: json|null
  icon: string(50)|null
- expiresAt: datetime|null
- archivedAt: datetime|null
+ expiresAt: datetime|null                            # [Phase 2] 卡片有效期，到期处理由 User.expiryPolicy 决定
  createdAt: datetime
  updatedAt: datetime
- deletedAt: datetime|null
+ deletedAt: datetime|null                            # 软删除 / 回收箱标记；非 null 即在回收箱，30 天后物理删除
 
 CardShare
  id: uuid PK
@@ -212,6 +212,13 @@ Nginx
 `email_verification_token`、失效 `refresh_tokens`（等价 `gesdinet:jwt:clear`）、超 **90 天**的
 `app_card_deletion` tombstone。**客户端若离线超过保留期（90 天）应触发全量同步**，否则会漏掉
 已被清理的删除记录。两个 worker 建议用 systemd/supervisor 常驻并自动重启。
+
+**回收箱与过期清理（Phase 2，复用同一 `CleanupExpiredDataHandler`，不新建调度器）**：
+
+1. **过期自动入箱**：对 `expiryPolicy = AUTO_TRASH` 的用户，将其 `expiresAt < now` 且未删除的卡片软删（设 `deletedAt`），并为 owner 及各 viewer 写 `CardDeletion` 墓碑（复用 `CardDeleteProcessor` 逻辑）。`KEEP` 用户不处理，过期仅由前端标记。
+2. **回收箱物理清理**：物理删除 `deletedAt < now - 30 天` 的 `app_card` 行及其关联 `app_card_share`，防止软删行无限堆积。查询/删除这些行时需**临时禁用全局 `SoftDeleteFilter`**（否则过滤器会把软删行隐藏，呼应 REV-L16 约定）。
+
+> 账户注销（ADR-021）匿名化后的 owned Card 同样处于 `deletedAt` 状态，将被上述物理清理在 30 天后一并删除——属预期行为，不影响匿名化后 User 行的保留。
 
 ### 开发环境
 

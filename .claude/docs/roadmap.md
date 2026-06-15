@@ -62,9 +62,9 @@
 
 - [ ] 后端：Sentry 集成（sentry/sentry-symfony bundle，错误上报 + 性能监控）
 - [ ] 后端：卡片全文搜索（ILIKE，GET /api/cards?q=）
-- [ ] 后端：卡片有效期字段开放（PATCH expiresAt）
-- [ ] 后端：Symfony Scheduler 自动归档（每日 3:00 UTC）
-- [ ] 后端：归档过滤（GET /api/cards?archived=false）
+- [ ] 后端：卡片有效期开放（PATCH expiresAt）+ 账户级过期策略（PATCH /api/users/me 的 expiryPolicy，默认 KEEP）
+- [ ] 后端：回收箱 API（GET /api/cards/trash 列表 / POST 恢复 / DELETE 永久删除，仅 Owner）
+- [ ] 后端：定时清理（复用 CleanupExpiredDataHandler）——AUTO_TRASH 用户过期卡片自动入箱 + 物理删除回收箱中 30 天前的卡片及关联 CardShare
 - [ ] 后端：PushToken 实体 + POST /api/auth/push-token
 - [ ] 后端：Symfony Messenger Worker + Expo Push API 集成
 

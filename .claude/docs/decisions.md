@@ -335,3 +335,33 @@
 **权衡**：
 - 匿名化后的 User/Card 行仍占用数据库空间（极小，每行约 100-200 字节）
 - 客户端 JWT 中携带的旧 email 在账户删除后立即失效（email 已变更，任何 JWT 验证都将因找不到用户而 401），无需额外的 token 黑名单机制
+
+---
+
+## ADR-022：卡片删除采用「回收箱」模型（软删除 + 30 天定期物理清理）+ 账户级过期策略，撤销「归档」设计
+
+**状态**：已采纳
+**日期**：2026-06-15
+
+**决策**：撤销原 Phase 2 规划的「归档（`archivedAt` + 自动归档）」，改用「回收箱」模型：
+
+1. **复用 `Card.deletedAt`** 作为回收箱标记，不引入 `archivedAt`。`deletedAt IS NOT NULL` 且尚未物理清理 = 在回收箱中。
+2. **回收箱仅含 Owner 自己的卡片**：`GET /api/cards/trash`、`POST /api/cards/{id}/restore`、`DELETE /api/cards/{id}/permanent` 均限 Owner。共享卡被 Owner 删除/过期后，对 viewer 只通过增量同步 `deleted` 数组从列表移除，**不进入任何人的回收箱**，viewer 无恢复/永久删除权限。
+3. **30 天保留期**：定时任务物理删除 `deletedAt < now - 30 天` 的 Card 及关联 CardShare。物理删除时需**临时禁用全局 `SoftDeleteFilter`**（否则查不到软删行），呼应 REV-L16 的「全局过滤器默认 + 具名方法显式子句」约定。
+4. **账户级过期策略 `User.expiryPolicy`**（enum `KEEP`|`AUTO_TRASH`，默认 `KEEP`，经 `PATCH /api/users/me` 设置，**不做单卡片覆盖**）：
+   - `KEEP`（默认）：过期仅前端标记「已过期」，不自动删除；用户手动删除才入回收箱。
+   - `AUTO_TRASH`：定时任务把 `expiresAt < now` 的卡片自动软删入回收箱。
+   - 两种策略**共用同一条「回收箱 30 天物理清理」通道**，过期策略只决定「是否自动入箱」。
+5. **复用现有清理基建**：上述「过期入箱」与「30 天物理清理」均作为新逻辑段加进现有 `CleanupExpiredDataHandler`（REV-L13 已建的 `App\Schedule`），**不新建第二个调度器**。
+
+**原因**：
+- 现有架构已有软删除（`deletedAt` + `SoftDeleteFilter`）与 tombstone 同步，回收箱复用即可，改动面小、概念一致。
+- 原「归档」缺口：tombstone 清理（90 天）只清审计记录，从不物理删除软删的 Card 行本身 → 软删行无限堆积。回收箱的 30 天物理清理正好补上。
+- 默认 `KEEP`：不擅自删除用户数据，自动删为 opt-in，更符合用户信任与 GDPR 稳妥原则。
+- 账户级而非单卡片：用户选择「全局统一」以降低复杂度（无需 `Card.expiryPolicy` 字段与继承逻辑）。
+
+**与 ADR-021 的关系**：账户注销时 owned Card 软删 + 匿名化（保留行）；这些卡同样处于 `deletedAt` 状态，将被本 ADR 的物理清理在 30 天后一并删除——属预期行为，释放空间且匿名化后无 GDPR 风险，不影响匿名化后 User 行的保留与外键完整性。
+
+**权衡**：
+- 回收箱内卡片在 30 天窗口内仍占数据库空间（可接受，且有上限）。
+- 增量同步对客户端而言「删除」与「过期入箱」表现一致（都进 `deleted` 数组）；回收箱内容需 Owner 在线经 `GET /api/cards/trash` 查看，不离线缓存。

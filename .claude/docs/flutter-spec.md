@@ -313,4 +313,4 @@ Phase 3 在"手动输入"页追加"从相册识别"入口（US-22）。
 - 好友 Tab 角标 + 推送通知（好友请求到达时）
 - 卡片颜色/渐变/图标自定义（`color` / `gradient` / `icon` 字段开放）
 - 卡片搜索（`GET /api/cards?q=`）
-- 卡片归档与过期（`expiresAt` / `archivedAt` 字段）
+- 卡片回收箱与过期（删除/过期入回收箱、回收箱列表、恢复、30 天后自动永久删除；账户级过期策略 `expiryPolicy`=KEEP/AUTO_TRASH 设置项；回收箱仅含自己拥有的卡片）

@@ -31,7 +31,7 @@
 - [x] BE-USER-05：编写用户模块集成测试（级联删除：Cards/CardShares/Friendships）
 
 #### [BE-CARD] 卡片模块
-- [x] BE-CARD-01：创建 Card 实体（含所有字段，expiresAt/archivedAt 预留）
+- [x] BE-CARD-01：创建 Card 实体（含核心字段；`expiresAt` 及账户级 `User.expiryPolicy`、回收箱物理清理为 Phase 2，**当前实体未预留 expiresAt/archivedAt**）
 - [x] BE-CARD-02：创建 Card 数据库迁移
 - [x] BE-CARD-02b：创建 Card DTO 类（CardCreateInput / CardUpdateInput / CardOwnerOutput / CardViewerOutput）
 - [x] BE-CARD-03：创建 CardVoter（CARD_VIEW, CARD_EDIT, CARD_DELETE）
@@ -97,7 +97,8 @@
 
 - [x] BE-BUGFIX-08：CardRepository `findActiveByOwner` / `countActiveByOwner` — 显式加 `deletedAt IS NULL` 条件，不依赖全局 Filter 隐式过滤，方法名与实现语义对齐（`src/Repository/CardRepository.php:23-31`）
 - [x] BE-BUGFIX-09：Card.owner FK 改为 `onDelete: 'CASCADE'`，与架构规格 ER 图一致（现状为 `RESTRICT`）（`src/Entity/Card.php:35`）
-- [ ] BE-BUGFIX-10：Phase 2 — 添加 Symfony Scheduler 定期清理 90 天前 `CardDeletion` 记录，防止表无限增长
+- [x] BE-BUGFIX-10：定期清理 90 天前 `CardDeletion` tombstone 记录，防止表无限增长 —— 已由 **REV-L13** 完成（`App\Schedule` + `CleanupExpiredDataHandler`，见 `backend-review.md`）
+- [ ] BE-BUGFIX-10b：Phase 2 — 物理删除回收箱中 30 天前的软删 `Card` 行及关联 `CardShare`（与上面的 tombstone 清理是不同的两段逻辑；物理删除时需临时禁用 `SoftDeleteFilter`，呼应 REV-L16）
 
 ---
 
@@ -105,9 +106,11 @@
 
 - [ ] BE: 安装 sentry/sentry-symfony bundle，配置 DSN + 敏感字段过滤
 - [ ] BE: 卡片全文搜索（GET /api/cards?q=，ILIKE）
-- [ ] BE: expiresAt 字段开放（PATCH）
-- [ ] BE: Symfony Scheduler 自动归档（每日 3:00 UTC）
-- [ ] BE: GET /api/cards?archived=false 过滤
+- [ ] BE: Card.expiresAt 字段 + 迁移；PATCH /api/cards/{id} 开放 expiresAt
+- [ ] BE: User.expiryPolicy 字段（enum KEEP|AUTO_TRASH，默认 KEEP）+ 迁移；PATCH /api/users/me 开放 expiryPolicy
+- [ ] BE: 回收箱 API —— GET /api/cards/trash（列表，仅 Owner）/ POST /api/cards/{id}/restore（恢复）/ DELETE /api/cards/{id}/permanent（永久删除）
+- [ ] BE: CleanupExpiredDataHandler 新增——AUTO_TRASH 用户过期卡片（expiresAt<now）自动软删入箱（写 CardDeletion 墓碑）
+- [ ] BE: CleanupExpiredDataHandler 新增——物理删除 deletedAt 超 30 天的 Card + 关联 CardShare（临时禁用 SoftDeleteFilter）
 - [ ] BE: PushToken 实体 + POST /api/auth/push-token
 - [ ] BE: Symfony Messenger Worker 配置
 - [ ] BE: Expo Push API 集成（含 isActive 处理）

@@ -223,25 +223,31 @@ platform 枚举值：`IOS` | `ANDROID` | `WEB`
   "email": "user@example.com",
   "userName": "john_doe",
   "emailVerified": true,
+  "expiryPolicy": "KEEP",
   "createdAt": "2026-06-01T10:00:00Z"
 }
 ```
 
+> `expiryPolicy`（Phase 2）：账户级卡片过期策略，`KEEP`（默认，过期仅标记不删）或 `AUTO_TRASH`（过期自动移入回收箱）。
+
 ---
 
 ### PATCH /api/users/me
-更新当前用户信息（userName 或 password，二者均为可选）。
+更新当前用户信息（userName、password、expiryPolicy 均为可选）。
 
 **请求体**（仅需传要修改的字段）
 ```json
 {
   "userName": "new_username",
   "currentPassword": "oldPass",
-  "newPassword": "newPass123"
+  "newPassword": "newPass123",
+  "expiryPolicy": "AUTO_TRASH"
 }
 ```
 
 修改密码时 `currentPassword` 必填。
+
+`expiryPolicy`（Phase 2）：账户级卡片过期策略，取值 `KEEP`（默认）或 `AUTO_TRASH`。设为 `AUTO_TRASH` 后，每日定时任务会把已过期（`expiresAt < now`）的卡片自动移入回收箱。
 
 **响应 200**（返回更新后的用户信息）
 
@@ -367,7 +373,6 @@ GDPR 删除账户，级联删除所有数据（不可逆）。
 | 参数 | 类型 | 说明 |
 |------|------|------|
 | `updatedAfter` | ISO 8601 | 增量同步：返回该时间后变化的卡片 |
-| `archived` | boolean | Phase 2：过滤归档状态 |
 | `q` | string | Phase 2：全文搜索 |
 | `page` | integer | 分页页码（默认 1） |
 | `itemsPerPage` | integer | 每页数量（默认 20，最大 50） |
@@ -385,7 +390,6 @@ GDPR 删除账户，级联删除所有数据（不可逆）。
       "gradient": null,
       "icon": null,
       "expiresAt": null,
-      "archivedAt": null,
       "owner": {
         "id": "uuid",
         "userName": "john_doe"
@@ -468,19 +472,65 @@ barcodeType 枚举值：`QR_CODE` | `CODE_128` | `EAN_13` | `CODE_39` | `PDF_417
   "icon": "🛒",
   "color": "#FF5733",
   "gradient": { "from": "#FF5733", "to": "#C70039", "direction": "horizontal" },
-  "expiresAt": "2027-01-01T00:00:00Z",
-  "archivedAt": null
+  "expiresAt": "2027-01-01T00:00:00Z"
 }
 ```
+
+> `expiresAt`（Phase 2）：卡片有效期。到期后的处理由账户级 `expiryPolicy` 决定（见 `PATCH /api/users/me`）。
 
 **响应 200**
 
 ---
 
 ### DELETE /api/cards/{id}
-删除卡片（仅 Owner）。级联删除所有 CardShare。
+删除卡片（仅 Owner）。**软删除：将卡片移入回收箱**（设置 `deletedAt`），并为 owner 及所有 viewer 写入 `CardDeletion` 墓碑供增量同步。
+
+- 客户端通过增量同步的 `deleted` 数组感知删除并从本地列表移除。
+- 卡片在回收箱保留 30 天，期间 Owner 可恢复；30 天后由定时任务**物理删除**该卡片及其所有 CardShare。
+- 共享对象（viewer）只通过 `deleted` 数组将该卡从列表移除，**不会进入任何人的回收箱**（回收箱仅含 Owner 自己的卡片）。
 
 **响应 204**
+
+---
+
+### GET /api/cards/trash
+*(Phase 2)* 获取当前用户回收箱中的卡片（**仅 Owner 自己拥有、已软删除且尚未物理清理的卡片**）。共享卡不在此列。
+
+**响应 200**（结构同 GET /api/cards 单条格式，附 `deletedAt`）
+```json
+{
+  "member": [
+    {
+      "id": "uuid",
+      "name": "Costco 会员卡",
+      "barcodeType": "QR_CODE",
+      "barcodeContent": "1234567890",
+      "deletedAt": "2026-06-10T10:00:00Z",
+      "isOwner": true
+    }
+  ],
+  "totalItems": 1
+}
+```
+
+---
+
+### POST /api/cards/{id}/restore
+*(Phase 2)* 从回收箱恢复卡片（**仅 Owner**）。清空 `deletedAt`，卡片重新出现在主列表，下次增量同步出现在 `updated`。
+
+**响应 200**（返回恢复后的完整 Card 对象）
+
+- 卡片不在回收箱（`deletedAt` 为 null）或已被物理清理 → 404。
+- 非 Owner（viewer）访问 → 403/404。
+
+---
+
+### DELETE /api/cards/{id}/permanent
+*(Phase 2)* 立即永久删除回收箱中的卡片（**仅 Owner**），物理删除该卡片及其所有 CardShare，不等待 30 天。
+
+**响应 204**
+
+- 卡片不在回收箱 → 404。非 Owner → 403/404。
 
 ---
 
