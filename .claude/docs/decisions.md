@@ -365,3 +365,31 @@
 **权衡**：
 - 回收箱内卡片在 30 天窗口内仍占数据库空间（可接受，且有上限）。
 - 增量同步对客户端而言「删除」与「过期入箱」表现一致（都进 `deleted` 数组）；回收箱内容需 Owner 在线经 `GET /api/cards/trash` 查看，不离线缓存。
+
+---
+
+## ADR-023：前后端统一使用 JSON-LD（`application/ld+json`）作为 API 传输格式
+
+**状态**：已采纳
+**日期**：2026-06-19
+
+**决策**：整个项目统一以 **JSON-LD（Hydra）** 作为 API 请求/响应的协商格式，并在**传输层显式钉死**，不依赖隐式内容协商：
+
+1. **前端**：所有 Dio 客户端（`dio_client.dart`、`auth_dio_provider.dart`）在 `BaseOptions.headers` 显式设置 `Accept: application/ld+json`。集合一律按 Hydra 信封解析（`member` / `totalItems`），不再有任何仓库按裸数组解析（已统一 `cards` / `friendship` / `share` 三个仓库）。
+2. **后端**：`config/packages/api_platform.yaml` 的 `formats` 把 `jsonld` 置于首位（= 默认），使任何不带 `Accept` 或 `*/*` 的请求也回退到 Hydra，而非裸数组。`json` 格式保留但不作默认。
+3. **测试契约**：后端集成测试一律请求 `application/ld+json` 并断言 Hydra 形状（集合断言 `toArray()['member']`），不再断言 plain-JSON 裸数组。`tests/` 中已无 `application/json` 残留。
+
+**原因**：
+- **根因修复**：此前 Dio 只设 `Content-Type`（描述请求体）而**从不设 `Accept`**（决定响应格式），API Platform 回退到 `formats` 中的第一项 `json` → 集合返回**裸数组**；而 `cards` 仓库按 JSON-LD（`member`/`totalItems`）解析 → cast 失败 → 被 `_mapError` 误判成 `NetworkException`。表现为「My Cards 一直转圈→网络错误」「卡片已在后端创建但前端报错」（POST 成功后 `refresh()` 触发的全量同步失败）。
+- **plain JSON 无法支撑同步分页**：AP 的 plain-JSON 集合是裸数组，body 中无 `totalItems`/分页信封，而全量同步的分页循环依赖 `totalItems`；JSON-LD 原生提供集合信封、分页链接与标准错误格式。
+- **JSON-LD 是 API Platform 的一等公民**：协商、错误格式（Hydra Error，含 `detail`）、IRI（`@id`）开箱即用；前端已按 Hydra 编写，统一阻力最小。
+- **关键原则**：格式必须在传输层一次性显式固定。本次 bug 的本质正是「格式留给隐式协商」——服务端去猜、默认值与解析器冲突。
+
+**权衡 / 注意**：
+- 切到 ld+json 后暴露并修复了一个真实 bug：`CardSyncOutput` 经 `GetCollection` 返回单对象，Hydra 会把它的 `updated`/`deleted` 数组**各自再包成嵌套 Collection**（`updated.member[]` / `deleted.member[]`）。前端 `_incrementalSync` 增加容错 helper `_hydraList()`，同时兼容裸数组与 `{member:[…]}`。此嵌套包装是设计异味，后续可把增量同步改为普通 `Get`（单资源）操作消除（见下「后续」）。
+- 错误响应体（4xx）的 ld+json 形状与 plain-JSON 不同，但前端 `_mapError` 仅按状态码分流、`_parse422` 读 `violations`，两种格式下均成立；纯 JWT 鉴权失败（401）由 lexik 返回固定 `{code,message}`，与格式无关。
+- `_mapError` 同时收紧：响应已到达但解析失败不再伪装成 `NetworkException`（改为 `ServerException`），避免契约不匹配被「检查网络连接」掩盖。
+
+**后续**：考虑将 `/api/cards?updatedAfter=` 的增量同步从 `GetCollection` 返回 `CardSyncOutput` 单对象，重构为普通 `Get` 单资源操作或自定义结构，消除 Hydra 对 `updated`/`deleted` 的嵌套 Collection 包装。
+
+**关联**：ADR-012（独立 DTO）、ADR-013（不用 Serialization Groups，每视图独立 DTO）。

@@ -229,7 +229,10 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => Response(
-          data: {'updated': [], 'deleted': []},
+          data: {
+            'updated': {'member': []},
+            'deleted': {'member': []},
+          },
           statusCode: 200,
           requestOptions: RequestOptions(path: '/api/cards'),
         ),
@@ -268,8 +271,10 @@ void main() {
       ).thenAnswer(
         (_) async => Response(
           data: {
-            'updated': [],
-            'deleted': ['card-to-delete'],
+            'updated': {'member': []},
+            'deleted': {
+              'member': ['card-to-delete'],
+            },
           },
           statusCode: 200,
           requestOptions: RequestOptions(path: '/api/cards'),

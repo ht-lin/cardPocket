@@ -15,7 +15,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
 {
     use Factories;
 
-    private const array JSON_HEADER = ['headers' => ['Accept' => 'application/json']];
+    private const array LD_HEADER = ['headers' => ['Accept' => 'application/ld+json']];
 
     // A fixed timestamp well in the past so any entity created during the test is "after" it.
     private const string PAST_ISO = '2020-01-01T00:00:00+00:00';
@@ -45,7 +45,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
             'GET',
             '/api/cards?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
@@ -53,9 +53,9 @@ final class IncrementalSyncTest extends AbstractApiTestCase
 
         $this->assertArrayHasKey('updated', $data);
         $this->assertArrayHasKey('deleted', $data);
-        $this->assertCount(1, $data['updated']);
-        $this->assertSame((string) $cardB->getId(), $data['updated'][0]['id']);
-        $this->assertEmpty($data['deleted']);
+        $this->assertCount(1, $data['updated']['member']);
+        $this->assertSame((string) $cardB->getId(), $data['updated']['member'][0]['id']);
+        $this->assertEmpty($data['deleted']['member']);
     }
 
     public function testDeletedIncludesRemovedCards(): void
@@ -74,15 +74,15 @@ final class IncrementalSyncTest extends AbstractApiTestCase
             'GET',
             '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
         $data = $response->toArray();
 
         $this->assertArrayHasKey('deleted', $data);
-        $this->assertContains((string) $card->getId(), $data['deleted']);
-        $this->assertEmpty($data['updated']);
+        $this->assertContains((string) $card->getId(), $data['deleted']['member']);
+        $this->assertEmpty($data['updated']['member']);
     }
 
     public function testUpdatedViewerNicknameAppearsInSync(): void
@@ -121,14 +121,14 @@ final class IncrementalSyncTest extends AbstractApiTestCase
             'GET',
             '/api/cards?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
             $viewerToken,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
         $data = $response->toArray();
 
         $this->assertArrayHasKey('updated', $data);
-        $cardIds = array_column($data['updated'], 'id');
+        $cardIds = array_column($data['updated']['member'], 'id');
         $this->assertContains((string) $card->getId(), $cardIds);
     }
 
@@ -154,14 +154,14 @@ final class IncrementalSyncTest extends AbstractApiTestCase
             'GET',
             '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
         $data = $response->toArray();
 
         $this->assertArrayHasKey('deleted', $data);
-        $this->assertContains((string) $card->getId(), $data['deleted']);
+        $this->assertContains((string) $card->getId(), $data['deleted']['member']);
     }
 
     public function testSyncResponseIncludesServerSyncedAt(): void
@@ -176,7 +176,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
             'GET',
             '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
@@ -201,7 +201,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
             'GET',
             '/api/cards?updatedAfter=garbage',
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(400);

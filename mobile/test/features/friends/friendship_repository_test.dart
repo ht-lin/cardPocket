@@ -33,9 +33,12 @@ void main() {
 
   group('FriendshipRepository.getFriends', () {
     test('returns list of Friendship on 200', () async {
-      when(() => mockDio.get<List<dynamic>>('/api/friendships')).thenAnswer(
+      when(() => mockDio.get<Map<String, dynamic>>('/api/friendships'))
+          .thenAnswer(
         (_) async => Response(
-          data: [_friendshipJson],
+          data: {
+            'member': [_friendshipJson],
+          },
           statusCode: 200,
           requestOptions: RequestOptions(path: '/api/friendships'),
         ),
@@ -49,7 +52,8 @@ void main() {
     });
 
     test('throws NetworkException on connection timeout', () async {
-      when(() => mockDio.get<List<dynamic>>('/api/friendships')).thenThrow(
+      when(() => mockDio.get<Map<String, dynamic>>('/api/friendships'))
+          .thenThrow(
         DioException(
           requestOptions: RequestOptions(path: '/api/friendships'),
           type: DioExceptionType.connectionTimeout,
@@ -63,10 +67,12 @@ void main() {
   group('FriendshipRepository.getPendingRequests', () {
     test('returns list of FriendRequest on 200', () async {
       when(
-        () => mockDio.get<List<dynamic>>('/api/friendships/requests'),
+        () => mockDio.get<Map<String, dynamic>>('/api/friendships/requests'),
       ).thenAnswer(
         (_) async => Response(
-          data: [_requestJson],
+          data: {
+            'member': [_requestJson],
+          },
           statusCode: 200,
           requestOptions: RequestOptions(path: '/api/friendships/requests'),
         ),
@@ -186,13 +192,15 @@ void main() {
   group('FriendshipRepository.searchUsers', () {
     test('returns list of UserSummary on 200', () async {
       when(
-        () => mockDio.get<List<dynamic>>(
+        () => mockDio.get<Map<String, dynamic>>(
           '/api/users/search',
           queryParameters: any(named: 'queryParameters'),
         ),
       ).thenAnswer(
         (_) async => Response(
-          data: [_userJson],
+          data: {
+            'member': [_userJson],
+          },
           statusCode: 200,
           requestOptions: RequestOptions(path: '/api/users/search'),
         ),
@@ -206,13 +214,13 @@ void main() {
 
     test('returns empty list when no matches', () async {
       when(
-        () => mockDio.get<List<dynamic>>(
+        () => mockDio.get<Map<String, dynamic>>(
           '/api/users/search',
           queryParameters: any(named: 'queryParameters'),
         ),
       ).thenAnswer(
         (_) async => Response(
-          data: <dynamic>[],
+          data: {'member': <dynamic>[]},
           statusCode: 200,
           requestOptions: RequestOptions(path: '/api/users/search'),
         ),
@@ -224,7 +232,7 @@ void main() {
 
     test('throws ServerException on 500', () async {
       when(
-        () => mockDio.get<List<dynamic>>(
+        () => mockDio.get<Map<String, dynamic>>(
           '/api/users/search',
           queryParameters: any(named: 'queryParameters'),
         ),

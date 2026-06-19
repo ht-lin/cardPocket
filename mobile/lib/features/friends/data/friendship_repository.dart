@@ -18,9 +18,8 @@ class FriendshipRepository {
 
   Future<List<Friendship>> getFriends() async {
     try {
-      final response = await _dio.get<List<dynamic>>('/api/friendships');
-      final list = (response.data ?? []).cast<Map<String, dynamic>>();
-      return list.map(_mapFriendship).toList();
+      final response = await _dio.get<Map<String, dynamic>>('/api/friendships');
+      return _members(response.data).map(_mapFriendship).toList();
     } on DioException catch (e) {
       throw _mapError(e);
     }
@@ -29,9 +28,8 @@ class FriendshipRepository {
   Future<List<FriendRequest>> getPendingRequests() async {
     try {
       final response =
-          await _dio.get<List<dynamic>>('/api/friendships/requests');
-      final list = (response.data ?? []).cast<Map<String, dynamic>>();
-      return list.map(_mapFriendRequest).toList();
+          await _dio.get<Map<String, dynamic>>('/api/friendships/requests');
+      return _members(response.data).map(_mapFriendRequest).toList();
     } on DioException catch (e) {
       throw _mapError(e);
     }
@@ -66,16 +64,20 @@ class FriendshipRepository {
 
   Future<List<UserSummary>> searchUsers(String q) async {
     try {
-      final response = await _dio.get<List<dynamic>>(
+      final response = await _dio.get<Map<String, dynamic>>(
         '/api/users/search',
         queryParameters: {'q': q},
       );
-      final list = (response.data ?? []).cast<Map<String, dynamic>>();
-      return list.map(_mapUserSummary).toList();
+      return _members(response.data).map(_mapUserSummary).toList();
     } on DioException catch (e) {
       throw _mapError(e);
     }
   }
+
+  // API Platform serves collections as a Hydra envelope under
+  // application/ld+json: the items live under `member`.
+  List<Map<String, dynamic>> _members(Map<String, dynamic>? data) =>
+      (data?['member'] as List?)?.cast<Map<String, dynamic>>() ?? const [];
 
   Friendship _mapFriendship(Map<String, dynamic> json) => Friendship(
         id: json['id'] as String,

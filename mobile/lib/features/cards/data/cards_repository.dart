@@ -66,8 +66,12 @@ class CardsRepository {
       queryParameters: {'updatedAfter': since.toIso8601String()},
     );
     final data = response.data!;
-    final updated = (data['updated'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-    final deleted = (data['deleted'] as List?)?.cast<String>() ?? [];
+    // Under application/ld+json, API Platform wraps each array property of the
+    // sync payload in a nested Hydra collection ({ member: [...] }), so
+    // `updated`/`deleted` arrive as objects, not bare lists. Unwrap defensively
+    // so the parser tolerates both shapes.
+    final updated = _hydraList(data['updated']).cast<Map<String, dynamic>>();
+    final deleted = _hydraList(data['deleted']).cast<String>();
     if (updated.isNotEmpty) {
       await _db.upsertCards(updated.map(_toCompanion).toList());
     }
@@ -138,6 +142,14 @@ class CardsRepository {
     return row != null ? _fromRow(row) : null;
   }
 
+  // Accepts either a bare JSON array or a Hydra collection envelope
+  // ({ member: [...] }) and returns the underlying list.
+  List<dynamic> _hydraList(dynamic value) {
+    if (value is List) return value;
+    if (value is Map<String, dynamic>) return (value['member'] as List?) ?? const [];
+    return const [];
+  }
+
   CardModel _mapCard(Map<String, dynamic> json) => CardModel(
         id: json['id'] as String,
         name: json['name'] as String,
@@ -195,6 +207,14 @@ class CardsRepository {
         return UnprocessableException(errors);
       default:
         if (status != null && status >= 500) return const ServerException();
+        // A response arrived but decoding/casting it failed (e.g. a response
+        // shape that doesn't match what we parse) — that's a contract/format
+        // mismatch, not a connectivity problem. Don't mask it as a network
+        // error, otherwise the real cause stays hidden behind "check your
+        // connection".
+        if (status != null) {
+          return ServerException('Unexpected response: ${e.message}');
+        }
         return NetworkException(e.message ?? 'Unknown error');
     }
   }

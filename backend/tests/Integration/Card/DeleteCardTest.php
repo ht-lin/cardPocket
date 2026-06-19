@@ -22,7 +22,7 @@ final class DeleteCardTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'owner@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', '/api/cards/' . $card->getId(), $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
 
         $this->assertResponseStatusCodeSame(204);
@@ -38,7 +38,7 @@ final class DeleteCardTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'other@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', '/api/cards/' . $card->getId(), $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
 
         $this->assertResponseStatusCodeSame(403);
@@ -52,7 +52,7 @@ final class DeleteCardTest extends AbstractApiTestCase
         $client = static::createClient();
 
         $client->request('DELETE', '/api/cards/' . $card->getId(), [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
 
         $this->assertResponseStatusCodeSame(401);
@@ -65,7 +65,7 @@ final class DeleteCardTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'owner@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', '/api/cards/00000000-0000-0000-0000-000000000000', $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
 
         $this->assertResponseStatusCodeSame(404);
@@ -78,7 +78,7 @@ final class DeleteCardTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'owner@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', '/api/cards/not-a-uuid', $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
 
         $this->assertResponseStatusCodeSame(404);

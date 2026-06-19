@@ -14,7 +14,7 @@ final class ListFriendshipsTest extends AbstractApiTestCase
 {
     use Factories;
 
-    private const array JSON_HEADER = ['headers' => ['Accept' => 'application/json']];
+    private const array LD_HEADER = ['headers' => ['Accept' => 'application/ld+json']];
 
     public function testGetAcceptedFriendsList(): void
     {
@@ -28,10 +28,10 @@ final class ListFriendshipsTest extends AbstractApiTestCase
         $client = static::createClient();
         $token  = $this->getToken($client, 'me@example.com', 'Password1!');
 
-        $response = $this->authenticatedRequest($client, 'GET', '/api/friendships', $token, self::JSON_HEADER);
+        $response = $this->authenticatedRequest($client, 'GET', '/api/friendships', $token, self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(200);
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(1, $data);
         $this->assertSame('ACCEPTED', $data[0]['status']);
         $this->assertArrayHasKey('friend', $data[0]);
@@ -54,10 +54,10 @@ final class ListFriendshipsTest extends AbstractApiTestCase
         $client = static::createClient();
         $token  = $this->getToken($client, 'me@example.com', 'Password1!');
 
-        $response = $this->authenticatedRequest($client, 'GET', '/api/friendships/requests', $token, self::JSON_HEADER);
+        $response = $this->authenticatedRequest($client, 'GET', '/api/friendships/requests', $token, self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(200);
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(2, $data);
         $this->assertArrayHasKey('requester', $data[0]);
     }
@@ -74,10 +74,10 @@ final class ListFriendshipsTest extends AbstractApiTestCase
         $client = static::createClient();
         $token  = $this->getToken($client, 'me@example.com', 'Password1!');
 
-        $response = $this->authenticatedRequest($client, 'GET', '/api/friendships', $token, self::JSON_HEADER);
+        $response = $this->authenticatedRequest($client, 'GET', '/api/friendships', $token, self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(200);
-        $this->assertCount(0, $response->toArray());
+        $this->assertCount(0, $response->toArray()['member']);
     }
 
     public function testUnauthenticatedRequestReturns401(): void

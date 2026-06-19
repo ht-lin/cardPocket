@@ -2,8 +2,11 @@ api_platform:
     title: CardPocket API
     version: 1.0.0
     formats:
-        json: ['application/json']
+        # jsonld first => default when a client sends no / `*/*` Accept header,
+        # so collections return the Hydra envelope (member/totalItems) the
+        # mobile client parses, instead of a bare JSON array.
         jsonld: ['application/ld+json']
+        json: ['application/json']
     defaults:
         stateless: true
         cache_headers:

@@ -16,7 +16,7 @@ final class ShareCardTest extends AbstractApiTestCase
 {
     use Factories;
 
-    private const array JSON_HEADER = ['headers' => ['Accept' => 'application/json']];
+    private const array LD_HEADER = ['headers' => ['Accept' => 'application/ld+json']];
 
     // ─── Happy path ───────────────────────────────────────────────────────────
 
@@ -39,7 +39,7 @@ final class ShareCardTest extends AbstractApiTestCase
             'POST',
             '/api/cards/' . $card->getId() . '/shares',
             $token,
-            ['json' => ['viewerId' => (string) $viewer->getId()], ...self::JSON_HEADER],
+            ['json' => ['viewerId' => (string) $viewer->getId()], ...self::LD_HEADER],
         );
 
         $this->assertResponseStatusCodeSame(201);
@@ -66,11 +66,11 @@ final class ShareCardTest extends AbstractApiTestCase
             'GET',
             '/api/cards/' . $card->getId() . '/shares',
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
-        $this->assertSame([], $response->toArray());
+        $this->assertSame([], $response->toArray()['member']);
     }
 
     // ─── Business rule violations ─────────────────────────────────────────────
@@ -89,7 +89,7 @@ final class ShareCardTest extends AbstractApiTestCase
             'POST',
             '/api/cards/' . $card->getId() . '/shares',
             $token,
-            ['json' => ['viewerId' => (string) $viewer->getId()], ...self::JSON_HEADER],
+            ['json' => ['viewerId' => (string) $viewer->getId()], ...self::LD_HEADER],
         );
 
         $this->assertResponseStatusCodeSame(403);
@@ -116,7 +116,7 @@ final class ShareCardTest extends AbstractApiTestCase
             'POST',
             '/api/cards/' . $card->getId() . '/shares',
             $token,
-            ['json' => ['viewerId' => (string) $viewer->getId()], ...self::JSON_HEADER],
+            ['json' => ['viewerId' => (string) $viewer->getId()], ...self::LD_HEADER],
         );
 
         $this->assertResponseStatusCodeSame(422);
@@ -144,11 +144,11 @@ final class ShareCardTest extends AbstractApiTestCase
             'GET',
             '/api/cards/' . $card->getId() . '/shares',
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(1, $data);
         $this->assertNull($data[0]['viewerNickname']);
     }
@@ -161,7 +161,7 @@ final class ShareCardTest extends AbstractApiTestCase
         $card  = CardFactory::createOne(['owner' => $owner]);
 
         $client = static::createClient();
-        $client->request('GET', '/api/cards/' . $card->getId() . '/shares', self::JSON_HEADER);
+        $client->request('GET', '/api/cards/' . $card->getId() . '/shares', self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(401);
     }
@@ -175,7 +175,7 @@ final class ShareCardTest extends AbstractApiTestCase
         $client = static::createClient();
         $client->request('POST', '/api/cards/' . $card->getId() . '/shares', [
             'json'    => ['viewerId' => (string) $viewer->getId()],
-            ...(self::JSON_HEADER),
+            ...(self::LD_HEADER),
         ]);
 
         $this->assertResponseStatusCodeSame(401);
@@ -196,7 +196,7 @@ final class ShareCardTest extends AbstractApiTestCase
             'GET',
             '/api/cards/' . $card->getId() . '/shares',
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(403);
@@ -217,7 +217,7 @@ final class ShareCardTest extends AbstractApiTestCase
             'POST',
             '/api/cards/' . $card->getId() . '/shares',
             $token,
-            ['json' => ['viewerId' => (string) $target->getId()], ...self::JSON_HEADER],
+            ['json' => ['viewerId' => (string) $target->getId()], ...self::LD_HEADER],
         );
 
         $this->assertResponseStatusCodeSame(403);
@@ -235,7 +235,7 @@ final class ShareCardTest extends AbstractApiTestCase
             'POST',
             '/api/cards/not-a-uuid/shares',
             $token,
-            ['json' => ['viewerId' => '00000000-0000-0000-0000-000000000000'], ...self::JSON_HEADER],
+            ['json' => ['viewerId' => '00000000-0000-0000-0000-000000000000'], ...self::LD_HEADER],
         );
 
         $this->assertResponseStatusCodeSame(404);
