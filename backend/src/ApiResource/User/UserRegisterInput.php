@@ -30,7 +30,7 @@ class UserRegisterInput
 
     #[Assert\NotBlank]
     #[Assert\PasswordStrength(
-        minScore: PasswordStrength::STRENGTH_MEDIUM,
+        minScore: PasswordStrength::STRENGTH_WEAK,
         message: 'The password is too weak. Try a longer password or mix in numbers, symbols, and upper/lower case letters.',
     )]
     public string $password = '';
