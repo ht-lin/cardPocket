@@ -14,6 +14,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // Flavors below define custom resource values (app_name) via resValue();
+    // AGP keeps this build feature off by default, so enable it explicitly.
+    buildFeatures {
+        resValues = true
+    }
+
     defaultConfig {
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
