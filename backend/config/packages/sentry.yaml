@@ -1,0 +1,24 @@
+sentry:
+    dsn: '%env(SENTRY_DSN)%'        # empty DSN disables the SDK (dev/test default empty → no-op)
+    register_error_listener: true   # auto-capture unhandled exceptions
+    options:
+        send_default_pii: false     # never send IP / cookies / user identity (default false, locked explicitly)
+
+when@prod:
+    sentry:
+        options:
+            traces_sample_rate: '%env(float:SENTRY_TRACES_SAMPLE_RATE)%'  # performance monitoring (slow requests / transactions)
+            before_send: 'App\Sentry\BeforeSend'                          # sensitive-field scrubbing callback (invokable service)
+
+    # The Sentry Monolog handler is not auto-registered as a service; declare it here.
+    services:
+        Sentry\Monolog\Handler:
+            arguments:
+                $hub: '@Sentry\State\HubInterface'
+                $level: !php/const Monolog\Level::Error
+
+    monolog:
+        handlers:
+            sentry:
+                type: service       # error-level logs also become Sentry events
+                id: Sentry\Monolog\Handler
