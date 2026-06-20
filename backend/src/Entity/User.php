@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\ExpiryPolicy;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -45,6 +46,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $gdprConsentAt = null;
+
+    #[ORM\Column(type: 'string', enumType: ExpiryPolicy::class)]
+    private ExpiryPolicy $expiryPolicy = ExpiryPolicy::KEEP;
 
     public function getId(): Uuid
     {
@@ -129,6 +133,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setGdprConsentAt(?\DateTimeImmutable $gdprConsentAt): static
     {
         $this->gdprConsentAt = $gdprConsentAt;
+
+        return $this;
+    }
+
+    public function getExpiryPolicy(): ExpiryPolicy
+    {
+        return $this->expiryPolicy;
+    }
+
+    public function setExpiryPolicy(ExpiryPolicy $expiryPolicy): static
+    {
+        $this->expiryPolicy = $expiryPolicy;
 
         return $this;
     }

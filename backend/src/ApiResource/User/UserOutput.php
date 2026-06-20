@@ -43,6 +43,7 @@ final class UserOutput
         public readonly string $userName,
         public readonly bool $emailVerified,
         public readonly string $createdAt,
+        public readonly string $expiryPolicy,
     ) {
     }
 }

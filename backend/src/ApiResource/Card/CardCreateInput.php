@@ -19,4 +19,6 @@ class CardCreateInput
     #[Assert\NotBlank]
     #[Assert\Length(max: 2048)]
     public string $barcodeContent = '';
+
+    public ?\DateTimeImmutable $expiresAt = null;
 }

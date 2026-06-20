@@ -16,6 +16,7 @@ final readonly class CardViewerOutput
         public ?string $viewerNickname,
         public string $createdAt,
         public string $updatedAt,
+        public ?string $expiresAt,
     ) {
     }
 }

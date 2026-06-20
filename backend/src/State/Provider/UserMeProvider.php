@@ -31,6 +31,7 @@ final class UserMeProvider implements ProviderInterface
             userName: $user->getUserName(),
             emailVerified: $user->getEmailVerifiedAt() !== null,
             createdAt: $user->getCreatedAt()->format(\DateTimeInterface::ATOM),
+            expiryPolicy: $user->getExpiryPolicy()->value,
         );
     }
 }

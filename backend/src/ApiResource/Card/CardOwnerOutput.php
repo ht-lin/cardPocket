@@ -67,6 +67,7 @@ final class CardOwnerOutput
         public readonly bool $isOwner,
         public readonly string $createdAt,
         public readonly string $updatedAt,
+        public readonly ?string $expiresAt,
     ) {
     }
 }

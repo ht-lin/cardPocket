@@ -52,6 +52,7 @@ final class CardListProvider implements ProviderInterface
                 isOwner: true,
                 createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
                 updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+                expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
             );
         }
 
@@ -67,6 +68,7 @@ final class CardListProvider implements ProviderInterface
                 viewerNickname: $cardShare->getViewerNickname(),
                 createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
                 updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+                expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
             );
         }
 
