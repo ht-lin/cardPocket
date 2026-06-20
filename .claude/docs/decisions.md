@@ -386,10 +386,10 @@
 - **关键原则**：格式必须在传输层一次性显式固定。本次 bug 的本质正是「格式留给隐式协商」——服务端去猜、默认值与解析器冲突。
 
 **权衡 / 注意**：
-- 切到 ld+json 后暴露并修复了一个真实 bug：`CardSyncOutput` 经 `GetCollection` 返回单对象，Hydra 会把它的 `updated`/`deleted` 数组**各自再包成嵌套 Collection**（`updated.member[]` / `deleted.member[]`）。前端 `_incrementalSync` 增加容错 helper `_hydraList()`，同时兼容裸数组与 `{member:[…]}`。此嵌套包装是设计异味，后续可把增量同步改为普通 `Get`（单资源）操作消除（见下「后续」）。
+- 切到 ld+json 后暴露并修复了一个真实 bug：`CardSyncOutput` 经 `GetCollection` 返回单对象，Hydra 会把它的 `updated`/`deleted` 数组**各自再包成嵌套 Collection**（`updated.member[]` / `deleted.member[]`）。当时前端 `_incrementalSync` 临时增加容错 helper `_hydraList()` 兼容两种形状。**此异味已由 BE-SYNC-04 消除**（见下「后续」）：增量同步迁出 `GetCollection` 至独立 `GET /api/cards/sync`，前端 `_hydraList()` 已移除。
 - 错误响应体（4xx）的 ld+json 形状与 plain-JSON 不同，但前端 `_mapError` 仅按状态码分流、`_parse422` 读 `violations`，两种格式下均成立；纯 JWT 鉴权失败（401）由 lexik 返回固定 `{code,message}`，与格式无关。
 - `_mapError` 同时收紧：响应已到达但解析失败不再伪装成 `NetworkException`（改为 `ServerException`），避免契约不匹配被「检查网络连接」掩盖。
 
-**后续**：考虑将 `/api/cards?updatedAfter=` 的增量同步从 `GetCollection` 返回 `CardSyncOutput` 单对象，重构为普通 `Get` 单资源操作或自定义结构，消除 Hydra 对 `updated`/`deleted` 的嵌套 Collection 包装。
+**后续**：~~考虑将增量同步从 `GetCollection` 返回 `CardSyncOutput` 单对象重构为单资源操作~~ —— **已由 BE-SYNC-04 完成（2026-06-20）**：增量同步改为独立操作 `GET /api/cards/sync`（`CardSyncProvider`），`CardListProvider` 回归纯集合职责。关键实现点：因 `CardOwnerOutput`/`CardViewerOutput` 本身是 `#[ApiResource]`，JSON-LD **item** 序列化会把 `updated` 内嵌对象当作关系（resolve IRI / 解析 resource class）而报错，故 `CardSyncOutput.updated` 改为承载**普通关联数组**（`(array)` 转型自 DTO，public readonly 属性键名干净），使其内联为扁平对象。前端直读 `data['updated']`/`data['deleted']` 扁平数组。
 
 **关联**：ADR-012（独立 DTO）、ADR-013（不用 Serialization Groups，每视图独立 DTO）。

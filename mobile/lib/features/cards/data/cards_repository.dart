@@ -62,16 +62,14 @@ class CardsRepository {
 
   Future<void> _incrementalSync(DateTime since) async {
     final response = await _dio.get<Map<String, dynamic>>(
-      '/api/cards',
+      '/api/cards/sync',
       queryParameters: {'updatedAfter': since.toIso8601String()},
     );
     final data = response.data!;
-    // Under application/ld+json, API Platform wraps each array property of the
-    // sync payload in a nested Hydra collection ({ member: [...] }), so
-    // `updated`/`deleted` arrive as objects, not bare lists. Unwrap defensively
-    // so the parser tolerates both shapes.
-    final updated = _hydraList(data['updated']).cast<Map<String, dynamic>>();
-    final deleted = _hydraList(data['deleted']).cast<String>();
+    // `/api/cards/sync` is a single-resource operation, so `updated`/`deleted`
+    // arrive as flat JSON arrays (not nested Hydra collections).
+    final updated = (data['updated'] as List).cast<Map<String, dynamic>>();
+    final deleted = (data['deleted'] as List).cast<String>();
     if (updated.isNotEmpty) {
       await _db.upsertCards(updated.map(_toCompanion).toList());
     }
@@ -140,14 +138,6 @@ class CardsRepository {
       _db.select(_db.cardsTable)..where((t) => t.id.equals(id))
     ).getSingleOrNull();
     return row != null ? _fromRow(row) : null;
-  }
-
-  // Accepts either a bare JSON array or a Hydra collection envelope
-  // ({ member: [...] }) and returns the underlying list.
-  List<dynamic> _hydraList(dynamic value) {
-    if (value is List) return value;
-    if (value is Map<String, dynamic>) return (value['member'] as List?) ?? const [];
-    return const [];
   }
 
   CardModel _mapCard(Map<String, dynamic> json) => CardModel(

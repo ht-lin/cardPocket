@@ -366,18 +366,17 @@ GDPR 删除账户，级联删除所有数据（不可逆）。
 ## 卡片模块
 
 ### GET /api/cards
-获取当前用户的所有卡片（自己创建 + 共享给我的）。支持增量同步。
+获取当前用户的所有卡片（自己创建 + 共享给我的）。全量列表（Hydra 集合）。增量同步见下方 `GET /api/cards/sync`。
 
 **查询参数**
 
 | 参数 | 类型 | 说明 |
 |------|------|------|
-| `updatedAfter` | ISO 8601 | 增量同步：返回该时间后变化的卡片 |
 | `q` | string | Phase 2：全文搜索 |
 | `page` | integer | 分页页码（默认 1） |
 | `itemsPerPage` | integer | 每页数量（默认 20，最大 50） |
 
-**标准响应 200**（无 updatedAfter 时）
+**标准响应 200**
 ```json
 {
   "member": [
@@ -404,7 +403,18 @@ GDPR 删除账户，级联删除所有数据（不可逆）。
 }
 ```
 
-**增量同步响应 200**（携带 updatedAfter 时）
+---
+
+### GET /api/cards/sync
+增量同步：返回某时间点后变化的卡片与已删除/撤销的卡片 ID。独立单资源操作（**非** Hydra 集合），故 `updated`/`deleted` 为扁平数组。
+
+**查询参数**
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `updatedAfter` | ISO 8601 | **必填**。返回该时间后变化的卡片；缺失或非法 → `400` |
+
+**响应 200**
 ```json
 {
   "updated": [
@@ -415,14 +425,17 @@ GDPR 删除账户，级联删除所有数据（不可逆）。
       "barcodeContent": "1234567890",
       "viewerNickname": null,
       "isOwner": true,
+      "createdAt": "2026-06-01T10:00:00Z",
       "updatedAt": "2026-06-01T10:00:00Z"
     }
   ],
-  "deleted": ["uuid-of-deleted-card", "uuid-of-revoked-share"]
+  "deleted": ["uuid-of-deleted-card", "uuid-of-revoked-share"],
+  "syncedAt": "2026-06-01T10:05:00+00:00"
 }
 ```
 
-`deleted` 数组包含：已删除的 Card ID + 对当前用户撤销共享的 CardShare 对应的 Card ID。
+- `deleted` 数组包含：已删除的 Card ID + 对当前用户撤销共享的 CardShare 对应的 Card ID。
+- `syncedAt`：服务端水位线，客户端**必须**在下次同步作为 `updatedAfter` 回传，使同步不依赖（可能偏移的）客户端时钟。
 
 ---
 

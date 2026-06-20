@@ -46,6 +46,7 @@
 - [x] BE-SYNC-01：实现 GET /api/cards?updatedAfter=（返回 updated + deleted）
 - [x] BE-SYNC-02：deleted 列表包含已删除 Card + 已撤销共享的 Card ID
 - [x] BE-SYNC-03：编写增量同步集成测试
+- [x] BE-SYNC-04：重构增量同步以消除 Hydra 嵌套 Collection（技术债，见 ADR-023）—— 增量同步迁出 `GetCollection`，改为独立单资源操作 `GET /api/cards/sync`（`CardSyncProvider`）；`CardSyncOutput.updated` 改承载普通关联数组以避免 JSON-LD item 把内嵌 DTO 当关系；前端移除 `_hydraList()` 容错、直读扁平 `updated`/`deleted`；`IncrementalSyncTest` 断言改为扁平形状
 
 #### [BE-FRIEND] 好友模块
 - [x] BE-FRIEND-00：创建 Friendship DTO 类（FriendshipOutput / FriendshipCreateInput）

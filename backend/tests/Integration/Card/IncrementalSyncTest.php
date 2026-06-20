@@ -43,7 +43,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
+            '/api/cards/sync?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
             $token,
             self::LD_HEADER,
         );
@@ -53,9 +53,9 @@ final class IncrementalSyncTest extends AbstractApiTestCase
 
         $this->assertArrayHasKey('updated', $data);
         $this->assertArrayHasKey('deleted', $data);
-        $this->assertCount(1, $data['updated']['member']);
-        $this->assertSame((string) $cardB->getId(), $data['updated']['member'][0]['id']);
-        $this->assertEmpty($data['deleted']['member']);
+        $this->assertCount(1, $data['updated']);
+        $this->assertSame((string) $cardB->getId(), $data['updated'][0]['id']);
+        $this->assertEmpty($data['deleted']);
     }
 
     public function testDeletedIncludesRemovedCards(): void
@@ -72,7 +72,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
+            '/api/cards/sync?updatedAfter=' . urlencode(self::PAST_ISO),
             $token,
             self::LD_HEADER,
         );
@@ -81,8 +81,8 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $data = $response->toArray();
 
         $this->assertArrayHasKey('deleted', $data);
-        $this->assertContains((string) $card->getId(), $data['deleted']['member']);
-        $this->assertEmpty($data['updated']['member']);
+        $this->assertContains((string) $card->getId(), $data['deleted']);
+        $this->assertEmpty($data['updated']);
     }
 
     public function testUpdatedViewerNicknameAppearsInSync(): void
@@ -119,7 +119,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
+            '/api/cards/sync?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
             $viewerToken,
             self::LD_HEADER,
         );
@@ -128,7 +128,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $data = $response->toArray();
 
         $this->assertArrayHasKey('updated', $data);
-        $cardIds = array_column($data['updated']['member'], 'id');
+        $cardIds = array_column($data['updated'], 'id');
         $this->assertContains((string) $card->getId(), $cardIds);
     }
 
@@ -152,7 +152,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
+            '/api/cards/sync?updatedAfter=' . urlencode(self::PAST_ISO),
             $token,
             self::LD_HEADER,
         );
@@ -161,7 +161,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $data = $response->toArray();
 
         $this->assertArrayHasKey('deleted', $data);
-        $this->assertContains((string) $card->getId(), $data['deleted']['member']);
+        $this->assertContains((string) $card->getId(), $data['deleted']);
     }
 
     public function testSyncResponseIncludesServerSyncedAt(): void
@@ -174,7 +174,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
+            '/api/cards/sync?updatedAfter=' . urlencode(self::PAST_ISO),
             $token,
             self::LD_HEADER,
         );
@@ -199,7 +199,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=garbage',
+            '/api/cards/sync?updatedAfter=garbage',
             $token,
             self::LD_HEADER,
         );

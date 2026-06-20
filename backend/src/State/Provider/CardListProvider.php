@@ -7,14 +7,11 @@ namespace App\State\Provider;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\Card\CardOwnerOutput;
-use App\ApiResource\Card\CardSyncOutput;
 use App\ApiResource\Card\CardViewerOutput;
 use App\Entity\User;
 use App\Repository\CardRepository;
 use App\Repository\CardShareRepository;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class CardListProvider implements ProviderInterface
 {
@@ -22,26 +19,13 @@ final class CardListProvider implements ProviderInterface
         private readonly Security $security,
         private readonly CardRepository $cardRepository,
         private readonly CardShareRepository $cardShareRepository,
-        private readonly IncrementalSyncProvider $incrementalSyncProvider,
-        private readonly RequestStack $requestStack,
     ) {
     }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): iterable|CardSyncOutput
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): iterable
     {
         /** @var User $user */
         $user = $this->security->getUser();
-
-        $updatedAfterParam = $this->requestStack->getCurrentRequest()?->query->get('updatedAfter');
-        if ($updatedAfterParam !== null && $updatedAfterParam !== '') {
-            try {
-                $since = new \DateTimeImmutable($updatedAfterParam);
-            } catch (\Exception $e) {
-                throw new BadRequestHttpException('Invalid "updatedAfter" parameter: expected a valid date/time.', $e);
-            }
-
-            return $this->incrementalSyncProvider->provide($user, $since);
-        }
 
         $result = [];
 
