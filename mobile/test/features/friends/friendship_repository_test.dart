@@ -4,7 +4,6 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:card_pocket/core/api/api_exception.dart';
 import 'package:card_pocket/features/friends/data/friendship_repository.dart';
-import 'package:card_pocket/features/friends/domain/friend_model.dart';
 
 class MockDio extends Mock implements Dio {}
 

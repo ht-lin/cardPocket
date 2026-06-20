@@ -35,12 +35,12 @@ Widget _buildTestApp({
   final router = GoRouter(routes: [
     GoRoute(
       path: '/',
-      builder: (_, __) => const CardsScreen(),
+      builder: (_, _) => const CardsScreen(),
     ),
-    GoRoute(path: '/cards/scan', builder: (_, __) => const SizedBox()),
+    GoRoute(path: '/cards/scan', builder: (_, _) => const SizedBox()),
     GoRoute(
       path: '/cards/:id/barcode',
-      builder: (_, __) => const SizedBox(),
+      builder: (_, _) => const SizedBox(),
     ),
   ]);
 

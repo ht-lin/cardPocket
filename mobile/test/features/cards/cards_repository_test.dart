@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -7,7 +6,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:card_pocket/core/api/api_exception.dart';
 import 'package:card_pocket/core/database/app_database.dart';
 import 'package:card_pocket/features/cards/data/cards_repository.dart';
-import 'package:card_pocket/features/cards/domain/card_model.dart';
 
 class MockDio extends Mock implements Dio {}
 

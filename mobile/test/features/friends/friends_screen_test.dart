@@ -33,10 +33,10 @@ Widget _buildTestApp({
   final router = GoRouter(routes: [
     GoRoute(
       path: '/',
-      builder: (_, __) => const FriendsScreen(),
+      builder: (_, _) => const FriendsScreen(),
     ),
-    GoRoute(path: '/friends/requests', builder: (_, __) => const SizedBox()),
-    GoRoute(path: '/friends/search', builder: (_, __) => const SizedBox()),
+    GoRoute(path: '/friends/requests', builder: (_, _) => const SizedBox()),
+    GoRoute(path: '/friends/search', builder: (_, _) => const SizedBox()),
   ]);
 
   return ProviderScope(
