@@ -33,6 +33,20 @@ class CardShareRepository extends ServiceEntityRepository
     }
 
     /** @return CardShare[] */
+    public function searchByViewer(User $viewer, string $q): array
+    {
+        return $this->createQueryBuilder('cs')
+            ->join('cs.card', 'c')
+            ->where('cs.viewer = :viewer')
+            ->andWhere('c.deletedAt IS NULL')
+            ->andWhere("LOWER(c.name) LIKE :pattern ESCAPE '\\'")
+            ->setParameter('viewer', $viewer)
+            ->setParameter('pattern', self::buildLikePattern($q))
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return CardShare[] */
     public function findByCard(Card $card): array
     {
         return $this->createQueryBuilder('cs')
@@ -99,5 +113,14 @@ class CardShareRepository extends ServiceEntityRepository
             ->setParameter('since', $since)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Build a case-insensitive substring LIKE pattern, escaping the user input so
+     * `%`, `_` and `\` are matched literally rather than as SQL wildcards.
+     */
+    private static function buildLikePattern(string $q): string
+    {
+        return '%' . addcslashes(mb_strtolower($q), '%_\\') . '%';
     }
 }
