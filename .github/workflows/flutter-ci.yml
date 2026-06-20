@@ -43,22 +43,6 @@ jobs:
           path: mobile/build/app/outputs/flutter-apk/app-dev-debug.apk
           retention-days: 7
 
-  build-ios:
-    name: Build dev IPA (no codesign)
-    runs-on: macos-latest
-    needs: ci
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        working-directory: mobile
-        run: flutter pub get
-
-      - name: Build dev IPA (debug, no codesign)
-        working-directory: mobile
-        run: flutter build ios --flavor dev --debug --no-codesign
+  # NOTE: iOS IPA build temporarily removed — the Xcode project lacks
+  # flavor-specific build configurations (Debug-dev/Release-dev/Profile-dev),
+  # which requires Xcode/macOS to set up. Re-add once iOS flavors are configured.

@@ -15,7 +15,7 @@ final class IncrementalSyncTest extends AbstractApiTestCase
 {
     use Factories;
 
-    private const array JSON_HEADER = ['headers' => ['Accept' => 'application/json']];
+    private const array LD_HEADER = ['headers' => ['Accept' => 'application/ld+json']];
 
     // A fixed timestamp well in the past so any entity created during the test is "after" it.
     private const string PAST_ISO = '2020-01-01T00:00:00+00:00';
@@ -43,9 +43,9 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
+            '/api/cards/sync?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
@@ -72,9 +72,9 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
+            '/api/cards/sync?updatedAfter=' . urlencode(self::PAST_ISO),
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
@@ -119,9 +119,9 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
+            '/api/cards/sync?updatedAfter=' . urlencode($since->format(\DateTimeInterface::ATOM)),
             $viewerToken,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
@@ -152,9 +152,9 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
+            '/api/cards/sync?updatedAfter=' . urlencode(self::PAST_ISO),
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
@@ -174,9 +174,9 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $response = $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=' . urlencode(self::PAST_ISO),
+            '/api/cards/sync?updatedAfter=' . urlencode(self::PAST_ISO),
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(200);
@@ -199,9 +199,9 @@ final class IncrementalSyncTest extends AbstractApiTestCase
         $this->authenticatedRequest(
             $client,
             'GET',
-            '/api/cards?updatedAfter=garbage',
+            '/api/cards/sync?updatedAfter=garbage',
             $token,
-            self::JSON_HEADER,
+            self::LD_HEADER,
         );
 
         $this->assertResponseStatusCodeSame(400);

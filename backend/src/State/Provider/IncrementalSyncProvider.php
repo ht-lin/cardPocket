@@ -30,7 +30,9 @@ final class IncrementalSyncProvider
         $updated = [];
 
         foreach ($this->cardRepository->findUpdatedByOwnerSince($user, $since) as $card) {
-            $updated[] = new CardOwnerOutput(
+            // Cast to a plain array (public readonly props → clean string keys)
+            // so CardSyncOutput carries flat data rather than resource objects.
+            $updated[] = (array) new CardOwnerOutput(
                 id: (string) $card->getId(),
                 name: $card->getName(),
                 barcodeType: $card->getBarcodeType()->value,
@@ -43,7 +45,7 @@ final class IncrementalSyncProvider
 
         foreach ($this->cardShareRepository->findUpdatedSharesSince($user, $since) as $cardShare) {
             $card = $cardShare->getCard();
-            $updated[] = new CardViewerOutput(
+            $updated[] = (array) new CardViewerOutput(
                 id: (string) $card->getId(),
                 name: $card->getName(),
                 barcodeType: $card->getBarcodeType()->value,

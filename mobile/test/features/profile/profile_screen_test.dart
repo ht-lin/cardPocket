@@ -18,13 +18,13 @@ final _testUser = User(
 
 Widget _buildTestApp({required User user}) {
   final router = GoRouter(routes: [
-    GoRoute(path: '/', builder: (_, __) => const ProfileScreen()),
-    GoRoute(path: '/profile/edit-name', builder: (_, __) => const SizedBox()),
+    GoRoute(path: '/', builder: (_, _) => const ProfileScreen()),
+    GoRoute(path: '/profile/edit-name', builder: (_, _) => const SizedBox()),
     GoRoute(
       path: '/profile/change-password',
-      builder: (_, __) => const SizedBox(),
+      builder: (_, _) => const SizedBox(),
     ),
-    GoRoute(path: '/login', builder: (_, __) => const SizedBox()),
+    GoRoute(path: '/login', builder: (_, _) => const SizedBox()),
   ]);
 
   return ProviderScope(

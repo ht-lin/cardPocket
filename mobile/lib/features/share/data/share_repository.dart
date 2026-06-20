@@ -23,8 +23,13 @@ class ShareRepository {
 
   Future<List<CardShareModel>> getShares(String cardId) async {
     try {
-      final response = await _dio.get<List<dynamic>>('/api/cards/$cardId/shares');
-      final list = (response.data ?? []).cast<Map<String, dynamic>>();
+      final response =
+          await _dio.get<Map<String, dynamic>>('/api/cards/$cardId/shares');
+      // API Platform serves collections as a Hydra envelope under
+      // application/ld+json: the items live under `member`.
+      final list =
+          (response.data?['member'] as List?)?.cast<Map<String, dynamic>>() ??
+              const [];
       return list.map(_mapShare).toList();
     } on DioException catch (e) {
       throw _mapError(e);

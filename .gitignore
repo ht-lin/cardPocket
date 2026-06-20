@@ -1,0 +1,12 @@
+# ---- Claude Code / AI assistant artifacts ----
+# Ignore all Claude-related docs and config (any location in the repo)
+CLAUDE.md
+**/CLAUDE.md
+.claude/
+**/.claude/
+
+# ---- OS / editor ----
+.DS_Store
+*.swp
+.idea/
+.vscode/

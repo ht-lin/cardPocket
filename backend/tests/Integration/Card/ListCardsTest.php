@@ -14,7 +14,7 @@ final class ListCardsTest extends AbstractApiTestCase
 {
     use Factories;
 
-    private const array JSON_HEADER = ['headers' => ['Accept' => 'application/json']];
+    private const array LD_HEADER = ['headers' => ['Accept' => 'application/ld+json']];
 
     public function testOwnerSeesOwnCards(): void
     {
@@ -25,10 +25,10 @@ final class ListCardsTest extends AbstractApiTestCase
         $client = static::createClient();
         $token = $this->getToken($client, 'owner@example.com', 'Password1!');
 
-        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::JSON_HEADER);
+        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(200);
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(2, $data);
         foreach ($data as $item) {
             $this->assertTrue($item['isOwner']);
@@ -45,10 +45,10 @@ final class ListCardsTest extends AbstractApiTestCase
         $client = static::createClient();
         $token = $this->getToken($client, 'viewer@example.com', 'Password1!');
 
-        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::JSON_HEADER);
+        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(200);
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(1, $data);
         $this->assertSame((string) $card->getId(), $data[0]['id']);
         $this->assertFalse($data[0]['isOwner']);
@@ -64,10 +64,10 @@ final class ListCardsTest extends AbstractApiTestCase
         $client = static::createClient();
         $token = $this->getToken($client, 'viewer@example.com', 'Password1!');
 
-        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::JSON_HEADER);
+        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(200);
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(1, $data);
         $this->assertSame('My Custom Label', $data[0]['viewerNickname']);
     }
@@ -82,10 +82,10 @@ final class ListCardsTest extends AbstractApiTestCase
         $client = static::createClient();
         $token = $this->getToken($client, 'owner@example.com', 'Password1!');
 
-        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::JSON_HEADER);
+        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(200);
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(1, $data);
         $this->assertArrayNotHasKey('viewerNickname', $data[0]);
     }
@@ -93,7 +93,7 @@ final class ListCardsTest extends AbstractApiTestCase
     public function testListCardsFailsWithoutAuth(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/cards', self::JSON_HEADER);
+        $client->request('GET', '/api/cards', self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(401);
     }
@@ -107,10 +107,10 @@ final class ListCardsTest extends AbstractApiTestCase
         $client = static::createClient();
         $token = $this->getToken($client, 'owner@example.com', 'Password1!');
 
-        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::JSON_HEADER);
+        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(200);
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(1, $data);
         $this->assertSame('Active Card', $data[0]['name']);
     }
@@ -126,10 +126,10 @@ final class ListCardsTest extends AbstractApiTestCase
         $client = static::createClient();
         $token = $this->getToken($client, 'user@example.com', 'Password1!');
 
-        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::JSON_HEADER);
+        $response = $this->authenticatedRequest($client, 'GET', '/api/cards', $token, self::LD_HEADER);
 
         $this->assertResponseStatusCodeSame(200);
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(2, $data);
 
         $ownerItems = array_values(array_filter($data, fn($item) => $item['isOwner'] === true));

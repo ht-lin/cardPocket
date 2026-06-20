@@ -28,7 +28,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'user@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
 
         $this->assertResponseStatusCodeSame(204);
@@ -38,7 +38,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
     {
         $client = static::createClient();
         $client->request('DELETE', self::ENDPOINT, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
 
         $this->assertResponseStatusCodeSame(401);
@@ -53,7 +53,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'cascade@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 
@@ -77,7 +77,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token  = $this->getToken($client, 'owner@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 
@@ -103,7 +103,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token  = $this->getToken($client, 'user@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 
@@ -124,7 +124,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'user@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 
@@ -149,7 +149,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'user@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 
@@ -172,7 +172,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'user@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 
@@ -191,13 +191,13 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token = $this->getToken($client, 'user@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 
         $client->request('POST', '/api/auth/login', [
             'json' => ['email' => 'user@example.com', 'password' => 'Password1!'],
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(401);
     }
@@ -213,7 +213,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token  = $this->getToken($client, 'owner@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 
@@ -237,7 +237,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
 
         $token = $this->getToken($client, 'revoke@example.com', 'Password1!');
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 
@@ -255,7 +255,7 @@ final class DeleteAccountTest extends AbstractApiTestCase
         $token  = $this->getToken($client, 'evt@example.com', 'Password1!');
 
         $this->authenticatedRequest($client, 'DELETE', self::ENDPOINT, $token, [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
         $this->assertResponseStatusCodeSame(204);
 

@@ -62,12 +62,14 @@ class CardsRepository {
 
   Future<void> _incrementalSync(DateTime since) async {
     final response = await _dio.get<Map<String, dynamic>>(
-      '/api/cards',
+      '/api/cards/sync',
       queryParameters: {'updatedAfter': since.toIso8601String()},
     );
     final data = response.data!;
-    final updated = (data['updated'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-    final deleted = (data['deleted'] as List?)?.cast<String>() ?? [];
+    // `/api/cards/sync` is a single-resource operation, so `updated`/`deleted`
+    // arrive as flat JSON arrays (not nested Hydra collections).
+    final updated = (data['updated'] as List).cast<Map<String, dynamic>>();
+    final deleted = (data['deleted'] as List).cast<String>();
     if (updated.isNotEmpty) {
       await _db.upsertCards(updated.map(_toCompanion).toList());
     }
@@ -195,6 +197,14 @@ class CardsRepository {
         return UnprocessableException(errors);
       default:
         if (status != null && status >= 500) return const ServerException();
+        // A response arrived but decoding/casting it failed (e.g. a response
+        // shape that doesn't match what we parse) — that's a contract/format
+        // mismatch, not a connectivity problem. Don't mask it as a network
+        // error, otherwise the real cause stays hidden behind "check your
+        // connection".
+        if (status != null) {
+          return ServerException('Unexpected response: ${e.message}');
+        }
         return NetworkException(e.message ?? 'Unknown error');
     }
   }

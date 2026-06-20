@@ -31,12 +31,12 @@ final class SearchTest extends AbstractApiTestCase
             'GET',
             self::ENDPOINT . '?q=' . urlencode($target->getUserName()),
             $token,
-            ['headers' => ['Accept' => 'application/json']],
+            ['headers' => ['Accept' => 'application/ld+json']],
         );
 
         $this->assertResponseStatusCodeSame(200);
 
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(1, $data);
         $this->assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/',
@@ -62,12 +62,12 @@ final class SearchTest extends AbstractApiTestCase
             'GET',
             self::ENDPOINT . '?q=' . urlencode('target@example.com'),
             $token,
-            ['headers' => ['Accept' => 'application/json']],
+            ['headers' => ['Accept' => 'application/ld+json']],
         );
 
         $this->assertResponseStatusCodeSame(200);
 
-        $data = $response->toArray();
+        $data = $response->toArray()['member'];
         $this->assertCount(1, $data);
         $this->assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/',
@@ -92,11 +92,11 @@ final class SearchTest extends AbstractApiTestCase
             'GET',
             self::ENDPOINT . '?q=nobody_exists',
             $token,
-            ['headers' => ['Accept' => 'application/json']],
+            ['headers' => ['Accept' => 'application/ld+json']],
         );
 
         $this->assertResponseStatusCodeSame(200);
-        $this->assertSame([], $response->toArray());
+        $this->assertSame([], $response->toArray()['member']);
     }
 
     public function testSearchReturnsEmptyArrayWhenQIsEmpty(): void
@@ -114,11 +114,11 @@ final class SearchTest extends AbstractApiTestCase
             'GET',
             self::ENDPOINT . '?q=',
             $token,
-            ['headers' => ['Accept' => 'application/json']],
+            ['headers' => ['Accept' => 'application/ld+json']],
         );
 
         $this->assertResponseStatusCodeSame(200);
-        $this->assertSame([], $response->toArray());
+        $this->assertSame([], $response->toArray()['member']);
     }
 
     public function testSearchReturnsEmptyArrayWhenQParamMissing(): void
@@ -136,11 +136,11 @@ final class SearchTest extends AbstractApiTestCase
             'GET',
             self::ENDPOINT,
             $token,
-            ['headers' => ['Accept' => 'application/json']],
+            ['headers' => ['Accept' => 'application/ld+json']],
         );
 
         $this->assertResponseStatusCodeSame(200);
-        $this->assertSame([], $response->toArray());
+        $this->assertSame([], $response->toArray()['member']);
     }
 
     public function testSearchDoesNotReturnSoftDeletedUser(): void
@@ -162,11 +162,11 @@ final class SearchTest extends AbstractApiTestCase
             'GET',
             self::ENDPOINT . '?q=' . urlencode($deleted->getUserName()),
             $token,
-            ['headers' => ['Accept' => 'application/json']],
+            ['headers' => ['Accept' => 'application/ld+json']],
         );
 
         $this->assertResponseStatusCodeSame(200);
-        $this->assertSame([], $response->toArray());
+        $this->assertSame([], $response->toArray()['member']);
     }
 
     public function testSearchFailsWhenEmailNotVerified(): void
@@ -181,7 +181,7 @@ final class SearchTest extends AbstractApiTestCase
             'GET',
             self::ENDPOINT . '?q=anyone',
             $token,
-            ['headers' => ['Accept' => 'application/json']],
+            ['headers' => ['Accept' => 'application/ld+json']],
         );
 
         $this->assertResponseStatusCodeSame(403);
@@ -191,7 +191,7 @@ final class SearchTest extends AbstractApiTestCase
     {
         $client = static::createClient();
         $response = $client->request('GET', self::ENDPOINT . '?q=anyone', [
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => ['Accept' => 'application/ld+json'],
         ]);
 
         $this->assertResponseStatusCodeSame(401);

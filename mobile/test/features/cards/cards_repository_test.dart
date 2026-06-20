@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -7,7 +6,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:card_pocket/core/api/api_exception.dart';
 import 'package:card_pocket/core/database/app_database.dart';
 import 'package:card_pocket/features/cards/data/cards_repository.dart';
-import 'package:card_pocket/features/cards/domain/card_model.dart';
 
 class MockDio extends Mock implements Dio {}
 
@@ -224,14 +222,17 @@ void main() {
 
       when(
         () => mockDio.get<Map<String, dynamic>>(
-          '/api/cards',
+          '/api/cards/sync',
           queryParameters: any(named: 'queryParameters'),
         ),
       ).thenAnswer(
         (_) async => Response(
-          data: {'updated': [], 'deleted': []},
+          data: {
+            'updated': <Map<String, dynamic>>[],
+            'deleted': <String>[],
+          },
           statusCode: 200,
-          requestOptions: RequestOptions(path: '/api/cards'),
+          requestOptions: RequestOptions(path: '/api/cards/sync'),
         ),
       );
 
@@ -239,7 +240,7 @@ void main() {
       // Verify the request included updatedAfter
       final captured = verify(
         () => mockDio.get<Map<String, dynamic>>(
-          '/api/cards',
+          '/api/cards/sync',
           queryParameters: captureAny(named: 'queryParameters'),
         ),
       ).captured;
@@ -262,17 +263,17 @@ void main() {
 
       when(
         () => mockDio.get<Map<String, dynamic>>(
-          '/api/cards',
+          '/api/cards/sync',
           queryParameters: any(named: 'queryParameters'),
         ),
       ).thenAnswer(
         (_) async => Response(
           data: {
-            'updated': [],
-            'deleted': ['card-to-delete'],
+            'updated': <Map<String, dynamic>>[],
+            'deleted': <String>['card-to-delete'],
           },
           statusCode: 200,
-          requestOptions: RequestOptions(path: '/api/cards'),
+          requestOptions: RequestOptions(path: '/api/cards/sync'),
         ),
       );
 
