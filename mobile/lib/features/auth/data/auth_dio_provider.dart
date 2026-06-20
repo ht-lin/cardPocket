@@ -11,7 +11,7 @@ part 'auth_dio_provider.g.dart';
 @Riverpod(keepAlive: true)
 Dio authDio(Ref ref) {
   final config = ref.watch(appConfigProvider);
-  final dio = Dio(
+  return Dio(
     BaseOptions(
       baseUrl: config.apiBaseUrl,
       connectTimeout: const Duration(seconds: 10),
@@ -24,12 +24,12 @@ Dio authDio(Ref ref) {
       },
     ),
   );
-  if (config.isDevFlavor) {
-      (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-          final c = HttpClient();
-          c.badCertificateCallback = (cert, host, port) => true;
-          return c;
-      };
-  }
-  return dio;
+  // if (config.isDevFlavor) {
+  //     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+  //         final c = HttpClient();
+  //         c.badCertificateCallback = (cert, host, port) => true;
+  //         return c;
+  //     };
+  // }
+  // return dio;
 }

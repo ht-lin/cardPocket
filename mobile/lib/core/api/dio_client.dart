@@ -45,13 +45,13 @@ abstract final class DioClient {
         LogInterceptor(requestBody: true, responseBody: true),
       );
       // dev-only: 信任 Symfony 本地自签证书（勿用于 prod，已被 isDevFlavor 门控）
-      for (final d in [dio, refreshDio]) {
-          (d.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-              final c = HttpClient();
-              c.badCertificateCallback = (cert, host, port) => true;
-              return c;
-          };
-      }
+      // for (final d in [dio, refreshDio]) {
+      //     (d.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      //         final c = HttpClient();
+      //         c.badCertificateCallback = (cert, host, port) => true;
+      //         return c;
+      //     };
+      // }
     }
 
     return dio;
