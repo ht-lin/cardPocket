@@ -35,8 +35,8 @@ dependencies:
   mobile_scanner: ^7.2.0
   barcode_widget: ^2.0.4
 
-  # Crash reporting (sentry 9.x not yet resolvable with current deps — stays at 8.x)
-  sentry_flutter: ^8.14.2
+  # Crash reporting (9.x required for Kotlin 2.x / AGP 9 toolchain)
+  sentry_flutter: ^9.0.0
 
   # Screen brightness control (barcode display page)
   screen_brightness: ^2.1.9
