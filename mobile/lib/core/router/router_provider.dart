@@ -9,6 +9,7 @@ import '../../features/auth/presentation/verify_pending_screen.dart';
 import '../../features/cards/presentation/barcode_screen.dart';
 import '../../features/cards/presentation/cards_screen.dart';
 import '../../features/cards/presentation/create_card_screen.dart';
+import '../../features/cards/presentation/edit_card_screen.dart';
 import '../../features/cards/presentation/scan_confirm_screen.dart';
 import '../../features/cards/presentation/scan_screen.dart';
 import '../../features/friends/presentation/friend_requests_screen.dart';
@@ -111,6 +112,13 @@ List<RouteBase> _buildRoutes() => [
                     path: ':id/barcode',
                     name: RouteNames.cardBarcode,
                     builder: (context, state) => BarcodeScreen(
+                      id: state.pathParameters['id']!,
+                    ),
+                  ),
+                  GoRoute(
+                    path: ':id/edit',
+                    name: RouteNames.cardsEdit,
+                    builder: (context, state) => EditCardScreen(
                       id: state.pathParameters['id']!,
                     ),
                   ),

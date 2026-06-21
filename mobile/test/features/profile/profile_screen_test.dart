@@ -71,6 +71,25 @@ void main() {
       expect(find.text('Change Password'), findsOneWidget);
     });
 
+    testWidgets('expiry policy switch is off for KEEP', (tester) async {
+      await tester.pumpWidget(_buildTestApp(user: _testUser));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Auto-move expired cards to trash'), findsOneWidget);
+      final sw = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+      expect(sw.value, false);
+    });
+
+    testWidgets('expiry policy switch is on for AUTO_TRASH', (tester) async {
+      await tester.pumpWidget(_buildTestApp(
+        user: _testUser.copyWith(expiryPolicy: ExpiryPolicy.autoTrash),
+      ));
+      await tester.pumpAndSettle();
+
+      final sw = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+      expect(sw.value, true);
+    });
+
     testWidgets('shows Sign Out list tile', (tester) async {
       await tester.pumpWidget(_buildTestApp(user: _testUser));
       await tester.pumpAndSettle();

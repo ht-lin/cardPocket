@@ -18,6 +18,16 @@ final _card1 = CardModel(
   updatedAt: DateTime(2026, 6, 1),
 );
 
+final _expiredCard = CardModel(
+  id: 'c3',
+  name: 'Expired Card',
+  barcodeType: 'QR_CODE',
+  barcodeContent: '999',
+  isOwner: true,
+  expiresAt: DateTime(2020, 1, 1),
+  updatedAt: DateTime(2026, 6, 1),
+);
+
 final _card2 = CardModel(
   id: 'c2',
   name: 'Shared Card',
@@ -150,6 +160,28 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('My Starbucks (alice)'), findsOneWidget);
+    });
+
+    testWidgets('shows Expired badge for an expired card', (tester) async {
+      await tester.pumpWidget(_buildTestApp(
+        ownedState: CardsListState(items: [_expiredCard], hasMore: false),
+        viewedState: const CardsListState(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Expired Card'), findsOneWidget);
+      expect(find.text('Expired'), findsOneWidget);
+    });
+
+    testWidgets('shows no Expired badge for a non-expired card',
+        (tester) async {
+      await tester.pumpWidget(_buildTestApp(
+        ownedState: CardsListState(items: [_card1], hasMore: false),
+        viewedState: const CardsListState(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Expired'), findsNothing);
     });
 
     testWidgets('shows FAB', (tester) async {

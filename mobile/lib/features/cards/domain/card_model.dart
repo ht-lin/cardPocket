@@ -13,8 +13,16 @@ abstract class CardModel with _$CardModel {
     String? shareId,
     String? viewerNickname,
     String? ownerUsername,
+    DateTime? expiresAt,
     required DateTime updatedAt,
   }) = _CardModel;
+}
+
+extension CardModelX on CardModel {
+  /// Whether the card's validity period has elapsed. Cards without an
+  /// `expiresAt` never expire.
+  bool get isExpired =>
+      expiresAt != null && expiresAt!.isBefore(DateTime.now());
 }
 
 @freezed

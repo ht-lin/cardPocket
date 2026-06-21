@@ -32,6 +32,8 @@
   "gdprValidationRequired": "需要同意才能继续",
   "profileEditNameTitle": "修改用户名",
   "profileChangePasswordTitle": "修改密码",
+  "profileExpiryPolicyTitle": "过期卡片自动移入回收箱",
+  "profileExpiryPolicySubtitle": "开启后，卡片过期将自动移入回收箱；关闭时，过期卡片仅作标记。",
   "profileLogoutButton": "退出登录",
   "profileDeleteAccountButton": "注销账号",
   "profileDeleteAccountConfirmTitle": "注销账号",

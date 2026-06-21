@@ -54,6 +54,21 @@ class UserRepository {
     }
   }
 
+  Future<User> updateExpiryPolicy(ExpiryPolicy policy) async {
+    try {
+      final response = await _dio.patch<Map<String, dynamic>>(
+        '/api/users/me',
+        data: {
+          'expiryPolicy':
+              policy == ExpiryPolicy.autoTrash ? 'AUTO_TRASH' : 'KEEP',
+        },
+      );
+      return User.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw _mapError(e);
+    }
+  }
+
   Future<void> deleteAccount() async {
     try {
       await _dio.delete<void>('/api/users/me');

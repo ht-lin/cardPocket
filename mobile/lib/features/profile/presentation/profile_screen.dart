@@ -6,6 +6,7 @@ import '../../../core/database/database_provider.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/router/route_names.dart';
 import '../../auth/application/auth_notifier.dart';
+import '../../auth/domain/auth_models.dart';
 import '../application/profile_notifier.dart';
 import '../data/user_repository.dart';
 
@@ -70,6 +71,15 @@ class ProfileScreen extends ConsumerWidget {
                   context.pushNamed(RouteNames.profileChangePassword),
             ),
             const Divider(),
+            SwitchListTile(
+              secondary: const Icon(Icons.auto_delete_outlined),
+              title: Text(l10n.profileExpiryPolicyTitle),
+              subtitle: Text(l10n.profileExpiryPolicySubtitle),
+              value: user.expiryPolicy == ExpiryPolicy.autoTrash,
+              onChanged: (enabled) =>
+                  _updateExpiryPolicy(context, ref, enabled),
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
               title: Text(l10n.profileLogoutButton),
@@ -93,6 +103,26 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _updateExpiryPolicy(
+    BuildContext context,
+    WidgetRef ref,
+    bool enabled,
+  ) async {
+    final policy = enabled ? ExpiryPolicy.autoTrash : ExpiryPolicy.keep;
+    try {
+      await ref.read(userRepositoryProvider).updateExpiryPolicy(policy);
+      ref.invalidate(profileProvider);
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      final message = switch (e) {
+        NetworkException() => context.l10n.errorNetworkTimeout,
+        _ => context.l10n.errorServerError,
+      };
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   Future<void> _confirmDeleteAccount(

@@ -96,6 +96,17 @@ class $CardsTableTable extends CardsTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _expiresAtMeta = const VerificationMeta(
+    'expiresAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
+    'expires_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -117,6 +128,7 @@ class $CardsTableTable extends CardsTable
     shareId,
     viewerNickname,
     ownerUsername,
+    expiresAt,
     updatedAt,
   ];
   @override
@@ -198,6 +210,12 @@ class $CardsTableTable extends CardsTable
         ),
       );
     }
+    if (data.containsKey('expires_at')) {
+      context.handle(
+        _expiresAtMeta,
+        expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -247,6 +265,10 @@ class $CardsTableTable extends CardsTable
         DriftSqlType.string,
         data['${effectivePrefix}owner_username'],
       ),
+      expiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expires_at'],
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -269,6 +291,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
   final String? shareId;
   final String? viewerNickname;
   final String? ownerUsername;
+  final DateTime? expiresAt;
   final DateTime updatedAt;
   const CardsTableData({
     required this.id,
@@ -279,6 +302,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     this.shareId,
     this.viewerNickname,
     this.ownerUsername,
+    this.expiresAt,
     required this.updatedAt,
   });
   @override
@@ -297,6 +321,9 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     }
     if (!nullToAbsent || ownerUsername != null) {
       map['owner_username'] = Variable<String>(ownerUsername);
+    }
+    if (!nullToAbsent || expiresAt != null) {
+      map['expires_at'] = Variable<DateTime>(expiresAt);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -318,6 +345,9 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       ownerUsername: ownerUsername == null && nullToAbsent
           ? const Value.absent()
           : Value(ownerUsername),
+      expiresAt: expiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expiresAt),
       updatedAt: Value(updatedAt),
     );
   }
@@ -336,6 +366,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       shareId: serializer.fromJson<String?>(json['shareId']),
       viewerNickname: serializer.fromJson<String?>(json['viewerNickname']),
       ownerUsername: serializer.fromJson<String?>(json['ownerUsername']),
+      expiresAt: serializer.fromJson<DateTime?>(json['expiresAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -351,6 +382,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       'shareId': serializer.toJson<String?>(shareId),
       'viewerNickname': serializer.toJson<String?>(viewerNickname),
       'ownerUsername': serializer.toJson<String?>(ownerUsername),
+      'expiresAt': serializer.toJson<DateTime?>(expiresAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -364,6 +396,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     Value<String?> shareId = const Value.absent(),
     Value<String?> viewerNickname = const Value.absent(),
     Value<String?> ownerUsername = const Value.absent(),
+    Value<DateTime?> expiresAt = const Value.absent(),
     DateTime? updatedAt,
   }) => CardsTableData(
     id: id ?? this.id,
@@ -378,6 +411,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     ownerUsername: ownerUsername.present
         ? ownerUsername.value
         : this.ownerUsername,
+    expiresAt: expiresAt.present ? expiresAt.value : this.expiresAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   CardsTableData copyWithCompanion(CardsTableCompanion data) {
@@ -398,6 +432,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       ownerUsername: data.ownerUsername.present
           ? data.ownerUsername.value
           : this.ownerUsername,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -413,6 +448,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
           ..write('shareId: $shareId, ')
           ..write('viewerNickname: $viewerNickname, ')
           ..write('ownerUsername: $ownerUsername, ')
+          ..write('expiresAt: $expiresAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -428,6 +464,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     shareId,
     viewerNickname,
     ownerUsername,
+    expiresAt,
     updatedAt,
   );
   @override
@@ -442,6 +479,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
           other.shareId == this.shareId &&
           other.viewerNickname == this.viewerNickname &&
           other.ownerUsername == this.ownerUsername &&
+          other.expiresAt == this.expiresAt &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -454,6 +492,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
   final Value<String?> shareId;
   final Value<String?> viewerNickname;
   final Value<String?> ownerUsername;
+  final Value<DateTime?> expiresAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const CardsTableCompanion({
@@ -465,6 +504,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     this.shareId = const Value.absent(),
     this.viewerNickname = const Value.absent(),
     this.ownerUsername = const Value.absent(),
+    this.expiresAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -477,6 +517,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     this.shareId = const Value.absent(),
     this.viewerNickname = const Value.absent(),
     this.ownerUsername = const Value.absent(),
+    this.expiresAt = const Value.absent(),
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -494,6 +535,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     Expression<String>? shareId,
     Expression<String>? viewerNickname,
     Expression<String>? ownerUsername,
+    Expression<DateTime>? expiresAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
@@ -506,6 +548,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
       if (shareId != null) 'share_id': shareId,
       if (viewerNickname != null) 'viewer_nickname': viewerNickname,
       if (ownerUsername != null) 'owner_username': ownerUsername,
+      if (expiresAt != null) 'expires_at': expiresAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -520,6 +563,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     Value<String?>? shareId,
     Value<String?>? viewerNickname,
     Value<String?>? ownerUsername,
+    Value<DateTime?>? expiresAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
   }) {
@@ -532,6 +576,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
       shareId: shareId ?? this.shareId,
       viewerNickname: viewerNickname ?? this.viewerNickname,
       ownerUsername: ownerUsername ?? this.ownerUsername,
+      expiresAt: expiresAt ?? this.expiresAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -564,6 +609,9 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     if (ownerUsername.present) {
       map['owner_username'] = Variable<String>(ownerUsername.value);
     }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<DateTime>(expiresAt.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -584,6 +632,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
           ..write('shareId: $shareId, ')
           ..write('viewerNickname: $viewerNickname, ')
           ..write('ownerUsername: $ownerUsername, ')
+          ..write('expiresAt: $expiresAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -841,6 +890,7 @@ typedef $$CardsTableTableCreateCompanionBuilder =
       Value<String?> shareId,
       Value<String?> viewerNickname,
       Value<String?> ownerUsername,
+      Value<DateTime?> expiresAt,
       required DateTime updatedAt,
       Value<int> rowid,
     });
@@ -854,6 +904,7 @@ typedef $$CardsTableTableUpdateCompanionBuilder =
       Value<String?> shareId,
       Value<String?> viewerNickname,
       Value<String?> ownerUsername,
+      Value<DateTime?> expiresAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
     });
@@ -904,6 +955,11 @@ class $$CardsTableTableFilterComposer
 
   ColumnFilters<String> get ownerUsername => $composableBuilder(
     column: $table.ownerUsername,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -962,6 +1018,11 @@ class $$CardsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -1009,6 +1070,9 @@ class $$CardsTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
@@ -1052,6 +1116,7 @@ class $$CardsTableTableTableManager
                 Value<String?> shareId = const Value.absent(),
                 Value<String?> viewerNickname = const Value.absent(),
                 Value<String?> ownerUsername = const Value.absent(),
+                Value<DateTime?> expiresAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CardsTableCompanion(
@@ -1063,6 +1128,7 @@ class $$CardsTableTableTableManager
                 shareId: shareId,
                 viewerNickname: viewerNickname,
                 ownerUsername: ownerUsername,
+                expiresAt: expiresAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
@@ -1076,6 +1142,7 @@ class $$CardsTableTableTableManager
                 Value<String?> shareId = const Value.absent(),
                 Value<String?> viewerNickname = const Value.absent(),
                 Value<String?> ownerUsername = const Value.absent(),
+                Value<DateTime?> expiresAt = const Value.absent(),
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
               }) => CardsTableCompanion.insert(
@@ -1087,6 +1154,7 @@ class $$CardsTableTableTableManager
                 shareId: shareId,
                 viewerNickname: viewerNickname,
                 ownerUsername: ownerUsername,
+                expiresAt: expiresAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),

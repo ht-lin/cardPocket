@@ -111,6 +111,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileChangePasswordTitle => 'Change Password';
 
   @override
+  String get profileExpiryPolicyTitle => 'Auto-move expired cards to trash';
+
+  @override
+  String get profileExpiryPolicySubtitle =>
+      'When on, cards are moved to trash after they expire. When off, expired cards are only marked.';
+
+  @override
   String get profileLogoutButton => 'Sign Out';
 
   @override

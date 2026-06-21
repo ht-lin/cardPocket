@@ -299,10 +299,19 @@ class _CardTile extends ConsumerWidget {
     final displayName = (!isOwner && card.viewerNickname != null)
         ? '${card.viewerNickname} (${card.ownerUsername ?? ''})'
         : card.name;
+    final errorColor = Theme.of(context).colorScheme.error;
 
     return ListTile(
       leading: const CircleAvatar(child: Icon(Icons.credit_card)),
-      title: Text(displayName),
+      title: Row(
+        children: [
+          Flexible(child: Text(displayName, overflow: TextOverflow.ellipsis)),
+          if (card.isExpired) ...[
+            const SizedBox(width: 8),
+            _ExpiredBadge(color: errorColor),
+          ],
+        ],
+      ),
       subtitle: isOwner ? null : Text(card.ownerUsername ?? ''),
       trailing: isOwner
           ? _OwnerMenu(card: card)
@@ -310,6 +319,29 @@ class _CardTile extends ConsumerWidget {
       onTap: () => context.pushNamed(
         RouteNames.cardBarcode,
         pathParameters: {'id': card.id},
+      ),
+    );
+  }
+}
+
+class _ExpiredBadge extends StatelessWidget {
+  const _ExpiredBadge({required this.color});
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        'Expired',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
       ),
     );
   }
@@ -325,8 +357,8 @@ class _OwnerMenu extends ConsumerWidget {
       onSelected: (action) => _handleAction(context, ref, action),
       itemBuilder: (_) => const [
         PopupMenuItem(
-          value: _MenuAction.editName,
-          child: Text('Edit name'),
+          value: _MenuAction.editCard,
+          child: Text('Edit card'),
         ),
         PopupMenuItem(
           value: _MenuAction.manageSharing,
@@ -346,62 +378,15 @@ class _OwnerMenu extends ConsumerWidget {
     _MenuAction action,
   ) async {
     switch (action) {
-      case _MenuAction.editName:
-        await _showEditDialog(context, ref);
+      case _MenuAction.editCard:
+        context.pushNamed(
+          RouteNames.cardsEdit,
+          pathParameters: {'id': card.id},
+        );
       case _MenuAction.manageSharing:
         _showManageSharingSheet(context);
       case _MenuAction.delete:
         await _showDeleteDialog(context, ref);
-    }
-  }
-
-  Future<void> _showEditDialog(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController(text: card.name);
-    String? errorText;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: const Text('Edit name'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: InputDecoration(
-              labelText: 'Card name',
-              errorText: errorText,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Save'),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (confirmed != true || !context.mounted) return;
-    final newName = controller.text.trim();
-    if (newName.isEmpty || newName == card.name) return;
-
-    try {
-      await ref.read(cardsRepositoryProvider).updateName(card.id, newName);
-      await ref.read(ownedCardsProvider.notifier).refresh();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Card name updated'),
-            backgroundColor: Colors.green,
-            duration: Duration(milliseconds: 1500),
-          ),
-        );
-      }
-    } on ApiException catch (e) {
-      if (context.mounted) _showErrorSnackBar(context, e);
     }
   }
 
@@ -465,7 +450,7 @@ class _OwnerMenu extends ConsumerWidget {
   }
 }
 
-enum _MenuAction { editName, manageSharing, delete }
+enum _MenuAction { editCard, manageSharing, delete }
 
 class _ViewerMenu extends ConsumerWidget {
   const _ViewerMenu({required this.card});

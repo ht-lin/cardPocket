@@ -110,6 +110,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileChangePasswordTitle => 'Passwort ändern';
 
   @override
+  String get profileExpiryPolicyTitle =>
+      'Abgelaufene Karten automatisch in den Papierkorb verschieben';
+
+  @override
+  String get profileExpiryPolicySubtitle =>
+      'Wenn aktiviert, werden Karten nach Ablauf in den Papierkorb verschoben. Andernfalls werden abgelaufene Karten nur markiert.';
+
+  @override
   String get profileLogoutButton => 'Abmelden';
 
   @override

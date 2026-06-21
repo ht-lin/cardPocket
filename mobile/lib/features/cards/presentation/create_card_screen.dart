@@ -6,6 +6,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/router/route_names.dart';
 import '../application/owned_cards_notifier.dart';
 import '../data/cards_repository.dart';
+import 'widgets/expiry_field.dart';
 
 const _barcodeTypes = [
   'QR_CODE',
@@ -32,6 +33,7 @@ class _CreateCardScreenState extends ConsumerState<CreateCardScreen> {
   final _contentController = TextEditingController();
   final _nameController = TextEditingController();
   String _selectedType = _barcodeTypes.first;
+  DateTime? _expiresAt;
   String? _contentError;
   String? _nameError;
   bool _loading = false;
@@ -84,6 +86,11 @@ class _CreateCardScreenState extends ConsumerState<CreateCardScreen> {
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Name is required' : null,
               ),
+              const SizedBox(height: 16),
+              ExpiryField(
+                value: _expiresAt,
+                onChanged: (v) => setState(() => _expiresAt = v),
+              ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _loading ? null : _submit,
@@ -115,6 +122,7 @@ class _CreateCardScreenState extends ConsumerState<CreateCardScreen> {
             name: _nameController.text.trim(),
             barcodeType: _selectedType,
             barcodeContent: _contentController.text.trim(),
+            expiresAt: _expiresAt,
           );
       await ref.read(ownedCardsProvider.notifier).refresh();
       if (mounted) {

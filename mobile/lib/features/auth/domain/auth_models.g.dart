@@ -26,6 +26,9 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   email: json['email'] as String,
   userName: json['userName'] as String,
   emailVerified: json['emailVerified'] as bool,
+  expiryPolicy:
+      $enumDecodeNullable(_$ExpiryPolicyEnumMap, json['expiryPolicy']) ??
+      ExpiryPolicy.keep,
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
@@ -34,7 +37,13 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'email': instance.email,
   'userName': instance.userName,
   'emailVerified': instance.emailVerified,
+  'expiryPolicy': _$ExpiryPolicyEnumMap[instance.expiryPolicy]!,
   'createdAt': instance.createdAt.toIso8601String(),
+};
+
+const _$ExpiryPolicyEnumMap = {
+  ExpiryPolicy.keep: 'KEEP',
+  ExpiryPolicy.autoTrash: 'AUTO_TRASH',
 };
 
 _LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) =>

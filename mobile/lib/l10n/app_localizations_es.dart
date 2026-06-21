@@ -114,6 +114,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileChangePasswordTitle => 'Cambiar contraseña';
 
   @override
+  String get profileExpiryPolicyTitle =>
+      'Mover automáticamente las tarjetas caducadas a la papelera';
+
+  @override
+  String get profileExpiryPolicySubtitle =>
+      'Cuando está activado, las tarjetas se mueven a la papelera tras caducar. Cuando está desactivado, las tarjetas caducadas solo se marcan.';
+
+  @override
   String get profileLogoutButton => 'Cerrar sesión';
 
   @override

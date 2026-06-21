@@ -296,6 +296,18 @@ abstract class AppLocalizations {
   /// **'Change Password'**
   String get profileChangePasswordTitle;
 
+  /// Title for the expiry policy toggle on profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-move expired cards to trash'**
+  String get profileExpiryPolicyTitle;
+
+  /// Subtitle explaining the expiry policy toggle
+  ///
+  /// In en, this message translates to:
+  /// **'When on, cards are moved to trash after they expire. When off, expired cards are only marked.'**
+  String get profileExpiryPolicySubtitle;
+
   /// Sign out button label on profile screen
   ///
   /// In en, this message translates to:
