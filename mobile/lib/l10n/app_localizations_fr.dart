@@ -113,6 +113,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profileChangePasswordTitle => 'Modifier le mot de passe';
 
   @override
+  String get profileTrashTitle => 'Corbeille';
+
+  @override
   String get profileExpiryPolicyTitle =>
       'Déplacer automatiquement les cartes expirées vers la corbeille';
 

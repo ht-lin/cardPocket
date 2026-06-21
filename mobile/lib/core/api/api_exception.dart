@@ -15,6 +15,10 @@ final class ForbiddenException extends ApiException {
   const ForbiddenException([super.message = 'Forbidden']);
 }
 
+final class NotFoundException extends ApiException {
+  const NotFoundException([super.message = 'Not found']);
+}
+
 final class UnprocessableException extends ApiException {
   const UnprocessableException(this.errors, [super.message = 'Validation failed']);
   final Map<String, List<String>> errors;

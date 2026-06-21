@@ -32,6 +32,7 @@
   "gdprValidationRequired": "Debes aceptar para continuar",
   "profileEditNameTitle": "Editar nombre de usuario",
   "profileChangePasswordTitle": "Cambiar contraseña",
+  "profileTrashTitle": "Papelera",
   "profileExpiryPolicyTitle": "Mover automáticamente las tarjetas caducadas a la papelera",
   "profileExpiryPolicySubtitle": "Cuando está activado, las tarjetas se mueven a la papelera tras caducar. Cuando está desactivado, las tarjetas caducadas solo se marcan.",
   "profileLogoutButton": "Cerrar sesión",

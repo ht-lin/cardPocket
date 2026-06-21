@@ -110,6 +110,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileChangePasswordTitle => 'Passwort ändern';
 
   @override
+  String get profileTrashTitle => 'Papierkorb';
+
+  @override
   String get profileExpiryPolicyTitle =>
       'Abgelaufene Karten automatisch in den Papierkorb verschieben';
 

@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'Change Password'**
   String get profileChangePasswordTitle;
 
+  /// Trash entry on the profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Trash'**
+  String get profileTrashTitle;
+
   /// Title for the expiry policy toggle on profile screen
   ///
   /// In en, this message translates to:
