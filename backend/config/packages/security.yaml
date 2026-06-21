@@ -37,6 +37,8 @@ security:
             jwt: ~
 
     access_control:
+        # Unlike the other /api/auth/* endpoints, registering a push token requires authentication.
+        - { path: ^/api/auth/push-token, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/auth, roles: PUBLIC_ACCESS }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

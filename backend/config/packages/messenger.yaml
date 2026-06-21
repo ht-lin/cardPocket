@@ -9,6 +9,8 @@ framework:
         routing:
             # Symfony Mailer dispatches this message; routing it async makes ->send() non-blocking.
             Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+            # Push notifications: route async so the triggering request never blocks on FCM.
+            App\Message\SendPushMessage: async
 
 # Run synchronously in dev/test so no worker is required and test behaviour is unchanged.
 when@dev:

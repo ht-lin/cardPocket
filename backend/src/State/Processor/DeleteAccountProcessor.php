@@ -12,6 +12,7 @@ use App\Repository\CardDeletionRepository;
 use App\Repository\CardRepository;
 use App\Repository\CardShareRepository;
 use App\Repository\FriendshipRepository;
+use App\Repository\PushTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -27,6 +28,7 @@ final class DeleteAccountProcessor implements ProcessorInterface
         private readonly CardShareRepository $cardShareRepository,
         private readonly FriendshipRepository $friendshipRepository,
         private readonly CardDeletionRepository $cardDeletionRepository,
+        private readonly PushTokenRepository $pushTokenRepository,
     ) {
     }
 
@@ -50,6 +52,9 @@ final class DeleteAccountProcessor implements ProcessorInterface
 
         // GDPR: remove audit log entries that reference this user before anonymizing
         $this->cardDeletionRepository->deleteByUserId($userId);
+
+        // User is soft-deleted, so the push-token FK ON DELETE CASCADE never fires — delete explicitly.
+        $this->pushTokenRepository->deleteByUser($user);
 
         foreach ($this->cardShareRepository->findByViewer($user) as $share) {
             $this->entityManager->remove($share);

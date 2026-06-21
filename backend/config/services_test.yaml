@@ -1,0 +1,4 @@
+services:
+    # Swap the real FCM client for a recording double so tests never hit the network.
+    App\Tests\Fake\RecordingFcmClient: ~
+    App\Service\Fcm\FcmClientInterface: '@App\Tests\Fake\RecordingFcmClient'
