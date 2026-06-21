@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ApiResource\User;
 
+use App\Enum\ExpiryPolicy;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\PasswordStrength;
 
@@ -11,6 +12,8 @@ class UserUpdateInput
 {
     #[Assert\Length(min: 2, max: 50)]
     public ?string $userName = null;
+
+    public ?ExpiryPolicy $expiryPolicy = null;
 
     public ?string $currentPassword = null;
 

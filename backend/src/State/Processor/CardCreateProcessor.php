@@ -49,6 +49,8 @@ final class CardCreateProcessor implements ProcessorInterface
         $card->setName($data->name);
         $card->setBarcodeType($data->barcodeType);
         $card->setBarcodeContent($data->barcodeContent);
+        $card->setExpiresAt($data->expiresAt);
+        $card->setColor($data->color);
         $card->setOwner($user);
 
         $this->entityManager->persist($card);
@@ -62,6 +64,8 @@ final class CardCreateProcessor implements ProcessorInterface
             isOwner: true,
             createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
             updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+            expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
+            color: $card->getColor(),
         );
     }
 }

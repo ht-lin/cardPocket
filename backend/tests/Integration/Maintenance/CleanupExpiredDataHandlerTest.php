@@ -7,6 +7,9 @@ namespace App\Tests\Integration\Maintenance;
 use App\Entity\CardDeletion;
 use App\Entity\EmailVerificationToken;
 use App\Entity\RefreshToken;
+use App\Enum\ExpiryPolicy;
+use App\Factory\CardFactory;
+use App\Factory\CardShareFactory;
 use App\Factory\UserFactory;
 use App\Message\CleanupExpiredDataMessage;
 use App\MessageHandler\CleanupExpiredDataHandler;
@@ -86,6 +89,126 @@ final class CleanupExpiredDataHandlerTest extends KernelTestCase
             1,
             (int) $conn->fetchOne('SELECT COUNT(*) FROM app_card_deletion'),
             'Only the recent tombstone should remain',
+        );
+    }
+
+    public function testAutoTrashesExpiredCardsForAutoTrashUsers(): void
+    {
+        $autoUser = UserFactory::createOne(['expiryPolicy' => ExpiryPolicy::AUTO_TRASH]);
+        $keepUser = UserFactory::createOne(['expiryPolicy' => ExpiryPolicy::KEEP]);
+
+        // AUTO_TRASH user, expired -> should be trashed, with owner + viewer tombstones.
+        $expiredCard = CardFactory::createOne([
+            'owner'     => $autoUser,
+            'expiresAt' => new \DateTimeImmutable('-1 day'),
+        ]);
+        CardShareFactory::createOne(['card' => $expiredCard]);
+
+        // KEEP user, expired -> must be left untouched.
+        $keepExpiredCard = CardFactory::createOne([
+            'owner'     => $keepUser,
+            'expiresAt' => new \DateTimeImmutable('-1 day'),
+        ]);
+
+        // AUTO_TRASH user, not yet expired / no expiry -> left untouched.
+        $futureCard = CardFactory::createOne([
+            'owner'     => $autoUser,
+            'expiresAt' => new \DateTimeImmutable('+1 day'),
+        ]);
+        $noExpiryCard = CardFactory::createOne([
+            'owner'     => $autoUser,
+            'expiresAt' => null,
+        ]);
+
+        $expiredId   = (string) $expiredCard->getId();
+        $keepId      = (string) $keepExpiredCard->getId();
+        $futureId    = (string) $futureCard->getId();
+        $noExpiryId  = (string) $noExpiryCard->getId();
+
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+
+        $handler = self::getContainer()->get(CleanupExpiredDataHandler::class);
+        $handler(new CleanupExpiredDataMessage());
+        $em->clear();
+
+        $conn = $em->getConnection();
+
+        $this->assertNotNull(
+            $conn->fetchOne('SELECT deleted_at FROM app_card WHERE id = :id', ['id' => $expiredId]),
+            'Expired card of an AUTO_TRASH user should be soft-deleted',
+        );
+        $this->assertNull(
+            $conn->fetchOne('SELECT deleted_at FROM app_card WHERE id = :id', ['id' => $keepId]),
+            'Expired card of a KEEP user must stay active',
+        );
+        $this->assertNull(
+            $conn->fetchOne('SELECT deleted_at FROM app_card WHERE id = :id', ['id' => $futureId]),
+            'Not-yet-expired card must stay active',
+        );
+        $this->assertNull(
+            $conn->fetchOne('SELECT deleted_at FROM app_card WHERE id = :id', ['id' => $noExpiryId]),
+            'Card without an expiry must stay active',
+        );
+
+        // One tombstone for the owner + one for the single viewer of the trashed card.
+        $this->assertSame(
+            2,
+            (int) $conn->fetchOne('SELECT COUNT(*) FROM app_card_deletion'),
+            'Owner + viewer tombstones should be written for the auto-trashed card only',
+        );
+    }
+
+    public function testPurgesCardsTrashedBeyondRetention(): void
+    {
+        $owner = UserFactory::createOne();
+
+        // Trashed longer than the 30-day retention window -> physically purged.
+        $oldCard = CardFactory::createOne([
+            'owner'     => $owner,
+            'deletedAt' => new \DateTimeImmutable('-31 days'),
+        ]);
+        CardShareFactory::createOne(['card' => $oldCard]);
+
+        // Trashed recently -> kept.
+        $recentCard = CardFactory::createOne([
+            'owner'     => $owner,
+            'deletedAt' => new \DateTimeImmutable('-10 days'),
+        ]);
+
+        $oldId    = (string) $oldCard->getId();
+        $recentId = (string) $recentCard->getId();
+
+        /** @var EntityManagerInterface $em */
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+
+        $handler = self::getContainer()->get(CleanupExpiredDataHandler::class);
+        $handler(new CleanupExpiredDataMessage());
+        $em->clear();
+
+        $conn = $em->getConnection();
+
+        $this->assertSame(
+            0,
+            (int) $conn->fetchOne('SELECT COUNT(*) FROM app_card WHERE id = :id', ['id' => $oldId]),
+            'Card trashed beyond the retention window should be physically deleted',
+        );
+        $this->assertSame(
+            0,
+            (int) $conn->fetchOne('SELECT COUNT(*) FROM app_card_share WHERE card_id = :id', ['id' => $oldId]),
+            'CardShare rows of a purged card should be deleted',
+        );
+        $this->assertSame(
+            1,
+            (int) $conn->fetchOne('SELECT COUNT(*) FROM app_card WHERE id = :id', ['id' => $recentId]),
+            'Recently trashed card should be kept',
+        );
+
+        // One tombstone for the owner + one for the single viewer of the purged card.
+        $this->assertSame(
+            2,
+            (int) $conn->fetchOne('SELECT COUNT(*) FROM app_card_deletion'),
+            'Owner + viewer tombstones should be written for the purged card',
         );
     }
 }

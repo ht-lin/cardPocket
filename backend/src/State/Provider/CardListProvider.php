@@ -12,6 +12,7 @@ use App\Entity\User;
 use App\Repository\CardRepository;
 use App\Repository\CardShareRepository;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 final class CardListProvider implements ProviderInterface
 {
@@ -19,6 +20,7 @@ final class CardListProvider implements ProviderInterface
         private readonly Security $security,
         private readonly CardRepository $cardRepository,
         private readonly CardShareRepository $cardShareRepository,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -27,9 +29,21 @@ final class CardListProvider implements ProviderInterface
         /** @var User $user */
         $user = $this->security->getUser();
 
+        // Optional `q` filters the list by card name (case-insensitive substring).
+        $qRaw = $this->requestStack->getCurrentRequest()?->query->get('q');
+        $q = is_string($qRaw) ? trim($qRaw) : '';
+
+        $ownerCards = $q !== ''
+            ? $this->cardRepository->searchByOwner($user, $q)
+            : $this->cardRepository->findActiveByOwner($user);
+
+        $sharedShares = $q !== ''
+            ? $this->cardShareRepository->searchByViewer($user, $q)
+            : $this->cardShareRepository->findByViewer($user);
+
         $result = [];
 
-        foreach ($this->cardRepository->findActiveByOwner($user) as $card) {
+        foreach ($ownerCards as $card) {
             $result[] = new CardOwnerOutput(
                 id: (string) $card->getId(),
                 name: $card->getName(),
@@ -38,10 +52,12 @@ final class CardListProvider implements ProviderInterface
                 isOwner: true,
                 createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
                 updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+                expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
+                color: $card->getColor(),
             );
         }
 
-        foreach ($this->cardShareRepository->findByViewer($user) as $cardShare) {
+        foreach ($sharedShares as $cardShare) {
             $card = $cardShare->getCard();
             $result[] = new CardViewerOutput(
                 id: (string) $card->getId(),
@@ -53,6 +69,8 @@ final class CardListProvider implements ProviderInterface
                 viewerNickname: $cardShare->getViewerNickname(),
                 createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
                 updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+                expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
+                color: $card->getColor(),
             );
         }
 

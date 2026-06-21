@@ -60,6 +60,10 @@ final class UserUpdateProcessor implements ProcessorInterface
             $user->setUserName($data->userName);
         }
 
+        if ($data->expiryPolicy !== null) {
+            $user->setExpiryPolicy($data->expiryPolicy);
+        }
+
         try {
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException $e) {
@@ -73,6 +77,7 @@ final class UserUpdateProcessor implements ProcessorInterface
             userName: $user->getUserName(),
             emailVerified: $user->getEmailVerifiedAt() !== null,
             createdAt: $user->getCreatedAt()->format(\DateTimeInterface::ATOM),
+            expiryPolicy: $user->getExpiryPolicy()->value,
         );
     }
 }

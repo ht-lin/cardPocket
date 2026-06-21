@@ -13,6 +13,7 @@ use App\Entity\User;
 use App\Security\Voter\CardVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Uid\Uuid;
@@ -25,6 +26,7 @@ final class CardUpdateProcessor implements ProcessorInterface
     public function __construct(
         private readonly Security $security,
         private readonly EntityManagerInterface $entityManager,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -49,6 +51,16 @@ final class CardUpdateProcessor implements ProcessorInterface
             $card->setName($data->name);
         }
 
+        // Distinguish "expiresAt omitted" (keep current) from "expiresAt: null" (clear)
+        // by inspecting the raw request payload, since both deserialize to null on the DTO.
+        $payload = $this->requestStack->getCurrentRequest()?->toArray() ?? [];
+        if (array_key_exists('expiresAt', $payload)) {
+            $card->setExpiresAt($data->expiresAt);
+        }
+        if (array_key_exists('color', $payload)) {
+            $card->setColor($data->color);
+        }
+
         $this->entityManager->flush();
 
         return new CardOwnerOutput(
@@ -59,6 +71,8 @@ final class CardUpdateProcessor implements ProcessorInterface
             isOwner: true,
             createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
             updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+            expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
+            color: $card->getColor(),
         );
     }
 }
