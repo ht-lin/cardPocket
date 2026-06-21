@@ -61,6 +61,24 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
+  Future<List<CardsTableData>> searchCards(
+    String query, {
+    int limit = 200,
+  }) {
+    // Escape LIKE wildcards so `%` and `_` match literally, mirroring the
+    // backend contract (GET /api/cards?q=). Backslash is the escape char.
+    final escaped = query
+        .replaceAll(r'\', r'\\')
+        .replaceAll('%', r'\%')
+        .replaceAll('_', r'\_')
+        .toLowerCase();
+    return (select(cardsTable)
+          ..where((t) => t.name.lower().like('%$escaped%', escapeChar: r'\'))
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
+          ..limit(limit))
+        .get();
+  }
+
   Future<DateTime?> getLastSyncAt() async {
     final row = await (select(syncMetaTable)
           ..where((t) => t.key.equals('default')))

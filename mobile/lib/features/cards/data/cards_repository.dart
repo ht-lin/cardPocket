@@ -133,6 +133,29 @@ class CardsRepository {
     return rows.map(_fromRow).toList();
   }
 
+  Future<List<CardModel>> searchLocal(String query) async {
+    final rows = await _db.searchCards(query);
+    return rows.map(_fromRow).toList();
+  }
+
+  Future<List<CardModel>> searchRemote(String query) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/api/cards',
+        queryParameters: {'q': query},
+      );
+      final members =
+          (response.data!['member'] as List?)?.cast<Map<String, dynamic>>() ??
+              [];
+      if (members.isNotEmpty) {
+        await _db.upsertCards(members.map(_toCompanion).toList());
+      }
+      return members.map(_mapCard).toList();
+    } on DioException catch (e) {
+      throw _mapError(e);
+    }
+  }
+
   Future<CardModel?> getCardById(String id) async {
     final row = await (
       _db.select(_db.cardsTable)..where((t) => t.id.equals(id))

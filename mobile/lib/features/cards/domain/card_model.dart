@@ -25,3 +25,12 @@ abstract class CardsListState with _$CardsListState {
     @Default(true) bool hasMore,
   }) = _CardsListState;
 }
+
+@freezed
+abstract class CardsSearchState with _$CardsSearchState {
+  const factory CardsSearchState({
+    @Default([]) List<CardModel> results,
+    @Default(false) bool fromRemote,
+    @Default('') String query,
+  }) = _CardsSearchState;
+}
