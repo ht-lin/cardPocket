@@ -57,6 +57,9 @@ final class CardUpdateProcessor implements ProcessorInterface
         if (array_key_exists('expiresAt', $payload)) {
             $card->setExpiresAt($data->expiresAt);
         }
+        if (array_key_exists('color', $payload)) {
+            $card->setColor($data->color);
+        }
 
         $this->entityManager->flush();
 
@@ -69,6 +72,7 @@ final class CardUpdateProcessor implements ProcessorInterface
             createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
             updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
             expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
+            color: $card->getColor(),
         );
     }
 }

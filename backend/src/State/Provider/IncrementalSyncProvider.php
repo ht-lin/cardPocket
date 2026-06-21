@@ -41,6 +41,7 @@ final class IncrementalSyncProvider
                 createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
                 updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
                 expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
+                color: $card->getColor(),
             );
         }
 
@@ -57,6 +58,7 @@ final class IncrementalSyncProvider
                 createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
                 updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
                 expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
+                color: $card->getColor(),
             );
         }
 

@@ -17,6 +17,7 @@ final readonly class CardViewerOutput
         public string $createdAt,
         public string $updatedAt,
         public ?string $expiresAt,
+        public ?string $color,
     ) {
     }
 }

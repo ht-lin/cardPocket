@@ -21,4 +21,10 @@ class CardCreateInput
     public string $barcodeContent = '';
 
     public ?\DateTimeImmutable $expiresAt = null;
+
+    #[Assert\Regex(
+        pattern: '/^#[0-9A-Fa-f]{6}$/',
+        message: 'color must be a #RRGGBB hex string',
+    )]
+    public ?string $color = null;
 }

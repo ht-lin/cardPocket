@@ -53,6 +53,7 @@ final class CardListProvider implements ProviderInterface
                 createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
                 updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
                 expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
+                color: $card->getColor(),
             );
         }
 
@@ -69,6 +70,7 @@ final class CardListProvider implements ProviderInterface
                 createdAt: $card->getCreatedAt()->format(\DateTimeInterface::ATOM),
                 updatedAt: $card->getUpdatedAt()->format(\DateTimeInterface::ATOM),
                 expiresAt: $card->getExpiresAt()?->format(\DateTimeInterface::ATOM),
+                color: $card->getColor(),
             );
         }
 

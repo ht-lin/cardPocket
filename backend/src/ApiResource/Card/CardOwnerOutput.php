@@ -68,6 +68,7 @@ final class CardOwnerOutput
         public readonly string $createdAt,
         public readonly string $updatedAt,
         public readonly ?string $expiresAt,
+        public readonly ?string $color,
     ) {
     }
 }
