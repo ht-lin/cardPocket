@@ -65,6 +65,73 @@ void main() {
       expect(rows.first.id, 'card-1');
     });
 
+    test('sends expiresAt as ISO8601 and parses it back', () async {
+      final expiry = DateTime.utc(2027, 1, 1);
+      final json = Map<String, dynamic>.from(_cardJson)
+        ..['expiresAt'] = '2027-01-01T00:00:00.000Z';
+      when(
+        () => mockDio.post<Map<String, dynamic>>(
+          '/api/cards',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: json,
+          statusCode: 201,
+          requestOptions: RequestOptions(path: '/api/cards'),
+        ),
+      );
+
+      final result = await repo.create(
+        name: 'Costco',
+        barcodeType: 'QR_CODE',
+        barcodeContent: '12345',
+        expiresAt: expiry,
+      );
+
+      expect(result.expiresAt!.isAtSameMomentAs(expiry), true);
+
+      final captured = verify(
+        () => mockDio.post<Map<String, dynamic>>(
+          '/api/cards',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      expect((captured.first as Map)['expiresAt'], '2027-01-01T00:00:00.000Z');
+
+      final rows = await db.getOwnedCards(offset: 0);
+      expect(rows.first.expiresAt!.isAtSameMomentAs(expiry), true);
+    });
+
+    test('omits expiresAt from payload when null', () async {
+      when(
+        () => mockDio.post<Map<String, dynamic>>(
+          '/api/cards',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: _cardJson,
+          statusCode: 201,
+          requestOptions: RequestOptions(path: '/api/cards'),
+        ),
+      );
+
+      await repo.create(
+        name: 'Costco',
+        barcodeType: 'QR_CODE',
+        barcodeContent: '12345',
+      );
+
+      final captured = verify(
+        () => mockDio.post<Map<String, dynamic>>(
+          '/api/cards',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      expect((captured.first as Map).containsKey('expiresAt'), false);
+    });
+
     test('throws UnprocessableException on 422', () async {
       when(
         () => mockDio.post<Map<String, dynamic>>(
@@ -127,8 +194,8 @@ void main() {
     });
   });
 
-  group('CardsRepository.updateName', () {
-    test('returns updated CardModel and updates DB on 200', () async {
+  group('CardsRepository.updateCard', () {
+    setUp(() async {
       await db.upsertCards([
         CardsTableCompanion.insert(
           id: 'card-1',
@@ -139,9 +206,13 @@ void main() {
           updatedAt: DateTime(2026, 6, 1),
         ),
       ]);
+    });
 
+    test('updates name + expiresAt and writes DB on 200', () async {
+      final expiry = DateTime.utc(2027, 1, 1);
       final updatedJson = Map<String, dynamic>.from(_cardJson)
-        ..['name'] = 'New Name';
+        ..['name'] = 'New Name'
+        ..['expiresAt'] = '2027-01-01T00:00:00.000Z';
 
       when(
         () => mockDio.patch<Map<String, dynamic>>(
@@ -156,11 +227,62 @@ void main() {
         ),
       );
 
-      final result = await repo.updateName('card-1', 'New Name');
+      final result = await repo.updateCard(
+        id: 'card-1',
+        name: 'New Name',
+        expiresAt: expiry,
+      );
       expect(result.name, 'New Name');
+      expect(result.expiresAt!.isAtSameMomentAs(expiry), true);
+
+      final captured = verify(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/cards/card-1',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      final body = captured.first as Map;
+      expect(body['name'], 'New Name');
+      expect(body['expiresAt'], '2027-01-01T00:00:00.000Z');
 
       final rows = await db.getOwnedCards(offset: 0);
       expect(rows.first.name, 'New Name');
+      expect(rows.first.expiresAt!.isAtSameMomentAs(expiry), true);
+    });
+
+    test('clears expiresAt by sending null', () async {
+      final updatedJson = Map<String, dynamic>.from(_cardJson)
+        ..['expiresAt'] = null;
+
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/cards/card-1',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: updatedJson,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/cards/card-1'),
+        ),
+      );
+
+      final result = await repo.updateCard(
+        id: 'card-1',
+        name: 'Costco',
+        expiresAt: null,
+      );
+      expect(result.expiresAt, isNull);
+
+      final captured = verify(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/cards/card-1',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      final body = captured.first as Map;
+      expect(body.containsKey('expiresAt'), true);
+      expect(body['expiresAt'], isNull);
     });
   });
 

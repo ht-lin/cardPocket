@@ -16,6 +16,17 @@ abstract class AuthTokens with _$AuthTokens {
       _$AuthTokensFromJson(json);
 }
 
+/// Account-level policy for what happens to cards once they expire.
+enum ExpiryPolicy {
+  /// Default: expired cards are only marked, never auto-deleted.
+  @JsonValue('KEEP')
+  keep,
+
+  /// Expired cards are automatically moved to trash by a backend cron job.
+  @JsonValue('AUTO_TRASH')
+  autoTrash,
+}
+
 @freezed
 abstract class User with _$User {
   const factory User({
@@ -23,6 +34,8 @@ abstract class User with _$User {
     required String email,
     required String userName,
     required bool emailVerified,
+    // Defaulted so an older backend that omits the field doesn't break parsing.
+    @Default(ExpiryPolicy.keep) ExpiryPolicy expiryPolicy,
     required DateTime createdAt,
   }) = _User;
 

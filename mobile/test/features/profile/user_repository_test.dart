@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:card_pocket/core/api/api_exception.dart';
+import 'package:card_pocket/features/auth/domain/auth_models.dart';
 import 'package:card_pocket/features/profile/data/user_repository.dart';
 
 class MockDio extends Mock implements Dio {}
@@ -40,6 +41,22 @@ void main() {
       expect(user.email, 'alice@example.com');
       expect(user.userName, 'alice');
       expect(user.emailVerified, isTrue);
+      // Field omitted by backend → defaults to keep.
+      expect(user.expiryPolicy, ExpiryPolicy.keep);
+    });
+
+    test('parses AUTO_TRASH expiryPolicy', () async {
+      final json = {..._userJson, 'expiryPolicy': 'AUTO_TRASH'};
+      when(() => mockDio.get<Map<String, dynamic>>('/api/users/me')).thenAnswer(
+        (_) async => Response(
+          data: json,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/users/me'),
+        ),
+      );
+
+      final user = await repo.getProfile();
+      expect(user.expiryPolicy, ExpiryPolicy.autoTrash);
     });
 
     test('throws NetworkException on connection timeout', () async {
@@ -186,6 +203,60 @@ void main() {
           ),
         ),
       );
+    });
+  });
+
+  group('UserRepository.updateExpiryPolicy', () {
+    test('sends AUTO_TRASH and returns updated User', () async {
+      final json = {..._userJson, 'expiryPolicy': 'AUTO_TRASH'};
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: json,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/users/me'),
+        ),
+      );
+
+      final user = await repo.updateExpiryPolicy(ExpiryPolicy.autoTrash);
+      expect(user.expiryPolicy, ExpiryPolicy.autoTrash);
+
+      final captured = verify(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      expect((captured.first as Map)['expiryPolicy'], 'AUTO_TRASH');
+    });
+
+    test('sends KEEP for the keep policy', () async {
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: _userJson,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/users/me'),
+        ),
+      );
+
+      await repo.updateExpiryPolicy(ExpiryPolicy.keep);
+
+      final captured = verify(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      expect((captured.first as Map)['expiryPolicy'], 'KEEP');
     });
   });
 

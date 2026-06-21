@@ -82,6 +82,7 @@ class CardsRepository {
     required String name,
     required String barcodeType,
     required String barcodeContent,
+    DateTime? expiresAt,
   }) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
@@ -90,6 +91,8 @@ class CardsRepository {
           'name': name,
           'barcodeType': barcodeType,
           'barcodeContent': barcodeContent,
+          if (expiresAt != null)
+            'expiresAt': expiresAt.toUtc().toIso8601String(),
         },
       );
       final card = _mapCard(response.data!);
@@ -100,11 +103,19 @@ class CardsRepository {
     }
   }
 
-  Future<CardModel> updateName(String id, String name) async {
+  Future<CardModel> updateCard({
+    required String id,
+    required String name,
+    required DateTime? expiresAt,
+  }) async {
     try {
       final response = await _dio.patch<Map<String, dynamic>>(
         '/api/cards/$id',
-        data: {'name': name},
+        data: {
+          'name': name,
+          // Always sent; null clears the validity period.
+          'expiresAt': expiresAt?.toUtc().toIso8601String(),
+        },
       );
       final card = _mapCard(response.data!);
       await _db.upsertCards([_toCompanion(response.data!)]);
@@ -173,6 +184,9 @@ class CardsRepository {
         viewerNickname: json['viewerNickname'] as String?,
         ownerUsername:
             (json['owner'] as Map<String, dynamic>?)?['userName'] as String?,
+        expiresAt: json['expiresAt'] != null
+            ? DateTime.parse(json['expiresAt'] as String)
+            : null,
         updatedAt: DateTime.parse(json['updatedAt'] as String),
       );
 
@@ -188,6 +202,11 @@ class CardsRepository {
         ownerUsername: Value(
           (json['owner'] as Map<String, dynamic>?)?['userName'] as String?,
         ),
+        expiresAt: Value(
+          json['expiresAt'] != null
+              ? DateTime.parse(json['expiresAt'] as String)
+              : null,
+        ),
         updatedAt: Value(DateTime.parse(json['updatedAt'] as String)),
       );
 
@@ -200,6 +219,7 @@ class CardsRepository {
         shareId: row.shareId,
         viewerNickname: row.viewerNickname,
         ownerUsername: row.ownerUsername,
+        expiresAt: row.expiresAt,
         updatedAt: row.updatedAt,
       );
 

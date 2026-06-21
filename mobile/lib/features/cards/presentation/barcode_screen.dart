@@ -59,13 +59,29 @@ class _BarcodeScreenState extends ConsumerState<BarcodeScreen> {
           : Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: bw.BarcodeWidget(
-                  barcode: _toBarcodeWidget(card.barcodeType),
-                  data: card.barcodeContent,
-                  color: Colors.white,
-                  drawText: true,
-                  width: double.infinity,
-                  height: 200,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (card.isExpired) ...[
+                      const Text(
+                        'Expired',
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    bw.BarcodeWidget(
+                      barcode: _toBarcodeWidget(card.barcodeType),
+                      data: card.barcodeContent,
+                      color: Colors.white,
+                      drawText: true,
+                      width: double.infinity,
+                      height: 200,
+                    ),
+                  ],
                 ),
               ),
             ),
