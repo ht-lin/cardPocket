@@ -14,6 +14,7 @@ abstract class CardModel with _$CardModel {
     String? viewerNickname,
     String? ownerUsername,
     DateTime? expiresAt,
+    String? color,
     required DateTime updatedAt,
   }) = _CardModel;
 }

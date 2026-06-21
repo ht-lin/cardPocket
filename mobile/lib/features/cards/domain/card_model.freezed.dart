@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CardModel {
 
- String get id; String get name; String get barcodeType; String get barcodeContent; bool get isOwner; String? get shareId; String? get viewerNickname; String? get ownerUsername; DateTime? get expiresAt; DateTime get updatedAt;
+ String get id; String get name; String get barcodeType; String get barcodeContent; bool get isOwner; String? get shareId; String? get viewerNickname; String? get ownerUsername; DateTime? get expiresAt; String? get color; DateTime get updatedAt;
 /// Create a copy of CardModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $CardModelCopyWith<CardModel> get copyWith => _$CardModelCopyWithImpl<CardModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.barcodeType, barcodeType) || other.barcodeType == barcodeType)&&(identical(other.barcodeContent, barcodeContent) || other.barcodeContent == barcodeContent)&&(identical(other.isOwner, isOwner) || other.isOwner == isOwner)&&(identical(other.shareId, shareId) || other.shareId == shareId)&&(identical(other.viewerNickname, viewerNickname) || other.viewerNickname == viewerNickname)&&(identical(other.ownerUsername, ownerUsername) || other.ownerUsername == ownerUsername)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CardModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.barcodeType, barcodeType) || other.barcodeType == barcodeType)&&(identical(other.barcodeContent, barcodeContent) || other.barcodeContent == barcodeContent)&&(identical(other.isOwner, isOwner) || other.isOwner == isOwner)&&(identical(other.shareId, shareId) || other.shareId == shareId)&&(identical(other.viewerNickname, viewerNickname) || other.viewerNickname == viewerNickname)&&(identical(other.ownerUsername, ownerUsername) || other.ownerUsername == ownerUsername)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.color, color) || other.color == color)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,barcodeType,barcodeContent,isOwner,shareId,viewerNickname,ownerUsername,expiresAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,name,barcodeType,barcodeContent,isOwner,shareId,viewerNickname,ownerUsername,expiresAt,color,updatedAt);
 
 @override
 String toString() {
-  return 'CardModel(id: $id, name: $name, barcodeType: $barcodeType, barcodeContent: $barcodeContent, isOwner: $isOwner, shareId: $shareId, viewerNickname: $viewerNickname, ownerUsername: $ownerUsername, expiresAt: $expiresAt, updatedAt: $updatedAt)';
+  return 'CardModel(id: $id, name: $name, barcodeType: $barcodeType, barcodeContent: $barcodeContent, isOwner: $isOwner, shareId: $shareId, viewerNickname: $viewerNickname, ownerUsername: $ownerUsername, expiresAt: $expiresAt, color: $color, updatedAt: $updatedAt)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $CardModelCopyWith<$Res>  {
   factory $CardModelCopyWith(CardModel value, $Res Function(CardModel) _then) = _$CardModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String barcodeType, String barcodeContent, bool isOwner, String? shareId, String? viewerNickname, String? ownerUsername, DateTime? expiresAt, DateTime updatedAt
+ String id, String name, String barcodeType, String barcodeContent, bool isOwner, String? shareId, String? viewerNickname, String? ownerUsername, DateTime? expiresAt, String? color, DateTime updatedAt
 });
 
 
@@ -62,7 +62,7 @@ class _$CardModelCopyWithImpl<$Res>
 
 /// Create a copy of CardModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? barcodeType = null,Object? barcodeContent = null,Object? isOwner = null,Object? shareId = freezed,Object? viewerNickname = freezed,Object? ownerUsername = freezed,Object? expiresAt = freezed,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? barcodeType = null,Object? barcodeContent = null,Object? isOwner = null,Object? shareId = freezed,Object? viewerNickname = freezed,Object? ownerUsername = freezed,Object? expiresAt = freezed,Object? color = freezed,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,8 @@ as bool,shareId: freezed == shareId ? _self.shareId : shareId // ignore: cast_nu
 as String?,viewerNickname: freezed == viewerNickname ? _self.viewerNickname : viewerNickname // ignore: cast_nullable_to_non_nullable
 as String?,ownerUsername: freezed == ownerUsername ? _self.ownerUsername : ownerUsername // ignore: cast_nullable_to_non_nullable
 as String?,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
+as String?,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String barcodeType,  String barcodeContent,  bool isOwner,  String? shareId,  String? viewerNickname,  String? ownerUsername,  DateTime? expiresAt,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String barcodeType,  String barcodeContent,  bool isOwner,  String? shareId,  String? viewerNickname,  String? ownerUsername,  DateTime? expiresAt,  String? color,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CardModel() when $default != null:
-return $default(_that.id,_that.name,_that.barcodeType,_that.barcodeContent,_that.isOwner,_that.shareId,_that.viewerNickname,_that.ownerUsername,_that.expiresAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.barcodeType,_that.barcodeContent,_that.isOwner,_that.shareId,_that.viewerNickname,_that.ownerUsername,_that.expiresAt,_that.color,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.id,_that.name,_that.barcodeType,_that.barcodeContent,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String barcodeType,  String barcodeContent,  bool isOwner,  String? shareId,  String? viewerNickname,  String? ownerUsername,  DateTime? expiresAt,  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String barcodeType,  String barcodeContent,  bool isOwner,  String? shareId,  String? viewerNickname,  String? ownerUsername,  DateTime? expiresAt,  String? color,  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _CardModel():
-return $default(_that.id,_that.name,_that.barcodeType,_that.barcodeContent,_that.isOwner,_that.shareId,_that.viewerNickname,_that.ownerUsername,_that.expiresAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.barcodeType,_that.barcodeContent,_that.isOwner,_that.shareId,_that.viewerNickname,_that.ownerUsername,_that.expiresAt,_that.color,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.id,_that.name,_that.barcodeType,_that.barcodeContent,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String barcodeType,  String barcodeContent,  bool isOwner,  String? shareId,  String? viewerNickname,  String? ownerUsername,  DateTime? expiresAt,  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String barcodeType,  String barcodeContent,  bool isOwner,  String? shareId,  String? viewerNickname,  String? ownerUsername,  DateTime? expiresAt,  String? color,  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _CardModel() when $default != null:
-return $default(_that.id,_that.name,_that.barcodeType,_that.barcodeContent,_that.isOwner,_that.shareId,_that.viewerNickname,_that.ownerUsername,_that.expiresAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.barcodeType,_that.barcodeContent,_that.isOwner,_that.shareId,_that.viewerNickname,_that.ownerUsername,_that.expiresAt,_that.color,_that.updatedAt);case _:
   return null;
 
 }
@@ -215,7 +216,7 @@ return $default(_that.id,_that.name,_that.barcodeType,_that.barcodeContent,_that
 
 
 class _CardModel implements CardModel {
-  const _CardModel({required this.id, required this.name, required this.barcodeType, required this.barcodeContent, required this.isOwner, this.shareId, this.viewerNickname, this.ownerUsername, this.expiresAt, required this.updatedAt});
+  const _CardModel({required this.id, required this.name, required this.barcodeType, required this.barcodeContent, required this.isOwner, this.shareId, this.viewerNickname, this.ownerUsername, this.expiresAt, this.color, required this.updatedAt});
   
 
 @override final  String id;
@@ -227,6 +228,7 @@ class _CardModel implements CardModel {
 @override final  String? viewerNickname;
 @override final  String? ownerUsername;
 @override final  DateTime? expiresAt;
+@override final  String? color;
 @override final  DateTime updatedAt;
 
 /// Create a copy of CardModel
@@ -239,16 +241,16 @@ _$CardModelCopyWith<_CardModel> get copyWith => __$CardModelCopyWithImpl<_CardMo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.barcodeType, barcodeType) || other.barcodeType == barcodeType)&&(identical(other.barcodeContent, barcodeContent) || other.barcodeContent == barcodeContent)&&(identical(other.isOwner, isOwner) || other.isOwner == isOwner)&&(identical(other.shareId, shareId) || other.shareId == shareId)&&(identical(other.viewerNickname, viewerNickname) || other.viewerNickname == viewerNickname)&&(identical(other.ownerUsername, ownerUsername) || other.ownerUsername == ownerUsername)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CardModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.barcodeType, barcodeType) || other.barcodeType == barcodeType)&&(identical(other.barcodeContent, barcodeContent) || other.barcodeContent == barcodeContent)&&(identical(other.isOwner, isOwner) || other.isOwner == isOwner)&&(identical(other.shareId, shareId) || other.shareId == shareId)&&(identical(other.viewerNickname, viewerNickname) || other.viewerNickname == viewerNickname)&&(identical(other.ownerUsername, ownerUsername) || other.ownerUsername == ownerUsername)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.color, color) || other.color == color)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,barcodeType,barcodeContent,isOwner,shareId,viewerNickname,ownerUsername,expiresAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,name,barcodeType,barcodeContent,isOwner,shareId,viewerNickname,ownerUsername,expiresAt,color,updatedAt);
 
 @override
 String toString() {
-  return 'CardModel(id: $id, name: $name, barcodeType: $barcodeType, barcodeContent: $barcodeContent, isOwner: $isOwner, shareId: $shareId, viewerNickname: $viewerNickname, ownerUsername: $ownerUsername, expiresAt: $expiresAt, updatedAt: $updatedAt)';
+  return 'CardModel(id: $id, name: $name, barcodeType: $barcodeType, barcodeContent: $barcodeContent, isOwner: $isOwner, shareId: $shareId, viewerNickname: $viewerNickname, ownerUsername: $ownerUsername, expiresAt: $expiresAt, color: $color, updatedAt: $updatedAt)';
 }
 
 
@@ -259,7 +261,7 @@ abstract mixin class _$CardModelCopyWith<$Res> implements $CardModelCopyWith<$Re
   factory _$CardModelCopyWith(_CardModel value, $Res Function(_CardModel) _then) = __$CardModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String barcodeType, String barcodeContent, bool isOwner, String? shareId, String? viewerNickname, String? ownerUsername, DateTime? expiresAt, DateTime updatedAt
+ String id, String name, String barcodeType, String barcodeContent, bool isOwner, String? shareId, String? viewerNickname, String? ownerUsername, DateTime? expiresAt, String? color, DateTime updatedAt
 });
 
 
@@ -276,7 +278,7 @@ class __$CardModelCopyWithImpl<$Res>
 
 /// Create a copy of CardModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? barcodeType = null,Object? barcodeContent = null,Object? isOwner = null,Object? shareId = freezed,Object? viewerNickname = freezed,Object? ownerUsername = freezed,Object? expiresAt = freezed,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? barcodeType = null,Object? barcodeContent = null,Object? isOwner = null,Object? shareId = freezed,Object? viewerNickname = freezed,Object? ownerUsername = freezed,Object? expiresAt = freezed,Object? color = freezed,Object? updatedAt = null,}) {
   return _then(_CardModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -287,7 +289,8 @@ as bool,shareId: freezed == shareId ? _self.shareId : shareId // ignore: cast_nu
 as String?,viewerNickname: freezed == viewerNickname ? _self.viewerNickname : viewerNickname // ignore: cast_nullable_to_non_nullable
 as String?,ownerUsername: freezed == ownerUsername ? _self.ownerUsername : ownerUsername // ignore: cast_nullable_to_non_nullable
 as String?,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
+as String?,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }

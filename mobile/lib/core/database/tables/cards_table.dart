@@ -10,6 +10,7 @@ class CardsTable extends Table {
   TextColumn get viewerNickname => text().nullable()();
   TextColumn get ownerUsername => text().nullable()();
   DateTimeColumn get expiresAt => dateTime().nullable()();
+  TextColumn get color => text().nullable()();
   DateTimeColumn get updatedAt => dateTime()();
 
   @override

@@ -6,6 +6,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/router/route_names.dart';
 import '../application/owned_cards_notifier.dart';
 import '../data/cards_repository.dart';
+import 'widgets/color_field.dart';
 import 'widgets/expiry_field.dart';
 
 const _barcodeTypes = [
@@ -34,6 +35,7 @@ class _CreateCardScreenState extends ConsumerState<CreateCardScreen> {
   final _nameController = TextEditingController();
   String _selectedType = _barcodeTypes.first;
   DateTime? _expiresAt;
+  String? _color;
   String? _contentError;
   String? _nameError;
   bool _loading = false;
@@ -91,6 +93,11 @@ class _CreateCardScreenState extends ConsumerState<CreateCardScreen> {
                 value: _expiresAt,
                 onChanged: (v) => setState(() => _expiresAt = v),
               ),
+              const SizedBox(height: 16),
+              ColorField(
+                value: _color,
+                onChanged: (v) => setState(() => _color = v),
+              ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _loading ? null : _submit,
@@ -123,6 +130,7 @@ class _CreateCardScreenState extends ConsumerState<CreateCardScreen> {
             barcodeType: _selectedType,
             barcodeContent: _contentController.text.trim(),
             expiresAt: _expiresAt,
+            color: _color,
           );
       await ref.read(ownedCardsProvider.notifier).refresh();
       if (mounted) {

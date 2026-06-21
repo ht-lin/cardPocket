@@ -39,6 +39,16 @@ final _card2 = CardModel(
   updatedAt: DateTime(2026, 6, 1),
 );
 
+final _coloredCard = CardModel(
+  id: 'c4',
+  name: 'Colored Card',
+  barcodeType: 'QR_CODE',
+  barcodeContent: '777',
+  isOwner: true,
+  color: '#FF5733',
+  updatedAt: DateTime(2026, 6, 1),
+);
+
 Widget _buildTestApp({
   required CardsListState ownedState,
   required CardsListState viewedState,
@@ -182,6 +192,39 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Expired'), findsNothing);
+    });
+
+    testWidgets('applies custom color as the tile background', (tester) async {
+      await tester.pumpWidget(_buildTestApp(
+        ownedState: CardsListState(items: [_coloredCard], hasMore: false),
+        viewedState: const CardsListState(),
+      ));
+      await tester.pumpAndSettle();
+
+      final tile = tester.widget<ListTile>(
+        find.ancestor(
+          of: find.text('Colored Card'),
+          matching: find.byType(ListTile),
+        ),
+      );
+      expect(tile.tileColor, const Color(0xFFFF5733));
+    });
+
+    testWidgets('leaves tile background unset when card has no color',
+        (tester) async {
+      await tester.pumpWidget(_buildTestApp(
+        ownedState: CardsListState(items: [_card1], hasMore: false),
+        viewedState: const CardsListState(),
+      ));
+      await tester.pumpAndSettle();
+
+      final tile = tester.widget<ListTile>(
+        find.ancestor(
+          of: find.text('Costco'),
+          matching: find.byType(ListTile),
+        ),
+      );
+      expect(tile.tileColor, isNull);
     });
 
     testWidgets('shows FAB', (tester) async {

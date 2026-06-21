@@ -12,6 +12,7 @@ import '../application/owned_cards_notifier.dart';
 import '../application/viewed_cards_notifier.dart';
 import '../data/cards_repository.dart';
 import '../domain/card_model.dart';
+import 'widgets/color_field.dart';
 import 'manage_sharing_sheet.dart';
 import 'set_nickname_sheet.dart';
 
@@ -300,8 +301,19 @@ class _CardTile extends ConsumerWidget {
         ? '${card.viewerNickname} (${card.ownerUsername ?? ''})'
         : card.name;
     final errorColor = Theme.of(context).colorScheme.error;
+    final bgColor = colorFromHex(card.color);
+    // On a custom background, derive a legible foreground from its luminance;
+    // otherwise leave it null so the ListTile uses the default theme colors.
+    final fgColor = bgColor == null
+        ? null
+        : (ThemeData.estimateBrightnessForColor(bgColor) == Brightness.dark
+            ? Colors.white
+            : Colors.black);
 
     return ListTile(
+      tileColor: bgColor,
+      iconColor: fgColor,
+      textColor: fgColor,
       leading: const CircleAvatar(child: Icon(Icons.credit_card)),
       title: Row(
         children: [

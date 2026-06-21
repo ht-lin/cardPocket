@@ -107,6 +107,15 @@ class $CardsTableTable extends CardsTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -129,6 +138,7 @@ class $CardsTableTable extends CardsTable
     viewerNickname,
     ownerUsername,
     expiresAt,
+    color,
     updatedAt,
   ];
   @override
@@ -216,6 +226,12 @@ class $CardsTableTable extends CardsTable
         expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
       );
     }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -269,6 +285,10 @@ class $CardsTableTable extends CardsTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}expires_at'],
       ),
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -292,6 +312,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
   final String? viewerNickname;
   final String? ownerUsername;
   final DateTime? expiresAt;
+  final String? color;
   final DateTime updatedAt;
   const CardsTableData({
     required this.id,
@@ -303,6 +324,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     this.viewerNickname,
     this.ownerUsername,
     this.expiresAt,
+    this.color,
     required this.updatedAt,
   });
   @override
@@ -324,6 +346,9 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     }
     if (!nullToAbsent || expiresAt != null) {
       map['expires_at'] = Variable<DateTime>(expiresAt);
+    }
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<String>(color);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -348,6 +373,9 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       expiresAt: expiresAt == null && nullToAbsent
           ? const Value.absent()
           : Value(expiresAt),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
       updatedAt: Value(updatedAt),
     );
   }
@@ -367,6 +395,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       viewerNickname: serializer.fromJson<String?>(json['viewerNickname']),
       ownerUsername: serializer.fromJson<String?>(json['ownerUsername']),
       expiresAt: serializer.fromJson<DateTime?>(json['expiresAt']),
+      color: serializer.fromJson<String?>(json['color']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -383,6 +412,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
       'viewerNickname': serializer.toJson<String?>(viewerNickname),
       'ownerUsername': serializer.toJson<String?>(ownerUsername),
       'expiresAt': serializer.toJson<DateTime?>(expiresAt),
+      'color': serializer.toJson<String?>(color),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -397,6 +427,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     Value<String?> viewerNickname = const Value.absent(),
     Value<String?> ownerUsername = const Value.absent(),
     Value<DateTime?> expiresAt = const Value.absent(),
+    Value<String?> color = const Value.absent(),
     DateTime? updatedAt,
   }) => CardsTableData(
     id: id ?? this.id,
@@ -412,6 +443,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
         ? ownerUsername.value
         : this.ownerUsername,
     expiresAt: expiresAt.present ? expiresAt.value : this.expiresAt,
+    color: color.present ? color.value : this.color,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   CardsTableData copyWithCompanion(CardsTableCompanion data) {
@@ -433,6 +465,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
           ? data.ownerUsername.value
           : this.ownerUsername,
       expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      color: data.color.present ? data.color.value : this.color,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -449,6 +482,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
           ..write('viewerNickname: $viewerNickname, ')
           ..write('ownerUsername: $ownerUsername, ')
           ..write('expiresAt: $expiresAt, ')
+          ..write('color: $color, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -465,6 +499,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
     viewerNickname,
     ownerUsername,
     expiresAt,
+    color,
     updatedAt,
   );
   @override
@@ -480,6 +515,7 @@ class CardsTableData extends DataClass implements Insertable<CardsTableData> {
           other.viewerNickname == this.viewerNickname &&
           other.ownerUsername == this.ownerUsername &&
           other.expiresAt == this.expiresAt &&
+          other.color == this.color &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -493,6 +529,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
   final Value<String?> viewerNickname;
   final Value<String?> ownerUsername;
   final Value<DateTime?> expiresAt;
+  final Value<String?> color;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const CardsTableCompanion({
@@ -505,6 +542,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     this.viewerNickname = const Value.absent(),
     this.ownerUsername = const Value.absent(),
     this.expiresAt = const Value.absent(),
+    this.color = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -518,6 +556,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     this.viewerNickname = const Value.absent(),
     this.ownerUsername = const Value.absent(),
     this.expiresAt = const Value.absent(),
+    this.color = const Value.absent(),
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -536,6 +575,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     Expression<String>? viewerNickname,
     Expression<String>? ownerUsername,
     Expression<DateTime>? expiresAt,
+    Expression<String>? color,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
@@ -549,6 +589,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
       if (viewerNickname != null) 'viewer_nickname': viewerNickname,
       if (ownerUsername != null) 'owner_username': ownerUsername,
       if (expiresAt != null) 'expires_at': expiresAt,
+      if (color != null) 'color': color,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -564,6 +605,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     Value<String?>? viewerNickname,
     Value<String?>? ownerUsername,
     Value<DateTime?>? expiresAt,
+    Value<String?>? color,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
   }) {
@@ -577,6 +619,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
       viewerNickname: viewerNickname ?? this.viewerNickname,
       ownerUsername: ownerUsername ?? this.ownerUsername,
       expiresAt: expiresAt ?? this.expiresAt,
+      color: color ?? this.color,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -612,6 +655,9 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
     if (expiresAt.present) {
       map['expires_at'] = Variable<DateTime>(expiresAt.value);
     }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -633,6 +679,7 @@ class CardsTableCompanion extends UpdateCompanion<CardsTableData> {
           ..write('viewerNickname: $viewerNickname, ')
           ..write('ownerUsername: $ownerUsername, ')
           ..write('expiresAt: $expiresAt, ')
+          ..write('color: $color, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -891,6 +938,7 @@ typedef $$CardsTableTableCreateCompanionBuilder =
       Value<String?> viewerNickname,
       Value<String?> ownerUsername,
       Value<DateTime?> expiresAt,
+      Value<String?> color,
       required DateTime updatedAt,
       Value<int> rowid,
     });
@@ -905,6 +953,7 @@ typedef $$CardsTableTableUpdateCompanionBuilder =
       Value<String?> viewerNickname,
       Value<String?> ownerUsername,
       Value<DateTime?> expiresAt,
+      Value<String?> color,
       Value<DateTime> updatedAt,
       Value<int> rowid,
     });
@@ -960,6 +1009,11 @@ class $$CardsTableTableFilterComposer
 
   ColumnFilters<DateTime> get expiresAt => $composableBuilder(
     column: $table.expiresAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1023,6 +1077,11 @@ class $$CardsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -1073,6 +1132,9 @@ class $$CardsTableTableAnnotationComposer
   GeneratedColumn<DateTime> get expiresAt =>
       $composableBuilder(column: $table.expiresAt, builder: (column) => column);
 
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
@@ -1117,6 +1179,7 @@ class $$CardsTableTableTableManager
                 Value<String?> viewerNickname = const Value.absent(),
                 Value<String?> ownerUsername = const Value.absent(),
                 Value<DateTime?> expiresAt = const Value.absent(),
+                Value<String?> color = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CardsTableCompanion(
@@ -1129,6 +1192,7 @@ class $$CardsTableTableTableManager
                 viewerNickname: viewerNickname,
                 ownerUsername: ownerUsername,
                 expiresAt: expiresAt,
+                color: color,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
@@ -1143,6 +1207,7 @@ class $$CardsTableTableTableManager
                 Value<String?> viewerNickname = const Value.absent(),
                 Value<String?> ownerUsername = const Value.absent(),
                 Value<DateTime?> expiresAt = const Value.absent(),
+                Value<String?> color = const Value.absent(),
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
               }) => CardsTableCompanion.insert(
@@ -1155,6 +1220,7 @@ class $$CardsTableTableTableManager
                 viewerNickname: viewerNickname,
                 ownerUsername: ownerUsername,
                 expiresAt: expiresAt,
+                color: color,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
