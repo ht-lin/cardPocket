@@ -132,6 +132,70 @@ void main() {
       expect((captured.first as Map).containsKey('expiresAt'), false);
     });
 
+    test('sends color and parses it back', () async {
+      final json = Map<String, dynamic>.from(_cardJson)..['color'] = '#FF5733';
+      when(
+        () => mockDio.post<Map<String, dynamic>>(
+          '/api/cards',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: json,
+          statusCode: 201,
+          requestOptions: RequestOptions(path: '/api/cards'),
+        ),
+      );
+
+      final result = await repo.create(
+        name: 'Costco',
+        barcodeType: 'QR_CODE',
+        barcodeContent: '12345',
+        color: '#FF5733',
+      );
+      expect(result.color, '#FF5733');
+
+      final captured = verify(
+        () => mockDio.post<Map<String, dynamic>>(
+          '/api/cards',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      expect((captured.first as Map)['color'], '#FF5733');
+
+      final rows = await db.getOwnedCards(offset: 0);
+      expect(rows.first.color, '#FF5733');
+    });
+
+    test('omits color from payload when null', () async {
+      when(
+        () => mockDio.post<Map<String, dynamic>>(
+          '/api/cards',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: _cardJson,
+          statusCode: 201,
+          requestOptions: RequestOptions(path: '/api/cards'),
+        ),
+      );
+
+      await repo.create(
+        name: 'Costco',
+        barcodeType: 'QR_CODE',
+        barcodeContent: '12345',
+      );
+
+      final captured = verify(
+        () => mockDio.post<Map<String, dynamic>>(
+          '/api/cards',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      expect((captured.first as Map).containsKey('color'), false);
+    });
+
     test('throws UnprocessableException on 422', () async {
       when(
         () => mockDio.post<Map<String, dynamic>>(
@@ -231,6 +295,7 @@ void main() {
         id: 'card-1',
         name: 'New Name',
         expiresAt: expiry,
+        color: null,
       );
       expect(result.name, 'New Name');
       expect(result.expiresAt!.isAtSameMomentAs(expiry), true);
@@ -271,6 +336,7 @@ void main() {
         id: 'card-1',
         name: 'Costco',
         expiresAt: null,
+        color: null,
       );
       expect(result.expiresAt, isNull);
 
@@ -283,6 +349,71 @@ void main() {
       final body = captured.first as Map;
       expect(body.containsKey('expiresAt'), true);
       expect(body['expiresAt'], isNull);
+    });
+
+    test('always sends color, including null to clear it', () async {
+      final updatedJson = Map<String, dynamic>.from(_cardJson)
+        ..['color'] = null;
+
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/cards/card-1',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: updatedJson,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/cards/card-1'),
+        ),
+      );
+
+      final result = await repo.updateCard(
+        id: 'card-1',
+        name: 'Costco',
+        expiresAt: null,
+        color: null,
+      );
+      expect(result.color, isNull);
+
+      final captured = verify(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/cards/card-1',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      final body = captured.first as Map;
+      expect(body.containsKey('color'), true);
+      expect(body['color'], isNull);
+    });
+
+    test('updates color and writes DB', () async {
+      final updatedJson = Map<String, dynamic>.from(_cardJson)
+        ..['color'] = '#00FF00';
+
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/cards/card-1',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: updatedJson,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/cards/card-1'),
+        ),
+      );
+
+      final result = await repo.updateCard(
+        id: 'card-1',
+        name: 'Costco',
+        expiresAt: null,
+        color: '#00FF00',
+      );
+      expect(result.color, '#00FF00');
+
+      final rows = await db.getOwnedCards(offset: 0);
+      expect(rows.first.color, '#00FF00');
     });
   });
 

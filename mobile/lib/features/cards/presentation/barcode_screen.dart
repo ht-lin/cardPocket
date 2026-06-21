@@ -5,6 +5,7 @@ import 'package:screen_brightness/screen_brightness.dart';
 
 import '../data/cards_repository.dart';
 import '../domain/card_model.dart';
+import 'widgets/color_field.dart';
 
 class BarcodeScreen extends ConsumerStatefulWidget {
   const BarcodeScreen({super.key, required this.id});
@@ -48,43 +49,10 @@ class _BarcodeScreenState extends ConsumerState<BarcodeScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: Text(title),
-      ),
+      appBar: AppBar(title: Text(title)),
       body: card == null
           ? const Center(child: CircularProgressIndicator())
-          : Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (card.isExpired) ...[
-                      const Text(
-                        'Expired',
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    bw.BarcodeWidget(
-                      barcode: _toBarcodeWidget(card.barcodeType),
-                      data: card.barcodeContent,
-                      color: Colors.white,
-                      drawText: true,
-                      width: double.infinity,
-                      height: 200,
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          : _CardPanel(card: card, barcode: _toBarcodeWidget(card.barcodeType)),
     );
   }
 
@@ -101,5 +69,82 @@ class _BarcodeScreenState extends ConsumerState<BarcodeScreen> {
       'DATA_MATRIX' => bw.Barcode.dataMatrix(),
       _ => bw.Barcode.qrCode(),
     };
+  }
+}
+
+/// A rounded color card sitting near the top of the screen, framed by
+/// whitespace. The custom color (or theme default) is the card background; the
+/// barcode itself renders black on an inner white panel so it stays scannable
+/// regardless of the chosen color.
+class _CardPanel extends StatelessWidget {
+  const _CardPanel({required this.card, required this.barcode});
+
+  final CardModel card;
+  final bw.Barcode barcode;
+
+  @override
+  Widget build(BuildContext context) {
+    final cardColor = colorFromHex(card.color) ??
+        Theme.of(context).colorScheme.surfaceContainerHighest;
+    final onCardColor =
+        ThemeData.estimateBrightnessForColor(cardColor) == Brightness.dark
+            ? Colors.white
+            : Colors.black;
+
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (card.isExpired) ...[
+                const Text(
+                  'Expired',
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: bw.BarcodeWidget(
+                  barcode: barcode,
+                  data: card.barcodeContent,
+                  color: Colors.black,
+                  drawText: false,
+                  width: double.infinity,
+                  height: 200,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                card.barcodeContent,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: onCardColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

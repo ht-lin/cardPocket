@@ -83,6 +83,7 @@ class CardsRepository {
     required String barcodeType,
     required String barcodeContent,
     DateTime? expiresAt,
+    String? color,
   }) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
@@ -93,6 +94,7 @@ class CardsRepository {
           'barcodeContent': barcodeContent,
           if (expiresAt != null)
             'expiresAt': expiresAt.toUtc().toIso8601String(),
+          'color': ?color,
         },
       );
       final card = _mapCard(response.data!);
@@ -107,6 +109,7 @@ class CardsRepository {
     required String id,
     required String name,
     required DateTime? expiresAt,
+    required String? color,
   }) async {
     try {
       final response = await _dio.patch<Map<String, dynamic>>(
@@ -115,6 +118,8 @@ class CardsRepository {
           'name': name,
           // Always sent; null clears the validity period.
           'expiresAt': expiresAt?.toUtc().toIso8601String(),
+          // Always sent; null clears the custom color.
+          'color': color,
         },
       );
       final card = _mapCard(response.data!);
@@ -187,6 +192,7 @@ class CardsRepository {
         expiresAt: json['expiresAt'] != null
             ? DateTime.parse(json['expiresAt'] as String)
             : null,
+        color: json['color'] as String?,
         updatedAt: DateTime.parse(json['updatedAt'] as String),
       );
 
@@ -207,6 +213,7 @@ class CardsRepository {
               ? DateTime.parse(json['expiresAt'] as String)
               : null,
         ),
+        color: Value(json['color'] as String?),
         updatedAt: Value(DateTime.parse(json['updatedAt'] as String)),
       );
 
@@ -220,6 +227,7 @@ class CardsRepository {
         viewerNickname: row.viewerNickname,
         ownerUsername: row.ownerUsername,
         expiresAt: row.expiresAt,
+        color: row.color,
         updatedAt: row.updatedAt,
       );
 

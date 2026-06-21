@@ -6,6 +6,7 @@ import '../../../core/api/api_exception.dart';
 import '../application/owned_cards_notifier.dart';
 import '../data/cards_repository.dart';
 import '../domain/card_model.dart';
+import 'widgets/color_field.dart';
 import 'widgets/expiry_field.dart';
 
 class EditCardScreen extends ConsumerStatefulWidget {
@@ -21,6 +22,7 @@ class _EditCardScreenState extends ConsumerState<EditCardScreen> {
   final _nameController = TextEditingController();
   CardModel? _card;
   DateTime? _expiresAt;
+  String? _color;
   String? _nameError;
   bool _loading = false;
 
@@ -33,6 +35,7 @@ class _EditCardScreenState extends ConsumerState<EditCardScreen> {
         _card = card;
         _nameController.text = card.name;
         _expiresAt = card.expiresAt;
+        _color = card.color;
       });
     });
   }
@@ -71,6 +74,11 @@ class _EditCardScreenState extends ConsumerState<EditCardScreen> {
                       value: _expiresAt,
                       onChanged: (v) => setState(() => _expiresAt = v),
                     ),
+                    const SizedBox(height: 16),
+                    ColorField(
+                      value: _color,
+                      onChanged: (v) => setState(() => _color = v),
+                    ),
                     const SizedBox(height: 24),
                     FilledButton(
                       onPressed: _loading ? null : _submit,
@@ -99,6 +107,7 @@ class _EditCardScreenState extends ConsumerState<EditCardScreen> {
             id: widget.id,
             name: _nameController.text.trim(),
             expiresAt: _expiresAt,
+            color: _color,
           );
       await ref.read(ownedCardsProvider.notifier).refresh();
       if (mounted) {
