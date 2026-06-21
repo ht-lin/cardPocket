@@ -11,6 +11,7 @@ use App\ApiResource\Friendship\FriendSendInput;
 use App\Entity\Friendship;
 use App\Entity\User;
 use App\Enum\FriendshipStatus;
+use App\Message\SendPushMessage;
 use App\Repository\FriendshipRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Uid\Uuid;
 
@@ -31,6 +33,7 @@ final class FriendSendProcessor implements ProcessorInterface
         private readonly Security $security,
         private readonly EntityManagerInterface $entityManager,
         private readonly FriendshipRepository $friendshipRepository,
+        private readonly MessageBusInterface $messageBus,
         #[Autowire(service: 'limiter.send_friend_request_by_user')]
         private readonly RateLimiterFactory $sendFriendRequestLimiter,
     ) {
@@ -78,6 +81,14 @@ final class FriendSendProcessor implements ProcessorInterface
 
         $this->entityManager->persist($friendship);
         $this->entityManager->flush();
+
+        // Notify the addressee's devices that a friend request arrived (routed async; FCM failures
+        // never affect this request's outcome).
+        $this->messageBus->dispatch(new SendPushMessage(
+            userId: (string) $addressee->getId(),
+            title: 'New friend request',
+            body: sprintf('%s wants to be your friend', $me->getUserName()),
+        ));
 
         return new FriendRequestOutput(
             id: (string) $friendship->getId(),
