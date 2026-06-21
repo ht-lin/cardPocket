@@ -7,10 +7,10 @@ namespace App\State\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\Card;
-use App\Entity\CardDeletion;
 use App\Entity\User;
 use App\Repository\CardShareRepository;
 use App\Security\Voter\CardVoter;
+use App\Service\CardTombstoneWriter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -31,6 +31,7 @@ final class CardPermanentDeleteProcessor implements ProcessorInterface
         private readonly Security $security,
         private readonly EntityManagerInterface $entityManager,
         private readonly CardShareRepository $cardShareRepository,
+        private readonly CardTombstoneWriter $cardTombstoneWriter,
     ) {
     }
 
@@ -52,19 +53,7 @@ final class CardPermanentDeleteProcessor implements ProcessorInterface
         $owner = $this->security->getUser();
         assert($owner instanceof User);
 
-        $cardId = (string) $data->getId();
-
-        $ownerDeletion = new CardDeletion();
-        $ownerDeletion->setUserId((string) $owner->getId());
-        $ownerDeletion->setCardId($cardId);
-        $this->entityManager->persist($ownerDeletion);
-
-        foreach ($this->cardShareRepository->findByCard($data) as $cardShare) {
-            $viewerDeletion = new CardDeletion();
-            $viewerDeletion->setUserId((string) $cardShare->getViewer()->getId());
-            $viewerDeletion->setCardId($cardId);
-            $this->entityManager->persist($viewerDeletion);
-        }
+        $this->cardTombstoneWriter->writeForOwnerAndViewers($data, (string) $owner->getId());
 
         $this->cardShareRepository->deleteByCard($data);
         $this->entityManager->remove($data);

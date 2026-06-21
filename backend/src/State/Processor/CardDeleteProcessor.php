@@ -7,10 +7,9 @@ namespace App\State\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\Card;
-use App\Entity\CardDeletion;
 use App\Entity\User;
-use App\Repository\CardShareRepository;
 use App\Security\Voter\CardVoter;
+use App\Service\CardTombstoneWriter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -25,7 +24,7 @@ final class CardDeleteProcessor implements ProcessorInterface
     public function __construct(
         private readonly Security $security,
         private readonly EntityManagerInterface $entityManager,
-        private readonly CardShareRepository $cardShareRepository,
+        private readonly CardTombstoneWriter $cardTombstoneWriter,
     ) {
     }
 
@@ -44,19 +43,7 @@ final class CardDeleteProcessor implements ProcessorInterface
             throw new AccessDeniedHttpException();
         }
 
-        $cardId = (string) $card->getId();
-
-        $ownerDeletion = new CardDeletion();
-        $ownerDeletion->setUserId((string) $user->getId());
-        $ownerDeletion->setCardId($cardId);
-        $this->entityManager->persist($ownerDeletion);
-
-        foreach ($this->cardShareRepository->findByCard($card) as $cardShare) {
-            $viewerDeletion = new CardDeletion();
-            $viewerDeletion->setUserId((string) $cardShare->getViewer()->getId());
-            $viewerDeletion->setCardId($cardId);
-            $this->entityManager->persist($viewerDeletion);
-        }
+        $this->cardTombstoneWriter->writeForOwnerAndViewers($card, (string) $user->getId());
 
         $card->setDeletedAt(new \DateTimeImmutable());
         $this->entityManager->flush();

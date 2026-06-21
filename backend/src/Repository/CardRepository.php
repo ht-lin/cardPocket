@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Card;
 use App\Entity\User;
+use App\Enum\ExpiryPolicy;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -80,6 +81,59 @@ class CardRepository extends ServiceEntityRepository
                 ->andWhere('c.deletedAt IS NOT NULL')
                 ->orderBy('c.deletedAt', 'DESC')
                 ->setParameter('owner', $owner)
+                ->getQuery()
+                ->getResult();
+        } finally {
+            if ($wasEnabled) {
+                $filters->enable('soft_delete');
+            }
+        }
+    }
+
+    /**
+     * Active (not yet trashed) cards that have expired and whose owner opted into the
+     * AUTO_TRASH expiry policy. Used by the scheduled cleanup to auto-trash expired cards.
+     *
+     * Carries the explicit `deletedAt IS NULL` clause (REV-L16: named methods do not rely
+     * on the implicit global `soft_delete` filter).
+     *
+     * @return Card[]
+     */
+    public function findExpiredForAutoTrash(\DateTimeImmutable $now): array
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.owner', 'o')
+            ->where('o.expiryPolicy = :policy')
+            ->andWhere('c.expiresAt IS NOT NULL')
+            ->andWhere('c.expiresAt < :now')
+            ->andWhere('c.deletedAt IS NULL')
+            ->setParameter('policy', ExpiryPolicy::AUTO_TRASH)
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Soft-deleted cards whose trash retention window has elapsed, ready to be physically
+     * purged. Temporarily disables the global `soft_delete` filter (which would otherwise
+     * force `deleted_at IS NULL` and hide every trashed row), mirroring findTrashedByOwner.
+     *
+     * @return Card[]
+     */
+    public function findPurgeable(\DateTimeImmutable $cutoff): array
+    {
+        $filters = $this->getEntityManager()->getFilters();
+        $wasEnabled = $filters->isEnabled('soft_delete');
+
+        if ($wasEnabled) {
+            $filters->disable('soft_delete');
+        }
+
+        try {
+            return $this->createQueryBuilder('c')
+                ->where('c.deletedAt IS NOT NULL')
+                ->andWhere('c.deletedAt < :cutoff')
+                ->setParameter('cutoff', $cutoff)
                 ->getQuery()
                 ->getResult();
         } finally {
