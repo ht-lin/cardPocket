@@ -54,6 +54,41 @@ class CardRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * Cards in the owner's trash (soft-deleted, not yet physically purged).
+     *
+     * The global `soft_delete` filter forces `deleted_at IS NULL` on every DQL
+     * query, which would make a trash listing impossible. We temporarily disable
+     * it and add the explicit inverse condition `deletedAt IS NOT NULL` (per the
+     * REV-L16 convention: global filter as default, named methods carry their own
+     * explicit clause), restoring the filter's prior state in a finally block.
+     *
+     * @return Card[]
+     */
+    public function findTrashedByOwner(User $owner): array
+    {
+        $filters = $this->getEntityManager()->getFilters();
+        $wasEnabled = $filters->isEnabled('soft_delete');
+
+        if ($wasEnabled) {
+            $filters->disable('soft_delete');
+        }
+
+        try {
+            return $this->createQueryBuilder('c')
+                ->where('c.owner = :owner')
+                ->andWhere('c.deletedAt IS NOT NULL')
+                ->orderBy('c.deletedAt', 'DESC')
+                ->setParameter('owner', $owner)
+                ->getQuery()
+                ->getResult();
+        } finally {
+            if ($wasEnabled) {
+                $filters->enable('soft_delete');
+            }
+        }
+    }
+
     /** @return Card[] */
     public function findUpdatedByOwnerSince(User $owner, \DateTimeImmutable $since): array
     {

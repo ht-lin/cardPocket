@@ -12,9 +12,12 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\State\Processor\CardCreateProcessor;
 use App\State\Processor\CardDeleteProcessor;
+use App\State\Processor\CardPermanentDeleteProcessor;
+use App\State\Processor\CardRestoreProcessor;
 use App\State\Processor\CardUpdateProcessor;
 use App\Routing\ApiRequirement;
 use App\State\Provider\CardListProvider;
+use App\State\Provider\CardTrashItemProvider;
 use App\State\Provider\CardViewProvider;
 
 #[ApiResource(
@@ -54,6 +57,24 @@ use App\State\Provider\CardViewProvider;
             provider: CardViewProvider::class,
             processor: CardDeleteProcessor::class,
             name: 'api_cards_delete',
+        ),
+        new Post(
+            uriTemplate: '/cards/{id}/restore',
+            requirements: ['id' => ApiRequirement::UUID],
+            input: false,
+            read: true,
+            provider: CardTrashItemProvider::class,
+            processor: CardRestoreProcessor::class,
+            name: 'api_cards_restore',
+        ),
+        new Delete(
+            uriTemplate: '/cards/{id}/permanent',
+            requirements: ['id' => ApiRequirement::UUID],
+            output: false,
+            status: 204,
+            provider: CardTrashItemProvider::class,
+            processor: CardPermanentDeleteProcessor::class,
+            name: 'api_cards_permanent_delete',
         ),
     ],
 )]

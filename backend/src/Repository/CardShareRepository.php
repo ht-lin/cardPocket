@@ -90,6 +90,13 @@ class CardShareRepository extends ServiceEntityRepository
         )->setParameter('owner', $owner)->execute();
     }
 
+    public function deleteByCard(Card $card): void
+    {
+        $this->getEntityManager()->createQuery(
+            'DELETE FROM App\Entity\CardShare cs WHERE cs.card = :card'
+        )->setParameter('card', $card)->execute();
+    }
+
     /** @return CardShare[] */
     public function findByOwner(User $owner): array
     {
