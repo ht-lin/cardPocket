@@ -32,6 +32,7 @@
   "gdprValidationRequired": "Sie müssen zustimmen, um fortzufahren",
   "profileEditNameTitle": "Benutzername ändern",
   "profileChangePasswordTitle": "Passwort ändern",
+  "profileTrashTitle": "Papierkorb",
   "profileExpiryPolicyTitle": "Abgelaufene Karten automatisch in den Papierkorb verschieben",
   "profileExpiryPolicySubtitle": "Wenn aktiviert, werden Karten nach Ablauf in den Papierkorb verschoben. Andernfalls werden abgelaufene Karten nur markiert.",
   "profileLogoutButton": "Abmelden",

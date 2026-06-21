@@ -111,6 +111,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileChangePasswordTitle => 'Change Password';
 
   @override
+  String get profileTrashTitle => 'Trash';
+
+  @override
   String get profileExpiryPolicyTitle => 'Auto-move expired cards to trash';
 
   @override

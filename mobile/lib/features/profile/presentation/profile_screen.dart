@@ -70,6 +70,12 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () =>
                   context.pushNamed(RouteNames.profileChangePassword),
             ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline),
+              title: Text(l10n.profileTrashTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.pushNamed(RouteNames.trash),
+            ),
             const Divider(),
             SwitchListTile(
               secondary: const Icon(Icons.auto_delete_outlined),

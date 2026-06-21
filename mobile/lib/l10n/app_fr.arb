@@ -32,6 +32,7 @@
   "gdprValidationRequired": "Vous devez accepter pour continuer",
   "profileEditNameTitle": "Modifier le nom d'utilisateur",
   "profileChangePasswordTitle": "Modifier le mot de passe",
+  "profileTrashTitle": "Corbeille",
   "profileExpiryPolicyTitle": "Déplacer automatiquement les cartes expirées vers la corbeille",
   "profileExpiryPolicySubtitle": "Si activé, les cartes sont déplacées vers la corbeille après leur expiration. Sinon, les cartes expirées sont seulement marquées.",
   "profileLogoutButton": "Se déconnecter",

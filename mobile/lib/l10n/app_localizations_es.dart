@@ -114,6 +114,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileChangePasswordTitle => 'Cambiar contraseña';
 
   @override
+  String get profileTrashTitle => 'Papelera';
+
+  @override
   String get profileExpiryPolicyTitle =>
       'Mover automáticamente las tarjetas caducadas a la papelera';
 

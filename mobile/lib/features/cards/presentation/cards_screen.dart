@@ -366,7 +366,7 @@ class _OwnerMenu extends ConsumerWidget {
         ),
         PopupMenuItem(
           value: _MenuAction.delete,
-          child: Text('Delete'),
+          child: Text('Move to Trash'),
         ),
       ],
     );
@@ -402,8 +402,11 @@ class _OwnerMenu extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete card'),
-        content: Text('Delete "${card.name}"? This cannot be undone.'),
+        title: const Text('Move to Trash'),
+        content: Text(
+          'Move "${card.name}" to Trash? You can restore it from Trash '
+          'within 30 days.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -411,7 +414,8 @@ class _OwnerMenu extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child:
+                const Text('Move to Trash', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -424,7 +428,7 @@ class _OwnerMenu extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Card deleted'),
+            content: Text('Moved to Trash'),
             backgroundColor: Colors.green,
             duration: Duration(milliseconds: 1500),
           ),

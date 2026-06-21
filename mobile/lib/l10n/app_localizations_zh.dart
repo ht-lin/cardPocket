@@ -105,6 +105,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileChangePasswordTitle => '修改密码';
 
   @override
+  String get profileTrashTitle => '回收箱';
+
+  @override
   String get profileExpiryPolicyTitle => '过期卡片自动移入回收箱';
 
   @override

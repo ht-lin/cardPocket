@@ -18,6 +18,7 @@ import '../../features/friends/presentation/friends_screen.dart';
 import '../../features/profile/presentation/change_password_screen.dart';
 import '../../features/profile/presentation/edit_name_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/trash/presentation/trash_screen.dart';
 import 'route_names.dart';
 
 part 'router_provider.g.dart';
@@ -166,6 +167,11 @@ List<RouteBase> _buildRoutes() => [
                     name: RouteNames.profileChangePassword,
                     builder: (context, state) =>
                         const ChangePasswordScreen(),
+                  ),
+                  GoRoute(
+                    path: 'trash',
+                    name: RouteNames.trash,
+                    builder: (context, state) => const TrashScreen(),
                   ),
                 ],
               ),

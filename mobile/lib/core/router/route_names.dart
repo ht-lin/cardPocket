@@ -14,4 +14,5 @@ abstract final class RouteNames {
   static const profile = 'profile';
   static const profileEditName = 'profile-edit-name';
   static const profileChangePassword = 'profile-change-password';
+  static const trash = 'trash';
 }
