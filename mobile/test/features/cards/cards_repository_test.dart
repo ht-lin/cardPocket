@@ -327,4 +327,126 @@ void main() {
       expect(card, isNull);
     });
   });
+
+  group('CardsRepository.searchLocal', () {
+    setUp(() async {
+      await db.upsertCards([
+        CardsTableCompanion.insert(
+          id: 'c1',
+          name: 'Costco Membership',
+          barcodeType: 'QR_CODE',
+          barcodeContent: 'abc',
+          isOwner: true,
+          updatedAt: DateTime(2026, 6, 3),
+        ),
+        CardsTableCompanion.insert(
+          id: 'c2',
+          name: 'Starbucks',
+          barcodeType: 'CODE_128',
+          barcodeContent: 'xyz',
+          isOwner: false,
+          updatedAt: DateTime(2026, 6, 2),
+        ),
+        CardsTableCompanion.insert(
+          id: 'c3',
+          name: '50% off coupon',
+          barcodeType: 'QR_CODE',
+          barcodeContent: '111',
+          isOwner: true,
+          updatedAt: DateTime(2026, 6, 1),
+        ),
+      ]);
+    });
+
+    test('matches by case-insensitive substring', () async {
+      final results = await repo.searchLocal('cost');
+      expect(results.map((c) => c.id), ['c1']);
+    });
+
+    test('matches owned and viewed cards together', () async {
+      // both names contain lowercase "s"
+      final results = await repo.searchLocal('s');
+      expect(results.map((c) => c.id), containsAll(['c1', 'c2']));
+    });
+
+    test('treats % as a literal character, not a wildcard', () async {
+      final results = await repo.searchLocal('%');
+      expect(results.map((c) => c.id), ['c3']);
+    });
+
+    test('returns empty list when nothing matches', () async {
+      final results = await repo.searchLocal('zzz');
+      expect(results, isEmpty);
+    });
+  });
+
+  group('CardsRepository.searchRemote', () {
+    test('parses member array and upserts results to DB', () async {
+      when(
+        () => mockDio.get<Map<String, dynamic>>(
+          '/api/cards',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: {
+            'member': [_cardJson],
+            'totalItems': 1,
+          },
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/cards'),
+        ),
+      );
+
+      final results = await repo.searchRemote('Costco');
+      expect(results.map((c) => c.id), ['card-1']);
+
+      final rows = await db.getOwnedCards(offset: 0);
+      expect(rows.length, 1);
+      expect(rows.first.id, 'card-1');
+    });
+
+    test('passes q query parameter', () async {
+      when(
+        () => mockDio.get<Map<String, dynamic>>(
+          '/api/cards',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: {'member': <Map<String, dynamic>>[], 'totalItems': 0},
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/cards'),
+        ),
+      );
+
+      await repo.searchRemote('Costco');
+      final captured = verify(
+        () => mockDio.get<Map<String, dynamic>>(
+          '/api/cards',
+          queryParameters: captureAny(named: 'queryParameters'),
+        ),
+      ).captured;
+      expect((captured.first as Map)['q'], 'Costco');
+    });
+
+    test('maps network failures to NetworkException', () async {
+      when(
+        () => mockDio.get<Map<String, dynamic>>(
+          '/api/cards',
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/cards'),
+          type: DioExceptionType.connectionError,
+        ),
+      );
+
+      expect(
+        () => repo.searchRemote('Costco'),
+        throwsA(isA<NetworkException>()),
+      );
+    });
+  });
 }

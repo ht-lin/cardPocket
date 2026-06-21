@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/router/route_names.dart';
 import '../../share/data/share_repository.dart';
+import '../application/cards_search_notifier.dart';
 import '../application/owned_cards_notifier.dart';
 import '../application/viewed_cards_notifier.dart';
 import '../data/cards_repository.dart';
@@ -12,14 +15,46 @@ import '../domain/card_model.dart';
 import 'manage_sharing_sheet.dart';
 import 'set_nickname_sheet.dart';
 
-class CardsScreen extends ConsumerWidget {
+class CardsScreen extends ConsumerStatefulWidget {
   const CardsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final owned = ref.watch(ownedCardsProvider);
-    final viewed = ref.watch(viewedCardsProvider);
+  ConsumerState<CardsScreen> createState() => _CardsScreenState();
+}
 
+class _CardsScreenState extends ConsumerState<CardsScreen> {
+  final _searchController = TextEditingController();
+  Timer? _debounce;
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    final q = value.trim();
+    setState(() => _query = q);
+    _debounce?.cancel();
+    if (q.isEmpty) {
+      ref.read(cardsSearchProvider.notifier).search('');
+      return;
+    }
+    _debounce = Timer(
+      const Duration(milliseconds: 400),
+      () => ref.read(cardsSearchProvider.notifier).search(q),
+    );
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _onSearchChanged('');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () => Future.wait([
@@ -29,46 +64,34 @@ class CardsScreen extends ConsumerWidget {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-          const SliverAppBar(
-            title: Text('Cards'),
-            floating: true,
-          ),
-          const _SectionHeader(title: 'My Cards'),
-          owned.when(
-            loading: () => const SliverToBoxAdapter(
-              child: Center(child: CircularProgressIndicator()),
+            SliverAppBar(
+              title: const Text('Cards'),
+              floating: true,
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(60),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    decoration: InputDecoration(
+                      hintText: 'Search cards',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _query.isEmpty
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: _clearSearch,
+                            ),
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                      filled: true,
+                    ),
+                  ),
+                ),
+              ),
             ),
-            error: (e, _) => SliverToBoxAdapter(
-              child: Center(child: Text('Error: $e')),
-            ),
-            data: (state) => _CardSection(
-              cards: state.items,
-              isLoadingMore: state.isLoadingMore,
-              hasMore: state.hasMore,
-              isOwner: true,
-              emptyMessage: 'No cards yet, tap + to add your first',
-              onLoadMore: () =>
-                  ref.read(ownedCardsProvider.notifier).loadMore(),
-            ),
-          ),
-          const _SectionHeader(title: 'Shared with Me'),
-          viewed.when(
-            loading: () => const SliverToBoxAdapter(
-              child: SizedBox(height: 40),
-            ),
-            error: (e, _) => SliverToBoxAdapter(
-              child: Center(child: Text('Error: $e')),
-            ),
-            data: (state) => _CardSection(
-              cards: state.items,
-              isLoadingMore: state.isLoadingMore,
-              hasMore: state.hasMore,
-              isOwner: false,
-              emptyMessage: 'No shared cards yet',
-              onLoadMore: () =>
-                  ref.read(viewedCardsProvider.notifier).loadMore(),
-            ),
-          ),
+            ...(_query.isEmpty ? _buildBrowseSlivers() : _buildSearchSlivers()),
           ],
         ),
       ),
@@ -78,6 +101,106 @@ class CardsScreen extends ConsumerWidget {
       ),
     );
   }
+
+  List<Widget> _buildBrowseSlivers() {
+    final owned = ref.watch(ownedCardsProvider);
+    final viewed = ref.watch(viewedCardsProvider);
+    return [
+      const _SectionHeader(title: 'My Cards'),
+      owned.when(
+        loading: () => const SliverToBoxAdapter(
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        error: (e, _) => SliverToBoxAdapter(
+          child: Center(child: Text('Error: $e')),
+        ),
+        data: (state) => _CardSection(
+          cards: state.items,
+          isLoadingMore: state.isLoadingMore,
+          hasMore: state.hasMore,
+          isOwner: true,
+          emptyMessage: 'No cards yet, tap + to add your first',
+          onLoadMore: () => ref.read(ownedCardsProvider.notifier).loadMore(),
+        ),
+      ),
+      const _SectionHeader(title: 'Shared with Me'),
+      viewed.when(
+        loading: () => const SliverToBoxAdapter(
+          child: SizedBox(height: 40),
+        ),
+        error: (e, _) => SliverToBoxAdapter(
+          child: Center(child: Text('Error: $e')),
+        ),
+        data: (state) => _CardSection(
+          cards: state.items,
+          isLoadingMore: state.isLoadingMore,
+          hasMore: state.hasMore,
+          isOwner: false,
+          emptyMessage: 'No shared cards yet',
+          onLoadMore: () => ref.read(viewedCardsProvider.notifier).loadMore(),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildSearchSlivers() {
+    final search = ref.watch(cardsSearchProvider);
+    return [
+      search.when(
+        loading: () => const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+        error: (e, _) => SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Center(child: Text(_searchErrorMessage(e))),
+          ),
+        ),
+        data: (state) {
+          if (state.results.isEmpty) {
+            return SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 16,
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.search_off, size: 48),
+                    const SizedBox(height: 8),
+                    Text(
+                      'No cards match "$_query"',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          return SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final card = state.results[index];
+                return _CardTile(card: card, isOwner: card.isOwner);
+              },
+              childCount: state.results.length,
+            ),
+          );
+        },
+      ),
+    ];
+  }
+
+  String _searchErrorMessage(Object e) => switch (e) {
+        NetworkException() => 'Network error, check your connection',
+        ForbiddenException() => 'Permission denied',
+        ServerException() => 'Server error, try later',
+        _ => 'An error occurred',
+      };
 }
 
 class _SectionHeader extends StatelessWidget {
