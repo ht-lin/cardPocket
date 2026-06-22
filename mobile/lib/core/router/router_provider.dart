@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../auth/auth_state.dart';
 import '../auth/auth_state_provider.dart';
+import '../../features/friends/presentation/widgets/friends_nav_icon.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/verify_pending_screen.dart';
@@ -200,8 +201,8 @@ class _ScaffoldWithNavBar extends StatelessWidget {
             label: 'Cards',
           ),
           NavigationDestination(
-            icon: Icon(Icons.people_outline),
-            selectedIcon: Icon(Icons.people),
+            icon: FriendsNavIcon(selected: false),
+            selectedIcon: FriendsNavIcon(selected: true),
             label: 'Friends',
           ),
           NavigationDestination(

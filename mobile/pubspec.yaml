@@ -25,6 +25,10 @@ dependencies:
   # drift_flutter 0.3.0 requires sqlite3_flutter_libs 0.6.x (ships native SQLite on Android)
   sqlite3_flutter_libs: ">=0.6.0 <0.7.0"
 
+  # Push notifications (FCM — see ADR-008)
+  firebase_core: ^4.1.1
+  firebase_messaging: ^16.0.2
+
   # HTTP client
   dio: ^5.9.2
 
