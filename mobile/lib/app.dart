@@ -8,6 +8,7 @@ import 'core/widgets/offline_banner.dart';
 import 'features/auth/presentation/widgets/unverified_banner.dart';
 import 'features/cards/application/owned_cards_notifier.dart';
 import 'features/cards/application/viewed_cards_notifier.dart';
+import 'features/notifications/application/push_notification_controller.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({required this.config, super.key});
@@ -41,6 +42,9 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final goRouter = ref.watch(routerProvider);
+    // Activate FCM wiring (permission, token registration, deep links).
+    // No-op until Firebase initialised and the user is authenticated.
+    ref.watch(pushNotificationControllerProvider);
     return MaterialApp.router(
       title: 'CardPocket',
       theme: AppTheme.light,
