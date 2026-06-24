@@ -125,6 +125,20 @@ class AppLocalizationsEs extends AppLocalizations {
       'Cuando está activado, las tarjetas se mueven a la papelera tras caducar. Cuando está desactivado, las tarjetas caducadas solo se marcan.';
 
   @override
+  String get profileDiscoverableTitle => 'Permitir que otros me encuentren';
+
+  @override
+  String get profileDiscoverableSubtitle =>
+      'Cuando está desactivado, otros no pueden encontrarte por nombre de usuario o correo en la búsqueda de amigos.';
+
+  @override
+  String get profileExportDataTitle => 'Exportar mis datos';
+
+  @override
+  String get profileExportDataSubtitle =>
+      'Descarga una copia de todos tus datos como archivo JSON.';
+
+  @override
   String get profileLogoutButton => 'Cerrar sesión';
 
   @override

@@ -58,6 +58,11 @@ dependencies:
   connectivity_plus: ^7.1.1
   flutter_colorpicker: ^1.1.0
 
+  # Phase 3: share exported data, pick images, receive shared images
+  share_plus: ^13.1.0
+  image_picker: ^1.2.2
+  receive_sharing_intent: ^1.8.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

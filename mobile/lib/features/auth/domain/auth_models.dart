@@ -36,6 +36,8 @@ abstract class User with _$User {
     required bool emailVerified,
     // Defaulted so an older backend that omits the field doesn't break parsing.
     @Default(ExpiryPolicy.keep) ExpiryPolicy expiryPolicy,
+    // Whether this account can be found via friend search (PATCH /api/users/me).
+    @Default(true) bool discoverable,
     required DateTime createdAt,
   }) = _User;
 

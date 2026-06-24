@@ -287,7 +287,7 @@ as int,
 /// @nodoc
 mixin _$User {
 
- String get id; String get email; String get userName; bool get emailVerified; ExpiryPolicy get expiryPolicy; DateTime get createdAt;
+ String get id; String get email; String get userName; bool get emailVerified; ExpiryPolicy get expiryPolicy; bool get discoverable; DateTime get createdAt;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -300,16 +300,16 @@ $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.emailVerified, emailVerified) || other.emailVerified == emailVerified)&&(identical(other.expiryPolicy, expiryPolicy) || other.expiryPolicy == expiryPolicy)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.emailVerified, emailVerified) || other.emailVerified == emailVerified)&&(identical(other.expiryPolicy, expiryPolicy) || other.expiryPolicy == expiryPolicy)&&(identical(other.discoverable, discoverable) || other.discoverable == discoverable)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,userName,emailVerified,expiryPolicy,createdAt);
+int get hashCode => Object.hash(runtimeType,id,email,userName,emailVerified,expiryPolicy,discoverable,createdAt);
 
 @override
 String toString() {
-  return 'User(id: $id, email: $email, userName: $userName, emailVerified: $emailVerified, expiryPolicy: $expiryPolicy, createdAt: $createdAt)';
+  return 'User(id: $id, email: $email, userName: $userName, emailVerified: $emailVerified, expiryPolicy: $expiryPolicy, discoverable: $discoverable, createdAt: $createdAt)';
 }
 
 
@@ -320,7 +320,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String id, String email, String userName, bool emailVerified, ExpiryPolicy expiryPolicy, DateTime createdAt
+ String id, String email, String userName, bool emailVerified, ExpiryPolicy expiryPolicy, bool discoverable, DateTime createdAt
 });
 
 
@@ -337,14 +337,15 @@ class _$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? userName = null,Object? emailVerified = null,Object? expiryPolicy = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? userName = null,Object? emailVerified = null,Object? expiryPolicy = null,Object? discoverable = null,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String,emailVerified: null == emailVerified ? _self.emailVerified : emailVerified // ignore: cast_nullable_to_non_nullable
 as bool,expiryPolicy: null == expiryPolicy ? _self.expiryPolicy : expiryPolicy // ignore: cast_nullable_to_non_nullable
-as ExpiryPolicy,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as ExpiryPolicy,discoverable: null == discoverable ? _self.discoverable : discoverable // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -430,10 +431,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String userName,  bool emailVerified,  ExpiryPolicy expiryPolicy,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String userName,  bool emailVerified,  ExpiryPolicy expiryPolicy,  bool discoverable,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.email,_that.userName,_that.emailVerified,_that.expiryPolicy,_that.createdAt);case _:
+return $default(_that.id,_that.email,_that.userName,_that.emailVerified,_that.expiryPolicy,_that.discoverable,_that.createdAt);case _:
   return orElse();
 
 }
@@ -451,10 +452,10 @@ return $default(_that.id,_that.email,_that.userName,_that.emailVerified,_that.ex
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String userName,  bool emailVerified,  ExpiryPolicy expiryPolicy,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String userName,  bool emailVerified,  ExpiryPolicy expiryPolicy,  bool discoverable,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _User():
-return $default(_that.id,_that.email,_that.userName,_that.emailVerified,_that.expiryPolicy,_that.createdAt);case _:
+return $default(_that.id,_that.email,_that.userName,_that.emailVerified,_that.expiryPolicy,_that.discoverable,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -471,10 +472,10 @@ return $default(_that.id,_that.email,_that.userName,_that.emailVerified,_that.ex
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String userName,  bool emailVerified,  ExpiryPolicy expiryPolicy,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String userName,  bool emailVerified,  ExpiryPolicy expiryPolicy,  bool discoverable,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.email,_that.userName,_that.emailVerified,_that.expiryPolicy,_that.createdAt);case _:
+return $default(_that.id,_that.email,_that.userName,_that.emailVerified,_that.expiryPolicy,_that.discoverable,_that.createdAt);case _:
   return null;
 
 }
@@ -486,7 +487,7 @@ return $default(_that.id,_that.email,_that.userName,_that.emailVerified,_that.ex
 @JsonSerializable()
 
 class _User implements User {
-  const _User({required this.id, required this.email, required this.userName, required this.emailVerified, this.expiryPolicy = ExpiryPolicy.keep, required this.createdAt});
+  const _User({required this.id, required this.email, required this.userName, required this.emailVerified, this.expiryPolicy = ExpiryPolicy.keep, this.discoverable = true, required this.createdAt});
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String id;
@@ -494,6 +495,7 @@ class _User implements User {
 @override final  String userName;
 @override final  bool emailVerified;
 @override@JsonKey() final  ExpiryPolicy expiryPolicy;
+@override@JsonKey() final  bool discoverable;
 @override final  DateTime createdAt;
 
 /// Create a copy of User
@@ -509,16 +511,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.emailVerified, emailVerified) || other.emailVerified == emailVerified)&&(identical(other.expiryPolicy, expiryPolicy) || other.expiryPolicy == expiryPolicy)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.emailVerified, emailVerified) || other.emailVerified == emailVerified)&&(identical(other.expiryPolicy, expiryPolicy) || other.expiryPolicy == expiryPolicy)&&(identical(other.discoverable, discoverable) || other.discoverable == discoverable)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,userName,emailVerified,expiryPolicy,createdAt);
+int get hashCode => Object.hash(runtimeType,id,email,userName,emailVerified,expiryPolicy,discoverable,createdAt);
 
 @override
 String toString() {
-  return 'User(id: $id, email: $email, userName: $userName, emailVerified: $emailVerified, expiryPolicy: $expiryPolicy, createdAt: $createdAt)';
+  return 'User(id: $id, email: $email, userName: $userName, emailVerified: $emailVerified, expiryPolicy: $expiryPolicy, discoverable: $discoverable, createdAt: $createdAt)';
 }
 
 
@@ -529,7 +531,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email, String userName, bool emailVerified, ExpiryPolicy expiryPolicy, DateTime createdAt
+ String id, String email, String userName, bool emailVerified, ExpiryPolicy expiryPolicy, bool discoverable, DateTime createdAt
 });
 
 
@@ -546,14 +548,15 @@ class __$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? userName = null,Object? emailVerified = null,Object? expiryPolicy = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? userName = null,Object? emailVerified = null,Object? expiryPolicy = null,Object? discoverable = null,Object? createdAt = null,}) {
   return _then(_User(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
 as String,emailVerified: null == emailVerified ? _self.emailVerified : emailVerified // ignore: cast_nullable_to_non_nullable
 as bool,expiryPolicy: null == expiryPolicy ? _self.expiryPolicy : expiryPolicy // ignore: cast_nullable_to_non_nullable
-as ExpiryPolicy,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as ExpiryPolicy,discoverable: null == discoverable ? _self.discoverable : discoverable // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }

@@ -314,6 +314,30 @@ abstract class AppLocalizations {
   /// **'When on, cards are moved to trash after they expire. When off, expired cards are only marked.'**
   String get profileExpiryPolicySubtitle;
 
+  /// Title for the friend-search discoverability toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Allow others to find me'**
+  String get profileDiscoverableTitle;
+
+  /// Subtitle explaining the discoverability toggle
+  ///
+  /// In en, this message translates to:
+  /// **'When off, others cannot find you by username or email in friend search.'**
+  String get profileDiscoverableSubtitle;
+
+  /// Title for the GDPR data export entry
+  ///
+  /// In en, this message translates to:
+  /// **'Export my data'**
+  String get profileExportDataTitle;
+
+  /// Subtitle for the data export entry
+  ///
+  /// In en, this message translates to:
+  /// **'Download a copy of all your data as a JSON file.'**
+  String get profileExportDataSubtitle;
+
   /// Sign out button label on profile screen
   ///
   /// In en, this message translates to:

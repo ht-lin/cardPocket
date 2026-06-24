@@ -121,6 +121,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'When on, cards are moved to trash after they expire. When off, expired cards are only marked.';
 
   @override
+  String get profileDiscoverableTitle => 'Allow others to find me';
+
+  @override
+  String get profileDiscoverableSubtitle =>
+      'When off, others cannot find you by username or email in friend search.';
+
+  @override
+  String get profileExportDataTitle => 'Export my data';
+
+  @override
+  String get profileExportDataSubtitle =>
+      'Download a copy of all your data as a JSON file.';
+
+  @override
   String get profileLogoutButton => 'Sign Out';
 
   @override

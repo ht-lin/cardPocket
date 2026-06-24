@@ -15,6 +15,8 @@ class UserUpdateInput
 
     public ?ExpiryPolicy $expiryPolicy = null;
 
+    public ?bool $discoverable = null;
+
     public ?string $currentPassword = null;
 
     #[Assert\PasswordStrength(

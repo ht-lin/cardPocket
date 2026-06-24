@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/l10n/l10n_extension.dart';
@@ -85,6 +90,20 @@ class ProfileScreen extends ConsumerWidget {
               onChanged: (enabled) =>
                   _updateExpiryPolicy(context, ref, enabled),
             ),
+            SwitchListTile(
+              secondary: const Icon(Icons.person_search_outlined),
+              title: Text(l10n.profileDiscoverableTitle),
+              subtitle: Text(l10n.profileDiscoverableSubtitle),
+              value: user.discoverable,
+              onChanged: (enabled) =>
+                  _updateDiscoverable(context, ref, enabled),
+            ),
+            ListTile(
+              leading: const Icon(Icons.download_outlined),
+              title: Text(l10n.profileExportDataTitle),
+              subtitle: Text(l10n.profileExportDataSubtitle),
+              onTap: () => _exportData(context, ref),
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
@@ -125,6 +144,51 @@ class ProfileScreen extends ConsumerWidget {
       final message = switch (e) {
         NetworkException() => context.l10n.errorNetworkTimeout,
         _ => context.l10n.errorServerError,
+      };
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  Future<void> _updateDiscoverable(
+    BuildContext context,
+    WidgetRef ref,
+    bool enabled,
+  ) async {
+    try {
+      await ref.read(userRepositoryProvider).updateDiscoverable(enabled);
+      ref.invalidate(profileProvider);
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      final message = switch (e) {
+        NetworkException() => context.l10n.errorNetworkTimeout,
+        _ => context.l10n.errorServerError,
+      };
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  Future<void> _exportData(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    try {
+      final data = await ref.read(userRepositoryProvider).exportData();
+      final json = const JsonEncoder.withIndent('  ').convert(data);
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/cardpocket-export.json');
+      await file.writeAsString(json);
+      if (!context.mounted) return;
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/json')],
+          subject: l10n.profileExportDataTitle,
+        ),
+      );
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      final message = switch (e) {
+        NetworkException() => l10n.errorNetworkTimeout,
+        _ => l10n.errorServerError,
       };
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(message)));

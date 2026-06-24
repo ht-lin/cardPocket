@@ -260,6 +260,97 @@ void main() {
     });
   });
 
+  group('UserRepository.updateDiscoverable', () {
+    test('sends discoverable flag and returns updated User', () async {
+      final json = {..._userJson, 'discoverable': false};
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: json,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/users/me'),
+        ),
+      );
+
+      final user = await repo.updateDiscoverable(false);
+      expect(user.discoverable, isFalse);
+
+      final captured = verify(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: captureAny(named: 'data'),
+        ),
+      ).captured;
+      expect((captured.first as Map)['discoverable'], false);
+    });
+
+    test('defaults to discoverable=true when backend omits the field', () async {
+      when(
+        () => mockDio.patch<Map<String, dynamic>>(
+          '/api/users/me',
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: _userJson,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/users/me'),
+        ),
+      );
+
+      final user = await repo.updateDiscoverable(true);
+      expect(user.discoverable, isTrue);
+    });
+  });
+
+  group('UserRepository.exportData', () {
+    test('returns the raw export map on 200', () async {
+      final export = {
+        'profile': {'email': 'alice@example.com'},
+        'ownedCards': [],
+        'friends': [],
+      };
+      when(
+        () => mockDio
+            .get<Map<String, dynamic>>('/api/users/me/data-export'),
+      ).thenAnswer(
+        (_) async => Response(
+          data: export,
+          statusCode: 200,
+          requestOptions:
+              RequestOptions(path: '/api/users/me/data-export'),
+        ),
+      );
+
+      final data = await repo.exportData();
+      expect(data['profile'], {'email': 'alice@example.com'});
+    });
+
+    test('throws UnauthorizedException on 401', () async {
+      when(
+        () => mockDio
+            .get<Map<String, dynamic>>('/api/users/me/data-export'),
+      ).thenThrow(
+        DioException(
+          response: Response(
+            statusCode: 401,
+            requestOptions:
+                RequestOptions(path: '/api/users/me/data-export'),
+          ),
+          requestOptions:
+              RequestOptions(path: '/api/users/me/data-export'),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      expect(() => repo.exportData(), throwsA(isA<UnauthorizedException>()));
+    });
+  });
+
   group('UserRepository.deleteAccount', () {
     test('completes without error on 204', () async {
       when(() => mockDio.delete<void>('/api/users/me')).thenAnswer(

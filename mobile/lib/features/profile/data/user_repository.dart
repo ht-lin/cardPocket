@@ -69,6 +69,29 @@ class UserRepository {
     }
   }
 
+  Future<User> updateDiscoverable(bool discoverable) async {
+    try {
+      final response = await _dio.patch<Map<String, dynamic>>(
+        '/api/users/me',
+        data: {'discoverable': discoverable},
+      );
+      return User.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw _mapError(e);
+    }
+  }
+
+  /// GDPR Art. 20 export: the full machine-readable dump of the user's data.
+  Future<Map<String, dynamic>> exportData() async {
+    try {
+      final response =
+          await _dio.get<Map<String, dynamic>>('/api/users/me/data-export');
+      return response.data!;
+    } on DioException catch (e) {
+      throw _mapError(e);
+    }
+  }
+
   Future<void> deleteAccount() async {
     try {
       await _dio.delete<void>('/api/users/me');

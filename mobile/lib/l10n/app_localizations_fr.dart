@@ -124,6 +124,20 @@ class AppLocalizationsFr extends AppLocalizations {
       'Si activé, les cartes sont déplacées vers la corbeille après leur expiration. Sinon, les cartes expirées sont seulement marquées.';
 
   @override
+  String get profileDiscoverableTitle => 'Permettre aux autres de me trouver';
+
+  @override
+  String get profileDiscoverableSubtitle =>
+      'Si désactivé, les autres ne peuvent pas vous trouver par nom d\'utilisateur ou e-mail dans la recherche d\'amis.';
+
+  @override
+  String get profileExportDataTitle => 'Exporter mes données';
+
+  @override
+  String get profileExportDataSubtitle =>
+      'Téléchargez une copie de toutes vos données sous forme de fichier JSON.';
+
+  @override
   String get profileLogoutButton => 'Se déconnecter';
 
   @override

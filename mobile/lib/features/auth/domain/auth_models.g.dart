@@ -29,6 +29,7 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   expiryPolicy:
       $enumDecodeNullable(_$ExpiryPolicyEnumMap, json['expiryPolicy']) ??
       ExpiryPolicy.keep,
+  discoverable: json['discoverable'] as bool? ?? true,
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
@@ -38,6 +39,7 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'userName': instance.userName,
   'emailVerified': instance.emailVerified,
   'expiryPolicy': _$ExpiryPolicyEnumMap[instance.expiryPolicy]!,
+  'discoverable': instance.discoverable,
   'createdAt': instance.createdAt.toIso8601String(),
 };
 
