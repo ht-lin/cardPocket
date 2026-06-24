@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:image_picker/image_picker.dart';
+
 import '../../../core/api/api_exception.dart';
 import '../../../core/router/route_names.dart';
 import '../application/owned_cards_notifier.dart';
+import '../data/barcode_image_analyzer.dart';
 import '../data/cards_repository.dart';
 import 'widgets/color_field.dart';
 import 'widgets/expiry_field.dart';
@@ -58,6 +61,12 @@ class _CreateCardScreenState extends ConsumerState<CreateCardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              OutlinedButton.icon(
+                onPressed: _loading ? null : _detectFromGallery,
+                icon: const Icon(Icons.photo_library_outlined),
+                label: const Text('Detect from gallery'),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _contentController,
                 decoration: InputDecoration(
@@ -114,6 +123,31 @@ class _CreateCardScreenState extends ConsumerState<CreateCardScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _detectFromGallery() async {
+    final picked = await ref
+        .read(imagePickerProvider)
+        .pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    final result =
+        await ref.read(barcodeImageAnalyzerProvider).analyze(picked.path);
+    if (!mounted) return;
+
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No barcode found in the image')),
+      );
+      return;
+    }
+    setState(() {
+      _contentController.text = result.barcodeContent;
+      if (_barcodeTypes.contains(result.barcodeType)) {
+        _selectedType = result.barcodeType;
+      }
+      _contentError = null;
+    });
   }
 
   Future<void> _submit() async {

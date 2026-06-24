@@ -39,6 +39,18 @@ Widget _buildTestApp({required User user}) {
   );
 }
 
+/// Pump the profile screen on a tall surface so every settings tile is laid out
+/// (the screen has more entries than the default 600px test viewport fits).
+Future<void> _pumpProfile(WidgetTester tester, {required User user}) async {
+  tester.view.physicalSize = const Size(1000, 2400);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  await tester.pumpWidget(_buildTestApp(user: user));
+  await tester.pumpAndSettle();
+}
+
 class _FakeProfileNotifier extends ProfileNotifier {
   _FakeProfileNotifier(this._user);
   final User _user;
@@ -50,64 +62,79 @@ class _FakeProfileNotifier extends ProfileNotifier {
 void main() {
   group('ProfileScreen', () {
     testWidgets('shows username and email', (tester) async {
-      await tester.pumpWidget(_buildTestApp(user: _testUser));
-      await tester.pumpAndSettle();
+      await _pumpProfile(tester, user: _testUser);
 
       expect(find.text('alice'), findsOneWidget);
       expect(find.text('alice@example.com'), findsOneWidget);
     });
 
     testWidgets('shows Edit Username list tile', (tester) async {
-      await tester.pumpWidget(_buildTestApp(user: _testUser));
-      await tester.pumpAndSettle();
+      await _pumpProfile(tester, user: _testUser);
 
       expect(find.text('Edit Username'), findsOneWidget);
     });
 
     testWidgets('shows Change Password list tile', (tester) async {
-      await tester.pumpWidget(_buildTestApp(user: _testUser));
-      await tester.pumpAndSettle();
+      await _pumpProfile(tester, user: _testUser);
 
       expect(find.text('Change Password'), findsOneWidget);
     });
 
     testWidgets('expiry policy switch is off for KEEP', (tester) async {
-      await tester.pumpWidget(_buildTestApp(user: _testUser));
-      await tester.pumpAndSettle();
+      await _pumpProfile(tester, user: _testUser);
 
       expect(find.text('Auto-move expired cards to trash'), findsOneWidget);
-      final sw = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+      final sw = tester.widget<SwitchListTile>(
+        find.widgetWithText(SwitchListTile, 'Auto-move expired cards to trash'),
+      );
       expect(sw.value, false);
     });
 
     testWidgets('expiry policy switch is on for AUTO_TRASH', (tester) async {
-      await tester.pumpWidget(_buildTestApp(
+      await _pumpProfile(
+        tester,
         user: _testUser.copyWith(expiryPolicy: ExpiryPolicy.autoTrash),
-      ));
-      await tester.pumpAndSettle();
+      );
 
-      final sw = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+      final sw = tester.widget<SwitchListTile>(
+        find.widgetWithText(SwitchListTile, 'Auto-move expired cards to trash'),
+      );
       expect(sw.value, true);
     });
 
+    testWidgets('discoverable switch reflects the user flag', (tester) async {
+      await _pumpProfile(
+        tester,
+        user: _testUser.copyWith(discoverable: false),
+      );
+
+      final sw = tester.widget<SwitchListTile>(
+        find.widgetWithText(SwitchListTile, 'Allow others to find me'),
+      );
+      expect(sw.value, false);
+    });
+
+    testWidgets('shows Export my data list tile', (tester) async {
+      await _pumpProfile(tester, user: _testUser);
+
+      expect(find.text('Export my data'), findsOneWidget);
+    });
+
     testWidgets('shows Sign Out list tile', (tester) async {
-      await tester.pumpWidget(_buildTestApp(user: _testUser));
-      await tester.pumpAndSettle();
+      await _pumpProfile(tester, user: _testUser);
 
       expect(find.text('Sign Out'), findsOneWidget);
     });
 
     testWidgets('shows Delete Account list tile', (tester) async {
-      await tester.pumpWidget(_buildTestApp(user: _testUser));
-      await tester.pumpAndSettle();
+      await _pumpProfile(tester, user: _testUser);
 
       expect(find.text('Delete Account'), findsOneWidget);
     });
 
     testWidgets('tapping Delete Account shows confirmation dialog',
         (tester) async {
-      await tester.pumpWidget(_buildTestApp(user: _testUser));
-      await tester.pumpAndSettle();
+      await _pumpProfile(tester, user: _testUser);
 
       await tester.tap(find.text('Delete Account'));
       await tester.pumpAndSettle();
@@ -121,8 +148,7 @@ void main() {
     });
 
     testWidgets('cancel button dismisses delete account dialog', (tester) async {
-      await tester.pumpWidget(_buildTestApp(user: _testUser));
-      await tester.pumpAndSettle();
+      await _pumpProfile(tester, user: _testUser);
 
       await tester.tap(find.text('Delete Account'));
       await tester.pumpAndSettle();

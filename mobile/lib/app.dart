@@ -7,6 +7,7 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/offline_banner.dart';
 import 'features/auth/presentation/widgets/unverified_banner.dart';
 import 'features/cards/application/owned_cards_notifier.dart';
+import 'features/cards/application/sharing_import_controller.dart';
 import 'features/cards/application/viewed_cards_notifier.dart';
 import 'features/notifications/application/push_notification_controller.dart';
 
@@ -45,6 +46,8 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     // Activate FCM wiring (permission, token registration, deep links).
     // No-op until Firebase initialised and the user is authenticated.
     ref.watch(pushNotificationControllerProvider);
+    // Activate share-to-app image import (US-23).
+    ref.watch(sharingImportControllerProvider);
     return MaterialApp.router(
       title: 'CardPocket',
       theme: AppTheme.light,

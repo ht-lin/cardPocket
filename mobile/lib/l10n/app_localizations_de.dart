@@ -121,6 +121,20 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wenn aktiviert, werden Karten nach Ablauf in den Papierkorb verschoben. Andernfalls werden abgelaufene Karten nur markiert.';
 
   @override
+  String get profileDiscoverableTitle => 'Anderen erlauben, mich zu finden';
+
+  @override
+  String get profileDiscoverableSubtitle =>
+      'Wenn deaktiviert, können andere dich nicht über Benutzername oder E-Mail in der Freundessuche finden.';
+
+  @override
+  String get profileExportDataTitle => 'Meine Daten exportieren';
+
+  @override
+  String get profileExportDataSubtitle =>
+      'Lade eine Kopie all deiner Daten als JSON-Datei herunter.';
+
+  @override
   String get profileLogoutButton => 'Abmelden';
 
   @override

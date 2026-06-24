@@ -50,6 +50,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', enumType: ExpiryPolicy::class)]
     private ExpiryPolicy $expiryPolicy = ExpiryPolicy::KEEP;
 
+    #[ORM\Column]
+    private bool $discoverable = true;
+
     public function getId(): Uuid
     {
         return $this->id;
@@ -145,6 +148,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setExpiryPolicy(ExpiryPolicy $expiryPolicy): static
     {
         $this->expiryPolicy = $expiryPolicy;
+
+        return $this;
+    }
+
+    public function isDiscoverable(): bool
+    {
+        return $this->discoverable;
+    }
+
+    public function setDiscoverable(bool $discoverable): static
+    {
+        $this->discoverable = $discoverable;
 
         return $this;
     }

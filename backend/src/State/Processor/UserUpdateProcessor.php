@@ -64,6 +64,10 @@ final class UserUpdateProcessor implements ProcessorInterface
             $user->setExpiryPolicy($data->expiryPolicy);
         }
 
+        if ($data->discoverable !== null) {
+            $user->setDiscoverable($data->discoverable);
+        }
+
         try {
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException $e) {
@@ -78,6 +82,7 @@ final class UserUpdateProcessor implements ProcessorInterface
             emailVerified: $user->getEmailVerifiedAt() !== null,
             createdAt: $user->getCreatedAt()->format(\DateTimeInterface::ATOM),
             expiryPolicy: $user->getExpiryPolicy()->value,
+            discoverable: $user->isDiscoverable(),
         );
     }
 }

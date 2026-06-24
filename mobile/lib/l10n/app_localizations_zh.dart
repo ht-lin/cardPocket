@@ -114,6 +114,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileExpiryPolicySubtitle => '开启后，卡片过期将自动移入回收箱；关闭时，过期卡片仅作标记。';
 
   @override
+  String get profileDiscoverableTitle => '允许他人找到我';
+
+  @override
+  String get profileDiscoverableSubtitle => '关闭后，他人将无法在好友搜索中通过用户名或邮箱找到你。';
+
+  @override
+  String get profileExportDataTitle => '导出我的数据';
+
+  @override
+  String get profileExportDataSubtitle => '将你的全部数据下载为 JSON 文件。';
+
+  @override
   String get profileLogoutButton => '退出登录';
 
   @override

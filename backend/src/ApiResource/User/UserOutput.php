@@ -44,6 +44,7 @@ final class UserOutput
         public readonly bool $emailVerified,
         public readonly string $createdAt,
         public readonly string $expiryPolicy,
+        public readonly bool $discoverable,
     ) {
     }
 }

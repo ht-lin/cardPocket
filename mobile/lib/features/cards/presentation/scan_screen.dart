@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/router/route_names.dart';
+import '../data/barcode_image_analyzer.dart';
 
-class ScanScreen extends StatefulWidget {
+class ScanScreen extends ConsumerStatefulWidget {
   const ScanScreen({super.key});
 
   @override
-  State<ScanScreen> createState() => _ScanScreenState();
+  ConsumerState<ScanScreen> createState() => _ScanScreenState();
 }
 
-class _ScanScreenState extends State<ScanScreen> {
+class _ScanScreenState extends ConsumerState<ScanScreen> {
   bool _detected = false;
 
   @override
@@ -27,22 +30,27 @@ class _ScanScreenState extends State<ScanScreen> {
               final value = barcode?.rawValue;
               if (value == null || value.isEmpty) return;
               _detected = true;
-              final apiType = _toApiType(barcode!.format);
-              context.pushNamed(
-                RouteNames.cardsScanConfirm,
-                extra: {'barcodeContent': value, 'barcodeType': apiType},
-              );
+              _openConfirm(value, barcodeFormatToApiType(barcode!.format));
             },
           ),
           Positioned(
             bottom: 32,
             left: 0,
             right: 0,
-            child: Center(
-              child: FilledButton.tonal(
-                onPressed: () => context.pushNamed(RouteNames.cardsCreate),
-                child: const Text('Manual input'),
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FilledButton.tonalIcon(
+                  onPressed: _pickFromGallery,
+                  icon: const Icon(Icons.photo_library_outlined),
+                  label: const Text('Pick from gallery'),
+                ),
+                const SizedBox(height: 12),
+                FilledButton.tonal(
+                  onPressed: () => context.pushNamed(RouteNames.cardsCreate),
+                  child: const Text('Manual input'),
+                ),
+              ],
             ),
           ),
         ],
@@ -50,19 +58,30 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
-  String _toApiType(BarcodeFormat format) {
-    return switch (format) {
-      BarcodeFormat.qrCode => 'QR_CODE',
-      BarcodeFormat.code128 => 'CODE_128',
-      BarcodeFormat.ean13 => 'EAN_13',
-      BarcodeFormat.ean8 => 'EAN_8',
-      BarcodeFormat.code39 => 'CODE_39',
-      BarcodeFormat.upcA => 'UPC_A',
-      BarcodeFormat.upcE => 'UPC_E',
-      BarcodeFormat.pdf417 => 'PDF_417',
-      BarcodeFormat.dataMatrix => 'DATA_MATRIX',
-      BarcodeFormat.aztec => 'AZTEC',
-      _ => 'QR_CODE',
-    };
+  void _openConfirm(String barcodeContent, String barcodeType) {
+    context.pushNamed(
+      RouteNames.cardsScanConfirm,
+      extra: {'barcodeContent': barcodeContent, 'barcodeType': barcodeType},
+    );
+  }
+
+  Future<void> _pickFromGallery() async {
+    if (_detected) return;
+    final picked = await ref
+        .read(imagePickerProvider)
+        .pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    final result = await ref.read(barcodeImageAnalyzerProvider).analyze(picked.path);
+    if (!mounted) return;
+
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No barcode found in the image')),
+      );
+      return;
+    }
+    _detected = true;
+    _openConfirm(result.barcodeContent, result.barcodeType);
   }
 }

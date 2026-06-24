@@ -41,7 +41,9 @@ final class UserSearchProvider implements ProviderInterface
         $found = $repo->findOneBy(['userName' => $q])
             ?? $repo->findOneBy(['email' => $q]);
 
-        if ($found === null) {
+        // A user who opted out of discovery is treated as not found, so neither
+        // an exact userName nor email match can confirm the account exists.
+        if ($found === null || !$found->isDiscoverable()) {
             return [];
         }
 
