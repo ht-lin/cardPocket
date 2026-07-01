@@ -6,6 +6,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/auth/auth_state.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../application/auth_notifier.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -50,6 +51,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 32),
+              const Center(child: AppLogo(size: 96)),
               const SizedBox(height: 32),
               TextFormField(
                 controller: _emailController,

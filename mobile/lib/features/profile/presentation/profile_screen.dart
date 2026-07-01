@@ -10,6 +10,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../../auth/application/auth_notifier.dart';
 import '../../auth/domain/auth_models.dart';
 import '../application/profile_notifier.dart';
@@ -47,6 +48,8 @@ class ProfileScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const AppLogo(size: 40),
+                  const SizedBox(height: 12),
                   Text(
                     user.userName,
                     style: Theme.of(context).textTheme.headlineMedium,

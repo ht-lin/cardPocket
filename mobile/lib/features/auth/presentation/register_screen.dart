@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../data/auth_repository.dart';
 import '../domain/auth_models.dart';
 
@@ -47,6 +48,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 32),
+              const Center(child: AppLogo(size: 96)),
               const SizedBox(height: 32),
               TextFormField(
                 controller: _emailController,
