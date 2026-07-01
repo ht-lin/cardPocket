@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../../share/data/share_repository.dart';
 import '../application/cards_search_notifier.dart';
 import '../application/owned_cards_notifier.dart';
@@ -66,7 +67,14 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverAppBar(
-              title: const Text('Cards'),
+              title: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppLogo(size: 24),
+                  SizedBox(width: 8),
+                  Text('Cards'),
+                ],
+              ),
               floating: true,
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),
